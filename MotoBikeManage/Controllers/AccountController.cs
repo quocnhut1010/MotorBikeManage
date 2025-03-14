@@ -31,6 +31,10 @@ namespace MotoBikeManage.Controllers
                 {
                     return RedirectToAction("Index", "Admin");
                 }
+                 else if (user.role == "NhanVien")
+                {
+                    return RedirectToAction("Index", "Staff");
+                }
 
                 ViewBag.Message = "Access Denied. Only Admin can access.";
             }
