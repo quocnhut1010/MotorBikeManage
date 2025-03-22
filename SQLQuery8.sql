@@ -139,16 +139,3 @@ INSERT INTO Maintenance (vehicle_id, user_id, start_date, end_date, status, note
 
 SELECT * FROM Users
 SELECT * FROM Vehicles
-
-ALTER TABLE Users ADD avatar NVARCHAR(MAX) NULL;
-UPDATE Users SET avatar = '~/Images/Users/admin01.jpg' WHERE username = 'admin01';
-UPDATE Users SET avatar = '~/Images/Users/nv_kho01.jpg' WHERE username = 'nv_kho01';
-UPDATE Users SET avatar = '~/Images/Users/nv_kho02.jpg' WHERE username = 'nv_kho02';
-
-ALTER TABLE Vehicles ADD image NVARCHAR(MAX) NULL;
-UPDATE Vehicles SET image = '~/Images/Vehicles/airblade125.jpg' WHERE vehicle_id = 1;
-UPDATE Vehicles SET image = '~/Images/Vehicles/exciter150.jpg' WHERE vehicle_id = 2;
-UPDATE Vehicles SET image = '~/Images/Vehicles/raider150.jpg' WHERE vehicle_id = 3;
-
-
-

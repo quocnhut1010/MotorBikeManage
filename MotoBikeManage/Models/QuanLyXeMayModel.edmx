@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="QLXMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="QLXMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Export_Details">
           <Key>
             <PropertyRef Name="export_detail_id" />
@@ -89,7 +89,6 @@
           <Property Name="email" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="phone" Type="nvarchar" MaxLength="15" />
           <Property Name="created_at" Type="datetime" />
-          <Property Name="avatar" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="Vehicles">
           <Key>
@@ -105,7 +104,6 @@
           <Property Name="manufacture_year" Type="int" Nullable="false" />
           <Property Name="status" Type="nvarchar" MaxLength="20" />
           <Property Name="created_at" Type="datetime" />
-          <Property Name="image" Type="nvarchar(max)" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -297,7 +295,8 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Maintenance" EntitySet="Maintenance" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="QLXMModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -400,7 +399,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <NavigationProperty Name="Export_Stock" Relationship="Self.FK__Export_St__user___2B3F6F97" FromRole="Users" ToRole="Export_Stock" />
           <NavigationProperty Name="Import_Stock" Relationship="Self.FK__Import_St__user___22AA2996" FromRole="Users" ToRole="Import_Stock" />
           <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__user___3E52440B" FromRole="Users" ToRole="Maintenance" />
-          <Property Name="avatar" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Vehicle">
           <Key>
@@ -419,7 +417,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <NavigationProperty Name="Export_Details" Relationship="Self.FK__Export_De__vehic__300424B4" FromRole="Vehicles" ToRole="Export_Details" />
           <NavigationProperty Name="Import_Details" Relationship="Self.FK__Import_De__vehic__276EDEB3" FromRole="Vehicles" ToRole="Import_Details" />
           <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__vehic__3D5E1FD2" FromRole="Vehicles" ToRole="Maintenance" />
-          <Property Name="image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="Inventory">
           <Key>
@@ -684,7 +681,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="QLXMModel.User">
               <MappingFragment StoreEntitySet="Users">
-                <ScalarProperty Name="avatar" ColumnName="avatar" />
                 <ScalarProperty Name="id" ColumnName="id" />
                 <ScalarProperty Name="username" ColumnName="username" />
                 <ScalarProperty Name="password" ColumnName="password" />
@@ -699,7 +695,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySetMapping Name="Vehicles">
             <EntityTypeMapping TypeName="QLXMModel.Vehicle">
               <MappingFragment StoreEntitySet="Vehicles">
-                <ScalarProperty Name="image" ColumnName="image" />
                 <ScalarProperty Name="vehicle_id" ColumnName="vehicle_id" />
                 <ScalarProperty Name="name" ColumnName="name" />
                 <ScalarProperty Name="brand" ColumnName="brand" />
