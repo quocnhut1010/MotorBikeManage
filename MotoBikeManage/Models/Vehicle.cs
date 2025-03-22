@@ -32,6 +32,7 @@ namespace MotoBikeManage.Models
         public int manufacture_year { get; set; }
         public string status { get; set; }
         public Nullable<System.DateTime> created_at { get; set; }
+        public string image { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Export_Details> Export_Details { get; set; }

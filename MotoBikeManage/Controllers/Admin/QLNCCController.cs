@@ -4,12 +4,12 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace MotoBikeManage.Controllers
+namespace MotoBikeManage.Controllers.Admin
 {
-    public class AdminController : Controller
+    public class QLNCCController : Controller
     {
-        // GET: Admin
-        public ActionResult Index()
+        // GET: QLNCC
+        public ActionResult ListNCC()
         {
             return View();
         }

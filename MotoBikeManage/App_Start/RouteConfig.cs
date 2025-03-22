@@ -16,8 +16,14 @@ namespace MotoBikeManage
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Account", action = "Login", id = UrlParameter.Optional }
+                defaults: new { controller = "Admin", action = "Login", id = UrlParameter.Optional }
             );
+            //            routes.MapRoute(
+            //            name: "EmployeeList",
+            //            url: "{controller}/{action}/{id}",
+            //            defaults: new { controller = "QLNhanVien", action = "List", id = UrlParameter.Optional }
+            //);
+
         }
     }
 }

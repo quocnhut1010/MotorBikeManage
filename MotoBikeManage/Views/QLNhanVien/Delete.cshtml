@@ -1,0 +1,137 @@
+﻿@model MotoBikeManage.Models.User
+
+@{
+    ViewBag.Title = "Xác nhận xóa nhân viên";
+    Layout = null;
+}
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    /* Tổng thể */
+    body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+    }
+
+    /* Container chính */
+    .delete-container {
+        max-width: 450px;
+        margin: 80px auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Tiêu đề xác nhận xóa */
+    .delete-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #dc3545;
+        margin-bottom: 15px;
+    }
+
+    /* Nút Xóa */
+    .btn-delete {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-delete:hover {
+            background-color: #b02a37;
+        }
+
+    /* Nút Hủy */
+    .btn-back {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        background-color: #6c757d;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-block;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-back:hover {
+            background-color: #545b62;
+        }
+
+    /* Modal */
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        background-color: #dc3545;
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    .modal-footer .btn {
+        font-weight: 600;
+        padding: 10px 20px;
+    }
+
+</style>
+<div class="container mt-5" style="width:40%">
+    <div class="card shadow-lg p-4">
+        <h3 class="text-center text-danger">Xác nhận xóa nhân viên</h3>
+        <p><strong>Tên đăng nhập:</strong> @Model.username</p>
+        <p><strong>Họ và Tên:</strong> @Model.full_name</p>
+        <p><strong>Email:</strong> @Model.email</p>
+        <p><strong>Số điện thoại:</strong> @Model.phone</p>
+
+        <!-- Nút Xóa mở modal xác nhận -->
+        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            XÓA
+        </button>
+
+        <!-- Nút Quay lại -->
+        <a href="@Url.Action("List", "QLNhanVien")" class="btn btn-secondary w-100 mt-2">
+            HỦY
+        </a>
+    </div>
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="deleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa nhân viên <strong>@Model.full_name</strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+
+                @using (Html.BeginForm("DeleteConfirmed", "QLNhanVien", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.id)
+                    <button type="submit" class="btn btn-danger">Đồng ý xóa</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
