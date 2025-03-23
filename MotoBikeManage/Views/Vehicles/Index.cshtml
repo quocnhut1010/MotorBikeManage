@@ -14,25 +14,25 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     @{
         ViewBag.Title = "Danh sách xe";
-        //Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+        Layout = null;
     }
-
     <h2>Danh sách xe</h2>
 
     <p>
         @Html.ActionLink("Thêm xe", "Create")
     </p>
 
-<style>
-    .table th {
-        background-color: #f0f0f0;
-        font-weight: bold;
-        text-align: center;
-    }
+    <style>
+        .table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            text-align: center;
+        }
 
-    .table td {
-        text-align: center;
-    }
+        .table td {
+            text-align: center;
+        }
+
         body {
             color: #566787;
             background: #f5f5f5;
@@ -61,7 +61,7 @@
                 font-size: 22px;
             }
 
-/*        .search-box {
+        /*        .search-box {
             position: relative;
             float: right;
         }
@@ -110,42 +110,45 @@
 
         table.table td a {
             color: #a0a5b1;
-/*            display: inline-block;*/
+            /*            display: inline-block;*/
             margin: 0 5px;
         }
-    .icon-detail {
-        color: #FFC107;
-    }
 
-    .icon-edit {
-        color: #FFC107;
-    }
+        .icon-detail {
+            color: #FFC107;
+        }
 
-    .icon-delete {
-        color: #E34724;
-    }
-            table.table td a.view {
-                color: #03A9F4;
-            }
+        .icon-edit {
+            color: #FFC107;
+        }
 
-            table.table td a.edit {
-                color: #FFC107;
-            }
+        .icon-delete {
+            color: #E34724;
+        }
 
-            table.table td a.delete {
-                color: #E34724;
-            }
-    a.detail .material-icons {
-        color: #03A9F4;
-    }
+        table.table td a.view {
+            color: #03A9F4;
+        }
 
-    a.edit .material-icons {
-        color: #FFC107;
-    }
+        table.table td a.edit {
+            color: #FFC107;
+        }
 
-    a.delete .material-icons {
-        color: #E34724;
-    }
+        table.table td a.delete {
+            color: #E34724;
+        }
+
+        a.detail .material-icons {
+            color: #03A9F4;
+        }
+
+        a.edit .material-icons {
+            color: #FFC107;
+        }
+
+        a.delete .material-icons {
+            color: #E34724;
+        }
 
         table.table td i {
             font-size: 19px;
