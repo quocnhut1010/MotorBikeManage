@@ -31,6 +31,7 @@ namespace MotoBikeManage.Models
         public virtual DbSet<Import_Stock> Import_Stock { get; set; }
         public virtual DbSet<Maintenance> Maintenances { get; set; }
         public virtual DbSet<Supplier> Suppliers { get; set; }
+        public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Vehicle> Vehicles { get; set; }
         public virtual DbSet<Inventory> Inventories { get; set; }

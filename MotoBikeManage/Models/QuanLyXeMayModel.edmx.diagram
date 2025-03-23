@@ -4,13 +4,14 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="d2079a10483b48f1900f7aa5f7444a4d" Name="Diagram1">
+      <Diagram DiagramId="352814b099d441ccabe4ad34731ca7ce" Name="Diagram1">
         <EntityTypeShape EntityType="QLXMModel.Export_Details" Width="1.5" PointX="3" PointY="4.875" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Export_Stock" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Import_Details" Width="1.5" PointX="3" PointY="1.75" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Import_Stock" Width="1.5" PointX="0.75" PointY="11.125" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Maintenance" Width="1.5" PointX="6" PointY="4.5" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Supplier" Width="1.5" PointX="1.5" PointY="15.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="QLXMModel.sysdiagram" Width="1.5" PointX="5.75" PointY="1" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.User" Width="1.5" PointX="1.5" PointY="18.375" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Vehicle" Width="1.5" PointX="0.75" PointY="4.125" IsExpanded="true" />
         <EntityTypeShape EntityType="QLXMModel.Inventory" Width="1.5" PointX="2.75" PointY="8" IsExpanded="true" />
@@ -21,8 +22,8 @@
         <AssociationConnector Association="QLXMModel.FK__Import_De__vehic__276EDEB3" ManuallyRouted="false" />
         <AssociationConnector Association="QLXMModel.FK__Import_St__suppl__21B6055D" ManuallyRouted="false" />
         <AssociationConnector Association="QLXMModel.FK__Import_St__user___22AA2996" ManuallyRouted="false" />
-        <AssociationConnector Association="QLXMModel.FK__Maintenan__user___36B12243" ManuallyRouted="false" />
-        <AssociationConnector Association="QLXMModel.FK__Maintenan__vehic__35BCFE0A" ManuallyRouted="false" />
+        <AssociationConnector Association="QLXMModel.FK__Maintenan__user___3E52440B" ManuallyRouted="false" />
+        <AssociationConnector Association="QLXMModel.FK__Maintenan__vehic__3D5E1FD2" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
