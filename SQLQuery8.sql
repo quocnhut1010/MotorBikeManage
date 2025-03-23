@@ -139,3 +139,5 @@ INSERT INTO Maintenance (vehicle_id, user_id, start_date, end_date, status, note
 
 SELECT * FROM Users
 SELECT * FROM Vehicles
+
+UPDATE Vehicles SET image = '~/Images/Vehicles/raider150.jpg' WHERE vehicle_id = 3;

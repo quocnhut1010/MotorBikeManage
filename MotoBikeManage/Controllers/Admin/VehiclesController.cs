@@ -17,8 +17,9 @@ namespace MotoBikeManage.Controllers
         // GET: Vehicles
         public ActionResult Index()
         {
-            var list = db.Vehicles;
-            return View(list.ToList());
+            var vehicles = db.Vehicles.ToList();
+            // Trả về View, và truyền 'vehicles' làm model
+            return View(vehicles);
         }
 
         // GET: Vehicles/Details/5

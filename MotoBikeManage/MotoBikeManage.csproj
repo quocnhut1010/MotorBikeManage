@@ -134,7 +134,7 @@
     <Compile Include="Controllers\Admin\QLNhanVienController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\StaffController.cs" />
-    <Compile Include="Controllers\VehiclesController.cs" />
+    <Compile Include="Controllers\Admin\VehiclesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -600,6 +600,9 @@
     <Content Include="Images\Users\nv002.jpg" />
     <Content Include="Images\Users\nv_kho02.jpg" />
     <Content Include="Images\Users\nv_kho01.jpg" />
+    <Content Include="Images\Vehicles\airblade125.jpg" />
+    <Content Include="Images\Vehicles\exciter150.jpg" />
+    <Content Include="Images\Vehicles\raider150.jpg" />
     <Content Include="Models\QuanLyXeMayModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>QuanLyXeMayModel.edmx</DependentUpon>
