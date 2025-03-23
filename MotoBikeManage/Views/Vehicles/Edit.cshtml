@@ -2,101 +2,154 @@
 
 @{
     ViewBag.Title = "Edit";
-    //Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = null;
 }
 
-<h2>Edit</h2>
+<style>
+    .edit-form-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Vehicle</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        @Html.HiddenFor(model => model.vehicle_id)
+    .form-group {
+        margin-bottom: 15px;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .form-label {
+        font-weight: 600;
+        color: #555;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.brand, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.brand, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.brand, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .form-control[readonly] {
+        background-color: #e9ecef;
+        opacity: 1;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.model, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.model, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.model, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    .btn-submit {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        margin-right: 10px;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.color, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.color, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.color, "", new { @class = "text-danger" })
-            </div>
-        </div>
+        .btn-submit:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+</style>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.frame_number, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.frame_number, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.frame_number, "", new { @class = "text-danger" })
-            </div>
-        </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="edit-form-card">
+                <h2 class="mb-4">Chỉnh sửa thông tin xe</h2>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.engine_number, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.engine_number, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.engine_number, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                @using (Html.BeginForm("Edit", "Vehicles", FormMethod.Post, new { id = Model.vehicle_id, enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.manufacture_year, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.manufacture_year, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.manufacture_year, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                    <!-- Hidden ID -->
+                    @Html.HiddenFor(m => m.vehicle_id)
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.status, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.status, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.status, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                    <!-- Thông tin chỉ xem -->
+                    <div class="form-group">
+                        <label class="form-label">Số khung</label>
+                        @Html.TextBoxFor(m => m.frame_number, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Số máy</label>
+                        @Html.TextBoxFor(m => m.engine_number, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Năm sản xuất</label>
+                        @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ngày nhập</label>
+                        @Html.TextBoxFor(m => m.created_at, new { @class = "form-control", @readonly = "readonly" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.created_at, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.created_at, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.created_at, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                    <hr />
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Save" class="btn btn-default" />
+                    <!-- Thông tin cho phép chỉnh sửa -->
+                    <div class="form-group">
+                        <label class="form-label">Tên xe</label>
+                        @Html.TextBox("name", Model.name, new { @class = "form-control change-check" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nhãn hiệu</label>
+                        @Html.TextBox("brand", Model.brand, new { @class = "form-control change-check" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Loại xe</label>
+                        @Html.TextBox("model", Model.model, new { @class = "form-control change-check" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Màu sắc</label>
+                        @Html.TextBox("color", Model.color, new { @class = "form-control change-check" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hiện trạng</label>
+                        @Html.TextBox("status", Model.status, new { @class = "form-control change-check" })
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hình ảnh</label><br />
+                        <img src="@Url.Content(Model.image)" alt="Ảnh xe" width="80" class="mb-2" />
+                        <input type="file" name="uploadImage" class="form-control change-check" />
+                    </div>
+
+                    <button type="submit" id="btnSubmit" class="btn btn-submit" disabled>Lưu</button>
+                    <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
+                }
             </div>
         </div>
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
+
+<!-- Thêm thư viện JS (nếu chưa có trong Layout) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+<script>
+    // Khóa nút Lưu nếu chưa có thay đổi
+    $(document).ready(function () {
+        var originalValues = {
+            name: '@Model.name',
+            brand: '@Model.brand',
+            model: '@Model.model',
+            color: '@Model.color',
+            status: '@Model.status'
+        };
+
+        // Sự kiện change/input
+        $('.change-check').on('input change', function () {
+            // Lấy giá trị hiện tại
+            var currentVals = {
+                name: $('input[name="name"]').val(),
+                brand: $('input[name="brand"]').val(),
+                model: $('input[name="model"]').val(),
+                color: $('input[name="color"]').val(),
+                status: $('input[name="status"]').val()
+            };
+
+            // Kiểm tra file input
+            var fileChanged = $('input[name="uploadImage"]')[0].files.length > 0;
+
+            // So sánh
+            var textChanged =
+                currentVals.name !== originalValues.name ||
+                currentVals.brand !== originalValues.brand ||
+                currentVals.model !== originalValues.model ||
+                currentVals.color !== originalValues.color ||
+                currentVals.status !== originalValues.status;
+
+            if (textChanged || fileChanged) {
+                $('#btnSubmit').prop('disabled', false);
+            } else {
+                $('#btnSubmit').prop('disabled', true);
+            }
+        });
+    });
+</script>

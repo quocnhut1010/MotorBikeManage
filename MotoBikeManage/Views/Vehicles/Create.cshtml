@@ -2,99 +2,117 @@
 
 @{
     ViewBag.Title = "Create";
-    //Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h2>Create</h2>
+<style>
+    /* Tăng khoảng cách giữa các nhóm form-control */
+    .form-group {
+        margin-bottom: 15px;
+    }
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Vehicle</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.name, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.name, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.name, "", new { @class = "text-danger" })
-            </div>
-        </div>
+        /* Tùy chỉnh style label */
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+        }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.brand, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.brand, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.brand, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    /* Nút submit */
+    .btn-submit {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        margin-right: 10px;
+    }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.model, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.model, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.model, "", new { @class = "text-danger" })
-            </div>
-        </div>
+        .btn-submit:hover {
+            background-color: #0056b3;
+            color: #fff;
+        }
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.color, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.color, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.color, "", new { @class = "text-danger" })
-            </div>
-        </div>
+    /* Card chứa toàn bộ form */
+    .create-form-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.frame_number, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.frame_number, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.frame_number, "", new { @class = "text-danger" })
-            </div>
-        </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="create-form-card">
+                <h2 class="mb-4">Thêm xe mới</h2>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.engine_number, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.engine_number, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.engine_number, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                @using (Html.BeginForm("Create", "Vehicles", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.manufacture_year, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.manufacture_year, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.manufacture_year, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                    <div class="form-group">
+                        <label for="uploadImage">Hình ảnh</label>
+                        <input type="file" name="uploadImage" class="form-control" />
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.status, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.status, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.status, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                    <div class="form-group">
+                        <label for="name">Tên xe <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.name, new { @class = "form-control", placeholder = "Nhập tên xe" })
+                    </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.created_at, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.created_at, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.created_at, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                    <div class="form-group">
+                        <label for="brand">Nhãn hiệu<span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.brand, new { @class = "form-control", placeholder = "Nhập nhãn hiệu" })
+                    </div>
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
+                    <div class="form-group">
+                        <label for="model">Loại xe <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.model, new { @class = "form-control", placeholder = "Nhập loại xe" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="color">Màu sắc <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.color, new { @class = "form-control", placeholder = "Nhập màu xe" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frame_number">Số khung <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.frame_number, new { @class = "form-control", placeholder = "Nhập số khung" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="engine_number">Số máy <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.engine_number, new { @class = "form-control", placeholder = "Nhập số máy" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="manufacture_year">Năm sản xuất <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", placeholder = "VD: 2023" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status">Hiện trạng <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.status, new { @class = "form-control", placeholder = "Nhập trạng thái xe" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="created_at">Ngày nhập <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.created_at, new { @class = "form-control", @type = "date" })
+                    </div>
+
+                    <button type="submit" class="btn btn-submit">Lưu</button>
+                    <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
+                }
             </div>
         </div>
     </div>
-}
-
-<div>
-    @Html.ActionLink("Back to List", "Index")
 </div>
+
+<!-- Thêm các thư viện JS của Bootstrap hoặc jQuery (nếu chưa có trong Layout) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+<script>
+    // Ví dụ: sau khi trang tải, focus vào ô nhập "Tên xe"
+    $(document).ready(function () {
+        $('input[name="name"]').focus();
+    });
+</script>
