@@ -1,248 +1,138 @@
 ﻿@model MotoBikeManage.Models.Vehicle
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Xóa thông tin về xe</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-    @{
-        ViewBag.Title = "Xóa thông tin về xe";
-        //Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+@{
+    ViewBag.Title = "Xóa thông tin về xe";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<style>
+    /* Tổng thể */
+    body {
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
     }
-    <style>
-        body {
-            font-family: 'Varela Round', sans-serif;
+
+    /* Container chính */
+    .delete-container {
+        max-width: 450px;
+        margin: 80px auto;
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    /* Tiêu đề xác nhận xóa */
+    .delete-header {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #dc3545;
+        margin-bottom: 15px;
+    }
+
+    /* Nút Xóa */
+    .btn-delete {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-delete:hover {
+            background-color: #b02a37;
         }
 
-        .modal-confirm {
-            color: #636363;
-            width: 400px;
+    /* Nút Hủy */
+    .btn-back {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        background-color: #6c757d;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-block;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-back:hover {
+            background-color: #545b62;
         }
 
-            .modal-confirm .modal-content {
-                padding: 20px;
-                border-radius: 5px;
-                border: none;
-                text-align: center;
-                font-size: 14px;
-            }
+    /* Modal */
+    .modal-content {
+        border-radius: 10px;
+    }
 
-            .modal-confirm .modal-header {
-                border-bottom: none;
-                position: relative;
-            }
+    .modal-header {
+        background-color: #dc3545;
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
 
-            .modal-confirm h4 {
-                text-align: center;
-                font-size: 26px;
-                margin: 30px 0 -10px;
-            }
+    .modal-title {
+        font-weight: 600;
+    }
 
-            .modal-confirm .close {
-                position: absolute;
-                top: -5px;
-                right: -2px;
-            }
+    .modal-footer .btn {
+        font-weight: 600;
+        padding: 10px 20px;
+    }
+</style>
+<div class="container mt-5" style="width:40%">
+    <div class="card shadow-lg p-4">
+        <h3 class="text-center text-danger">Xác nhận xóa nhân viên</h3>
+        <p><strong>Tên xe:</strong> @Model.name</p>
+        <p><strong>Kiểu xe:</strong> @Model.brand</p>
+        <p><strong>Màu:</strong> @Model.color</p>
+        <p><strong>Năm sản xuất:</strong> @Model.manufacture_year</p>
 
-            .modal-confirm .modal-body {
-                color: #999;
-            }
+        <!-- Nút Xóa mở modal xác nhận -->
+        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            XÓA
+        </button>
 
-            .modal-confirm .modal-footer {
-                border: none;
-                text-align: center;
-                border-radius: 5px;
-                font-size: 13px;
-                padding: 10px 15px 25px;
-            }
-
-                .modal-confirm .modal-footer a {
-                    color: #999;
-                }
-
-            .modal-confirm .icon-box {
-                width: 80px;
-                height: 80px;
-                margin: 0 auto;
-                border-radius: 50%;
-                z-index: 9;
-                text-align: center;
-                border: 3px solid #f15e5e;
-            }
-
-                .modal-confirm .icon-box i {
-                    color: #f15e5e;
-                    font-size: 46px;
-                    display: inline-block;
-                    margin-top: 13px;
-                }
-
-            .modal-confirm .btn, .modal-confirm .btn:active {
-                color: #fff;
-                border-radius: 4px;
-                background: #60c7c1;
-                text-decoration: none;
-                transition: all 0.4s;
-                line-height: normal;
-                min-width: 120px;
-                border: none;
-                min-height: 40px;
-                border-radius: 3px;
-                margin: 0 5px;
-            }
-
-            .modal-confirm .btn-secondary {
-                background: #c1c1c1;
-            }
-
-                .modal-confirm .btn-secondary:hover, .modal-confirm .btn-secondary:focus {
-                    background: #a8a8a8;
-                }
-
-            .modal-confirm .btn-danger {
-                background: #f15e5e;
-            }
-
-                .modal-confirm .btn-danger:hover, .modal-confirm .btn-danger:focus {
-                    background: #ee3535;
-                }
-
-        .trigger-btn {
-            display: inline-block;
-            margin: 100px auto;
-        }
-    </style>
-</head>
-
-<body>
-    <h2>Xóa dữ liệu của xe</h2>
-
-    <h3>Hãy check lại toàn bộ thông tin bên dưới 1 lần nữa, trước khi xóa</h3>
-    <div>
-        <h4>Thông tin về xe</h4>
-        <hr />
-        <dl class="dl-horizontal">
-            <dt>
-                Tên xe:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.name)
-            </dd>
-
-            <dt>
-                Nhãn hiệu:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.brand)
-            </dd>
-
-            <dt>
-                Loại xe:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.model)
-            </dd>
-
-            <dt>
-                Màu sắc:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.color)
-            </dd>
-
-            <dt>
-                Số khung:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.frame_number)
-            </dd>
-
-            <dt>
-                Số máy:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.engine_number)
-            </dd>
-
-            <dt>
-                Năm sản xuất:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.manufacture_year)
-            </dd>
-
-            <dt>
-                Hiện trạng:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.status)
-            </dd>
-
-            <dt>
-                Ngày nhập:
-            </dt>
-
-            <dd>
-                @Html.DisplayFor(model => model.created_at)
-            </dd>
-
-        </dl>
-
-       
-        @using (Html.BeginForm())
-        {
-            @Html.AntiForgeryToken()
-
-            <div class="form-actions text-center">
-                <!-- Thay vì hiển thị submit ngay, ta dùng modal trigger -->
-                <a href="#myModal" class="trigger-btn btn btn-danger" data-toggle="modal">Delete</a>
-                @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-default" })
-            </div>
-        }
+        <!-- Nút Quay lại -->
+        <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary w-100 mt-2">
+            HỦY
+        </a>
     </div>
-    <!-- Modal xác nhận -->
-    <div id="myModal" class="modal fade">
-        <div class="modal-dialog modal-confirm">
-            <div class="modal-content">
-                <div class="modal-header flex-column">
-                    <div class="icon-box">
-                        <i class="material-icons">&#xE5CD;</i>
-                    </div>
-                    <h4 class="modal-title w-100">Chắc chắn chưa?</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Việc xóa sẽ không thể khôi phục. Hãy cân nhắc!</p>
-                </div>
-                <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Thôi</button>
-                    <!-- Nút này sẽ submit form khi người dùng xác nhận -->
-                    <button type="button" class="btn btn-danger" id="confirmDelete">Xóa luôn</button>
-                </div>
+</div>
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="deleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa mẫu xe này <strong>@Model.name</strong>?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+
+                @using (Html.BeginForm("DeleteConfirmed", "Vehicles", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <!-- Dùng name="id" để khớp với DeleteConfirmed(int id) -->
+                    <input type="hidden" name="id" value="@Model.vehicle_id" />
+                    <button type="submit" class="btn btn-danger">Đồng ý xóa</button>
+                }
             </div>
         </div>
     </div>
-
-    <script>
-        // Khi nhấn nút Delete trong modal, submit form
-        $('#confirmDelete').click(function () {
-            $('form').submit();
-        });
-    </script>
-</body>
-</html>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+<!-- Bootstrap -->
+@*<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">*@
+@*<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>*@

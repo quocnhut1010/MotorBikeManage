@@ -78,45 +78,74 @@ namespace MotoBikeManage.Controllers.Admin
             return View(newEmployee);
         }
         // GET: QLNhanVien/Edit/5
+        [HttpGet]
         public ActionResult Edit(int id)
         {
+            // Tìm nhân viên trong DB (role = NhanVien)
             var employee = db.Users.FirstOrDefault(u => u.id == id && u.role == "NhanVien");
             if (employee == null)
-            {
                 return HttpNotFound();
-            }
+
+            // Trả về View editnhanvien.cshtml, truyền model
             return View(employee);
         }
 
         // POST: QLNhanVien/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(User updatedEmployee, HttpPostedFileBase avatarFile)
+        public ActionResult Edit(int id,
+                                 HttpPostedFileBase avatarFile,
+                                 string full_name,
+                                 string phone,
+                                 string email,
+                                 string password)
         {
-            // Tìm đối tượng cũ
-            var existingEmployee = db.Users.FirstOrDefault(u => u.id == updatedEmployee.id && u.role == "NhanVien");
-            if (existingEmployee == null)
+            try
             {
-                return HttpNotFound();
+                var oldEmp = db.Users.FirstOrDefault(u => u.id == id && u.role == "NhanVien");
+                if (oldEmp == null)
+                    return HttpNotFound();
+
+                // Lưu password cũ
+                var oldPass = oldEmp.password;
+
+                // Cập nhật các trường khác
+                oldEmp.full_name = full_name;
+                oldEmp.phone = phone;
+                oldEmp.email = email;
+
+                // Nếu password người dùng để trống -> giữ nguyên
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    oldEmp.password = oldPass;
+                }
+                else
+                {
+                    oldEmp.password = password;
+                }
+
+                // Nếu upload ảnh mới
+                if (avatarFile != null && avatarFile.ContentLength > 0)
+                {
+                    var fileName = Path.GetFileName(avatarFile.FileName);
+                    var path = Path.Combine(Server.MapPath("~/Images/Users"), fileName);
+                    avatarFile.SaveAs(path);
+
+                    oldEmp.avatar = "~/Images/Users/" + fileName;
+                }
+
+                db.SaveChanges();
+
+                // Về trang danh sách
+                return RedirectToAction("List");
             }
-
-            // Chỉ cập nhật các trường cho phép
-            existingEmployee.password = updatedEmployee.password;
-            existingEmployee.full_name = updatedEmployee.full_name;
-            existingEmployee.email = updatedEmployee.email;
-            existingEmployee.phone = updatedEmployee.phone;
-
-            // Nếu người dùng upload ảnh mới
-            if (avatarFile != null && avatarFile.ContentLength > 0)
+            catch (Exception ex)
             {
-                var fileName = Path.GetFileName(avatarFile.FileName);
-                var path = Path.Combine(Server.MapPath("~/Images/Users"), fileName);
-                avatarFile.SaveAs(path);
-                existingEmployee.avatar = "~/Images/Users/" + fileName;
+                ModelState.AddModelError("", "Lỗi khi lưu nhân viên: " + ex.Message);
+                // Tìm lại employee để trả về View
+                var emp = db.Users.FirstOrDefault(u => u.id == id && u.role == "NhanVien");
+                return View(emp);
             }
-
-            db.SaveChanges();
-            return RedirectToAction("List"); // Hoặc action nào bạn muốn
         }
         // Hiển thị trang xác nhận xóa (tùy chọn)
         public ActionResult Delete(int id)

@@ -48,59 +48,60 @@
                 @using (Html.BeginForm("Create", "Vehicles", FormMethod.Post, new { enctype = "multipart/form-data" }))
                 {
                     @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="form-group">
+    <label>Hình ảnh</label>
+    <input type="file" name="uploadImage" class="form-control" />
+</div>
 
-                    <div class="form-group">
-                        <label for="uploadImage">Hình ảnh</label>
-                        <input type="file" name="uploadImage" class="form-control" />
-                    </div>
+<div class="form-group">
+    <label>Tên xe <span class="text-danger">*</span></label>
+    @Html.TextBoxFor(m => m.name, new { @class = "form-control" })
+    @Html.ValidationMessageFor(m => m.name, "", new { @class = "text-danger" })
+</div>
 
-                    <div class="form-group">
-                        <label for="name">Tên xe <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.name, new { @class = "form-control", placeholder = "Nhập tên xe" })
-                    </div>
+<div class="form-group">
+    <label>Nhãn hiệu</label>
+    @Html.TextBoxFor(m => m.brand, new { @class = "form-control" })
+</div>
 
-                    <div class="form-group">
-                        <label for="brand">Nhãn hiệu<span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.brand, new { @class = "form-control", placeholder = "Nhập nhãn hiệu" })
-                    </div>
+<div class="form-group">
+    <label>Loại xe</label>
+    @Html.TextBoxFor(m => m.model, new { @class = "form-control" })
+</div>
 
-                    <div class="form-group">
-                        <label for="model">Loại xe <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.model, new { @class = "form-control", placeholder = "Nhập loại xe" })
-                    </div>
+<div class="form-group">
+    <label>Màu sắc</label>
+    @Html.TextBoxFor(m => m.color, new { @class = "form-control" })
+</div>
 
-                    <div class="form-group">
-                        <label for="color">Màu sắc <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.color, new { @class = "form-control", placeholder = "Nhập màu xe" })
-                    </div>
+<div class="form-group">
+    <label>Số khung</label>
+    @Html.TextBoxFor(m => m.frame_number, new { @class = "form-control" })
+</div>
 
-                    <div class="form-group">
-                        <label for="frame_number">Số khung <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.frame_number, new { @class = "form-control", placeholder = "Nhập số khung" })
-                    </div>
+<div class="form-group">
+    <label>Số máy</label>
+    @Html.TextBoxFor(m => m.engine_number, new { @class = "form-control" })
+</div>
 
-                    <div class="form-group">
-                        <label for="engine_number">Số máy <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.engine_number, new { @class = "form-control", placeholder = "Nhập số máy" })
-                    </div>
+<div class="form-group">
+    <label>Năm sản xuất</label>
+    @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", type="number" })
+</div>
 
-                    <div class="form-group">
-                        <label for="manufacture_year">Năm sản xuất <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", placeholder = "VD: 2023" })
-                    </div>
+<div class="form-group">
+    <label>Hiện trạng</label>
+    @Html.TextBoxFor(m => m.status, new { @class = "form-control" })
+</div>
 
-                    <div class="form-group">
-                        <label for="status">Hiện trạng <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.status, new { @class = "form-control", placeholder = "Nhập trạng thái xe" })
-                    </div>
+<div class="form-group">
+    <label>Ngày nhập</label>
+    @Html.TextBoxFor(m => m.created_at, new { @class = "form-control", type="date" })
+</div>
 
-                    <div class="form-group">
-                        <label for="created_at">Ngày nhập <span class="text-danger">*</span></label>
-                        @Html.TextBoxFor(m => m.created_at, new { @class = "form-control", @type = "date" })
-                    </div>
-
-                    <button type="submit" class="btn btn-submit">Lưu</button>
-                    <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
+<button type="submit" class="btn btn-primary">Lưu</button>
+<a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
                 }
             </div>
         </div>

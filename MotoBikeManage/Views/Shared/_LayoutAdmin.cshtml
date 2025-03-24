@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <title>N2D SHOP</title>
     <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
-    <link rel="stylesheet" href="../assets/css/styles.min.css" />
+    <link rel="stylesheet" href='@Url.Content("~/assets/css/styles.min.css")' />
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
 </head>
@@ -22,7 +22,7 @@
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                     <a href="@Url.Action("Index","Admin","Admin")" class="text-nowrap logo-img">
                         @*<img src="../assets/images/logos/dark-logo.svg" width="180" alt="" />*@
-                        <img src="../assets/images/logos/logo1.png" width="180" height="80" alt="" />
+                        <img src='@Url.Content("~/assets/images/logos/logo1.png")' width="180" height="80" alt="" />
                     </a>
                     <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
@@ -38,7 +38,8 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="@Url.Action("Index","Admin","Admin")" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/dashboard.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/dashboard.png")'
+                                         alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Dashboard</span>
                             </a>
@@ -50,7 +51,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="@Url.Action("List","QLNhanVien","Admin")" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/account.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/account.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Tài Khoản Nhân Viên</span>
                             </a>
@@ -58,7 +59,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="@Url.Action("ListNCC","QLNCC","Admin")" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/supplier.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/supplier.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Nhà Cung Cấp</span>
                             </a>
@@ -66,7 +67,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="@Url.Action("Index","Vehicles")" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/motorbike.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/motorbike.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Xe Máy</span>
                             </a>
@@ -78,7 +79,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="./authentication-login.html" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/inventory.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/inventory.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Tồn Kho</span>
                             </a>
@@ -86,7 +87,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/import.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/import.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Nhập Kho</span>
                             </a>
@@ -94,7 +95,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/logistics.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/logistics.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Xuất Kho</span>
                             </a>
@@ -106,7 +107,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="./icon-tabler.html" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/monitor.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/monitor.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Báo Cáo, Thống Kê</span>
                             </a>
@@ -114,7 +115,7 @@
                         <li class="sidebar-item">
                             <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
                                 <span>
-                                    <img src="~/assets/images/products/predictive.png" alt="" style="width: 40px; height: 40px;" />
+                                    <img src='@Url.Content("~/assets/images/products/predictive.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
                                 <span class="hide-menu">Bảo Trì</span>
                             </a>
@@ -127,7 +128,8 @@
                                 <a href="https://adminmart.com/product/modernize-bootstrap-5-admin-template/" target="_blank" class="btn btn-primary fs-2 fw-semibold lh-sm">Buy Pro</a>
                             </div>
                             <div class="unlimited-access-img">
-                                <img src="../assets/images/backgrounds/rocket.png" alt="" class="img-fluid">
+                                <img src='@Url.Content("~/assets/images/backgrounds/rocket.png")' alt=""
+                                     class="img-fluid">
                             </div>
                         </div>
                     </div>
@@ -196,12 +198,13 @@
             <p class="mb-0 fs-4">Design and Developed by <a href="https://XeMayN2D.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">XeMayN2D.com</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a></p>
         </div>
     </div>
-    <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/sidebarmenu.js"></script>
-    <script src="../assets/js/app.min.js"></script>
-    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-    <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-    <script src="../assets/js/dashboard.js"></script>
+    <!-- Thay đường dẫn tương đối bằng Url.Content cho JS -->
+    <script src='@Url.Content("~/assets/libs/jquery/dist/jquery.min.js")'></script>
+    <script src='@Url.Content("~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js")'></script>
+    <script src='@Url.Content("~/assets/js/sidebarmenu.js")'></script>
+    <script src='@Url.Content("~/assets/js/app.min.js")'></script>
+    <script src='@Url.Content("~/assets/libs/apexcharts/dist/apexcharts.min.js")'></script>
+    <script src='@Url.Content("~/assets/libs/simplebar/dist/simplebar.js")'></script>
+    <script src='@Url.Content("~/assets/js/dashboard.js")'></script>
 </body>
 </html>

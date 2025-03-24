@@ -2,112 +2,205 @@
 
 @{
     ViewBag.Title = "Edit";
-    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    Layout = null;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    //Layout = null;
 }
 
 <style>
+    /* Giới hạn chiều rộng và căn giữa cho container */
+    .container.my-5 {
+        max-width: 850px; /* Điều chỉnh form hẹp lại nhưng vẫn ở giữa */
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    /* Thẻ chứa form */
     .edit-form-card {
         background: #fff;
         border-radius: 8px;
         padding: 20px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease-in-out;
     }
 
+        .edit-form-card:hover {
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+        }
+
+    /* Mỗi row của form */
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -15px;
+    }
+
+        .form-row > .col-md-6 {
+            padding: 0 15px;
+        }
+
+    /* Mỗi nhóm form-group */
     .form-group {
         margin-bottom: 15px;
     }
 
+    /* Label */
     .form-label {
         font-weight: 600;
         color: #555;
+        display: block;
+        margin-bottom: 5px;
     }
 
-    .form-control[readonly] {
-        background-color: #e9ecef;
-        opacity: 1;
+    /* Trường nhập */
+    .form-control {
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        transition: border-color 0.3s ease-in-out;
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 14px;
+        color: #495057;
     }
 
+        /* Hiệu ứng khi focus */
+        .form-control:focus {
+            border-color: #80bdff;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        /* Trường readonly */
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
+    /* Nút Submit */
     .btn-submit {
         background-color: #007bff;
         color: #fff;
         border: none;
         margin-right: 10px;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.2s ease;
     }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
 
         .btn-submit:disabled {
             background-color: #6c757d;
             cursor: not-allowed;
         }
+
+    /* Nút Hủy (btn-secondary) không gạch chân (mặc định button đã không có) */
+    .btn-secondary {
+        background-color: #ff0000;
+        color: #fff;
+        border: none;
+        margin-right: 10px;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+        text-decoration: none; /* Dù button không bị gạch chân, có thể thêm thuộc tính này để chắc chắn */
+    }
+
 </style>
 
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="edit-form-card">
-                <h2 class="mb-4">Chỉnh sửa thông tin xe</h2>
+    <div class="edit-form-card">
+        <h2 class="mb-4">Chỉnh sửa thông tin xe</h2>
 
-                @using (Html.BeginForm("Edit", "Vehicles", FormMethod.Post, new { id = Model.vehicle_id, enctype = "multipart/form-data" }))
-                {
-                    @Html.AntiForgeryToken()
+        @using (Html.BeginForm("Edit", "Vehicles", FormMethod.Post, new { id = Model.vehicle_id, enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.vehicle_id)
 
-                    <!-- Hidden ID -->
-                    @Html.HiddenFor(m => m.vehicle_id)
-
-                    <!-- Thông tin chỉ xem -->
-                    <div class="form-group">
-                        <label class="form-label">Số khung</label>
-                        @Html.TextBoxFor(m => m.frame_number, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Số máy</label>
-                        @Html.TextBoxFor(m => m.engine_number, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Năm sản xuất</label>
-                        @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Ngày nhập</label>
-                        @Html.TextBoxFor(m => m.created_at, new { @class = "form-control", @readonly = "readonly" })
-                    </div>
-
-                    <hr />
-
-                    <!-- Thông tin cho phép chỉnh sửa -->
-                    <div class="form-group">
-                        <label class="form-label">Tên xe</label>
-                        @Html.TextBox("name", Model.name, new { @class = "form-control change-check" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Nhãn hiệu</label>
-                        @Html.TextBox("brand", Model.brand, new { @class = "form-control change-check" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Loại xe</label>
-                        @Html.TextBox("model", Model.model, new { @class = "form-control change-check" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Màu sắc</label>
-                        @Html.TextBox("color", Model.color, new { @class = "form-control change-check" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Hiện trạng</label>
-                        @Html.TextBox("status", Model.status, new { @class = "form-control change-check" })
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Hình ảnh</label><br />
-                        <img src="@Url.Content(Model.image)" alt="Ảnh xe" width="80" class="mb-2" />
-                        <input type="file" name="uploadImage" class="form-control change-check" />
-                    </div>
-
-                    <button type="submit" id="btnSubmit" class="btn btn-submit" disabled>Lưu</button>
-                    <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
-                }
+            <!-- Các trường chỉ xem -->
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label class="form-label">Số khung</label>
+                    @Html.TextBoxFor(m => m.frame_number,
+                                    new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="form-label">Số máy</label>
+                    @Html.TextBoxFor(m => m.engine_number,
+                                    new { @class = "form-control", @readonly = "readonly" })
+                </div>
             </div>
-        </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label class="form-label">Năm sản xuất</label>
+                    @Html.TextBoxFor(m => m.manufacture_year,
+                                    new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="form-label">Ngày nhập</label>
+                    @Html.TextBoxFor(m => m.created_at,
+                                    new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- Các trường chỉnh sửa -->
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label class="form-label">Tên xe</label>
+                    @Html.TextBox("name", Model.name,
+                                new { @class = "form-control change-check" })
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="form-label">Nhãn hiệu</label>
+                    @Html.TextBox("brand", Model.brand,
+                                new { @class = "form-control change-check" })
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label class="form-label">Loại xe</label>
+                    @Html.TextBox("model", Model.model,
+                                new { @class = "form-control change-check" })
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="form-label">Màu sắc</label>
+                    @Html.TextBox("color", Model.color,
+                                new { @class = "form-control change-check" })
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label class="form-label">Hiện trạng</label>
+                    @Html.TextBox("status", Model.status,
+                                new { @class = "form-control change-check" })
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="form-label">Hình ảnh</label><br />
+                    <img src="@Url.Content(Model.image)" alt="Ảnh xe" width="80" class="mb-2" />
+                    <input type="file" name="uploadImage" class="form-control change-check" />
+                </div>
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn btn-submit" disabled>Lưu</button>
+            <button type="button" class="btn btn-secondary"
+                    onclick="location.href='@Url.Action("Index", "Vehicles")'">
+                Hủy
+            </button>
+        }
     </div>
 </div>
+
+
 
 <!-- Thêm thư viện JS (nếu chưa có trong Layout) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

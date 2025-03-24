@@ -25,7 +25,7 @@ namespace MotoBikeManage.Controllers
         // GET: Vehicles/Create
         public ActionResult Create()
         {
-            // Trả về view Create.cshtml, nơi chứa form nhập thông tin xe
+            // Trả về form Create
             return View(new Vehicle());
         }
 
@@ -36,47 +36,53 @@ namespace MotoBikeManage.Controllers
         {
             try
             {
+                // Kiểm tra trùng lặp frame_number (nếu bạn có unique constraint)
+                // bool isDuplicated = db.Vehicles.Any(v => v.frame_number == newVehicle.frame_number);
+                // if (isDuplicated)
+                // {
+                //     ModelState.AddModelError("", "Số khung đã tồn tại.");
+                // }
+
+                // Chỉ khi ModelState hợp lệ mới lưu
                 if (ModelState.IsValid)
                 {
-                    // 1) Đặt thời gian tạo (nếu yêu cầu)
-                    newVehicle.created_at = DateTime.Now;
+                    // 1) Nếu bạn muốn user chọn ngày, thì để user nhập created_at.
+                    //    Ngược lại, ấn định newVehicle.created_at = DateTime.Now; (tùy logic)
+                    if (newVehicle.created_at == null)
+                    {
+                        newVehicle.created_at = DateTime.Now;
+                    }
 
                     // 2) Xử lý upload ảnh
                     if (uploadImage != null && uploadImage.ContentLength > 0)
                     {
-                        // Lấy tên file (kể cả phần mở rộng)
                         var fileName = Path.GetFileName(uploadImage.FileName);
-
-                        // Tạo đường dẫn vật lý để lưu file (ví dụ: /Images/Vehicles)
                         var path = Path.Combine(Server.MapPath("~/Images/Vehicles"), fileName);
-
-                        // Lưu file lên server
                         uploadImage.SaveAs(path);
 
-                        // Lưu vào trường image đường dẫn ảo (để hiển thị)
+                        // Gán đường dẫn ảo hiển thị
                         newVehicle.image = "~/Images/Vehicles/" + fileName;
                     }
                     else
                     {
-                        // Nếu người dùng không upload ảnh, có thể đặt ảnh mặc định
-                        newVehicle.image = "~/Images/Vehicles/default.png";
+                        // Ảnh mặc định
+                        newVehicle.image = "~/Images/Vehicles/default.jpg";
                     }
 
-                    // 3) Lưu đối tượng vào DB
+                    // 3) Lưu DB
                     db.Vehicles.Add(newVehicle);
                     db.SaveChanges();
 
-                    // 4) Điều hướng về trang danh sách xe (Index) sau khi thêm thành công
+                    // 4) Về trang Index
                     return RedirectToAction("Index");
                 }
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi (ghi log hoặc hiển thị thông báo)
-                ModelState.AddModelError("", "Không thể thêm xe vào danh sách. Lỗi: " + ex.Message);
+                ModelState.AddModelError("", "Không thể thêm xe: " + ex.Message);
             }
 
-            // Nếu có lỗi, return lại view Create kèm dữ liệu nhập
+            // Nếu ModelState không valid, trả về view Create kèm Model => hiển thị lỗi
             return View(newVehicle);
         }
         // GET: Vehicles/Edit/5
@@ -168,6 +174,39 @@ namespace MotoBikeManage.Controllers
                 // Tìm lại Vehicle để trả về View
                 var vehicle = db.Vehicles.Find(id);
                 return View(vehicle);
+            }
+        }
+        // Hiển thị trang xác nhận xóa (tùy chọn)
+        public ActionResult Delete(int id)
+        {
+            var vehicle = db.Vehicles.FirstOrDefault(u => u.vehicle_id == id);
+            if (vehicle == null)
+            {
+                return HttpNotFound();
+            }
+            return View(vehicle);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(int id)
+        {
+            try
+            {
+                var vehicle = db.Vehicles.FirstOrDefault(u => u.vehicle_id == id);
+                if (vehicle == null)
+                {
+                    return HttpNotFound();
+                }
+
+                db.Vehicles.Remove(vehicle);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "Lỗi khi xóa xe máy: " + ex.Message;
+                return RedirectToAction("Delete", new { id = id });
             }
         }
     }
