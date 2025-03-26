@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="QLXMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="QLXMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Export_Details">
           <Key>
             <PropertyRef Name="export_detail_id" />
@@ -66,16 +66,6 @@
           <Property Name="phone" Type="nvarchar" MaxLength="15" />
           <Property Name="email" Type="nvarchar" MaxLength="100" />
           <Property Name="created_at" Type="datetime" />
-        </EntityType>
-        <EntityType Name="sysdiagrams">
-          <Key>
-            <PropertyRef Name="diagram_id" />
-          </Key>
-          <Property Name="name" Type="nvarchar" MaxLength="128" Nullable="false" />
-          <Property Name="principal_id" Type="int" Nullable="false" />
-          <Property Name="diagram_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="version" Type="int" />
-          <Property Name="definition" Type="varbinary(max)" />
         </EntityType>
         <EntityType Name="Users">
           <Key>
@@ -212,7 +202,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__user___3E52440B">
+        <Association Name="FK__Maintenan__user___36B12243">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
           <ReferentialConstraint>
@@ -224,7 +214,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__vehic__3D5E1FD2">
+        <Association Name="FK__Maintenan__vehic__35BCFE0A">
           <End Role="Vehicles" Type="Self.Vehicles" Multiplicity="1" />
           <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
           <ReferentialConstraint>
@@ -243,7 +233,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySet Name="Import_Stock" EntityType="Self.Import_Stock" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Maintenance" EntityType="Self.Maintenance" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Suppliers" EntityType="Self.Suppliers" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Vehicles" EntityType="Self.Vehicles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Inventory" EntityType="Self.Inventory" store:Type="Views" store:Schema="dbo">
@@ -288,16 +277,17 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Users" EntitySet="Users" />
             <End Role="Import_Stock" EntitySet="Import_Stock" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__user___3E52440B" Association="Self.FK__Maintenan__user___3E52440B">
+          <AssociationSet Name="FK__Maintenan__user___36B12243" Association="Self.FK__Maintenan__user___36B12243">
             <End Role="Users" EntitySet="Users" />
             <End Role="Maintenance" EntitySet="Maintenance" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__vehic__3D5E1FD2" Association="Self.FK__Maintenan__vehic__3D5E1FD2">
+          <AssociationSet Name="FK__Maintenan__vehic__35BCFE0A" Association="Self.FK__Maintenan__vehic__35BCFE0A">
             <End Role="Vehicles" EntitySet="Vehicles" />
             <End Role="Maintenance" EntitySet="Maintenance" />
           </AssociationSet>
         </EntityContainer>
-      </Schema></edmx:StorageModels>
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="QLXMModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -360,8 +350,8 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="end_date" Type="DateTime" Precision="3" />
           <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="note" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="User" Relationship="Self.FK__Maintenan__user___3E52440B" FromRole="Maintenance" ToRole="Users" />
-          <NavigationProperty Name="Vehicle" Relationship="Self.FK__Maintenan__vehic__3D5E1FD2" FromRole="Maintenance" ToRole="Vehicles" />
+          <NavigationProperty Name="User" Relationship="Self.FK__Maintenan__user___36B12243" FromRole="Maintenance" ToRole="Users" />
+          <NavigationProperty Name="Vehicle" Relationship="Self.FK__Maintenan__vehic__35BCFE0A" FromRole="Maintenance" ToRole="Vehicles" />
         </EntityType>
         <EntityType Name="Supplier">
           <Key>
@@ -374,16 +364,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="created_at" Type="DateTime" Precision="3" />
           <NavigationProperty Name="Import_Stock" Relationship="Self.FK__Import_St__suppl__21B6055D" FromRole="Suppliers" ToRole="Import_Stock" />
-        </EntityType>
-        <EntityType Name="sysdiagram">
-          <Key>
-            <PropertyRef Name="diagram_id" />
-          </Key>
-          <Property Name="name" Type="String" MaxLength="128" FixedLength="false" Unicode="true" Nullable="false" />
-          <Property Name="principal_id" Type="Int32" Nullable="false" />
-          <Property Name="diagram_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="version" Type="Int32" />
-          <Property Name="definition" Type="Binary" MaxLength="Max" FixedLength="false" />
         </EntityType>
         <EntityType Name="User">
           <Key>
@@ -400,7 +380,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="avatar" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Export_Stock" Relationship="Self.FK__Export_St__user___2B3F6F97" FromRole="Users" ToRole="Export_Stock" />
           <NavigationProperty Name="Import_Stock" Relationship="Self.FK__Import_St__user___22AA2996" FromRole="Users" ToRole="Import_Stock" />
-          <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__user___3E52440B" FromRole="Users" ToRole="Maintenance" />
+          <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__user___36B12243" FromRole="Users" ToRole="Maintenance" />
         </EntityType>
         <EntityType Name="Vehicle">
           <Key>
@@ -419,7 +399,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Export_Details" Relationship="Self.FK__Export_De__vehic__300424B4" FromRole="Vehicles" ToRole="Export_Details" />
           <NavigationProperty Name="Import_Details" Relationship="Self.FK__Import_De__vehic__276EDEB3" FromRole="Vehicles" ToRole="Import_Details" />
-          <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__vehic__3D5E1FD2" FromRole="Vehicles" ToRole="Maintenance" />
+          <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__vehic__35BCFE0A" FromRole="Vehicles" ToRole="Maintenance" />
         </EntityType>
         <EntityType Name="Inventory">
           <Key>
@@ -524,7 +504,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__user___3E52440B">
+        <Association Name="FK__Maintenan__user___36B12243">
           <End Role="Users" Type="Self.User" Multiplicity="1" />
           <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
           <ReferentialConstraint>
@@ -536,7 +516,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__vehic__3D5E1FD2">
+        <Association Name="FK__Maintenan__vehic__35BCFE0A">
           <End Role="Vehicles" Type="Self.Vehicle" Multiplicity="1" />
           <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
           <ReferentialConstraint>
@@ -555,7 +535,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySet Name="Import_Stock" EntityType="Self.Import_Stock" />
           <EntitySet Name="Maintenances" EntityType="Self.Maintenance" />
           <EntitySet Name="Suppliers" EntityType="Self.Supplier" />
-          <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagram" />
           <EntitySet Name="Users" EntityType="Self.User" />
           <EntitySet Name="Vehicles" EntityType="Self.Vehicle" />
           <EntitySet Name="Inventories" EntityType="Self.Inventory" />
@@ -587,11 +566,11 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Users" EntitySet="Users" />
             <End Role="Import_Stock" EntitySet="Import_Stock" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__user___3E52440B" Association="Self.FK__Maintenan__user___3E52440B">
+          <AssociationSet Name="FK__Maintenan__user___36B12243" Association="Self.FK__Maintenan__user___36B12243">
             <End Role="Users" EntitySet="Users" />
             <End Role="Maintenance" EntitySet="Maintenances" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__vehic__3D5E1FD2" Association="Self.FK__Maintenan__vehic__3D5E1FD2">
+          <AssociationSet Name="FK__Maintenan__vehic__35BCFE0A" Association="Self.FK__Maintenan__vehic__35BCFE0A">
             <End Role="Vehicles" EntitySet="Vehicles" />
             <End Role="Maintenance" EntitySet="Maintenances" />
           </AssociationSet>
@@ -667,17 +646,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
                 <ScalarProperty Name="phone" ColumnName="phone" />
                 <ScalarProperty Name="email" ColumnName="email" />
                 <ScalarProperty Name="created_at" ColumnName="created_at" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="sysdiagrams">
-            <EntityTypeMapping TypeName="QLXMModel.sysdiagram">
-              <MappingFragment StoreEntitySet="sysdiagrams">
-                <ScalarProperty Name="name" ColumnName="name" />
-                <ScalarProperty Name="principal_id" ColumnName="principal_id" />
-                <ScalarProperty Name="diagram_id" ColumnName="diagram_id" />
-                <ScalarProperty Name="version" ColumnName="version" />
-                <ScalarProperty Name="definition" ColumnName="definition" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
