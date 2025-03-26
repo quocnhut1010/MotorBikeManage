@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 
 namespace MotoBikeManage.Controllers.Admin
@@ -45,6 +47,8 @@ namespace MotoBikeManage.Controllers.Admin
             Session["Role"] = userRole;
             Session["Email"] = user.email;
             Session["Phone"] = user.phone;
+            Session["Username"] = user.username;
+            Session["Password"] = user.password;
 
             // Kiểm tra quyền
             if (userRole == "Admin")
@@ -143,6 +147,27 @@ namespace MotoBikeManage.Controllers.Admin
             return RedirectToAction("Index", "Admin");
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditAccount(int Id, string Username, string Password)
+        {
+            var user = db.Users.FirstOrDefault(u => u.id == Id);
+            if (user == null)
+            {
+                TempData["EditAccountMessage"] = "Không tìm thấy tài khoản.";
+                return RedirectToAction("Index", "Admin");
+            }
+
+            user.username = Username;
+            user.password = Password; // Nên mã hóa
+            db.SaveChanges();
+
+            Session["Username"] = user.username;
+            Session["Password"] = user.password;
+
+            TempData["SuccessMessage"] = "Thay đổi thông tin thành công!";
+            return RedirectToAction("Index", "Admin");
+        }
 
 
         // Logout Functionality

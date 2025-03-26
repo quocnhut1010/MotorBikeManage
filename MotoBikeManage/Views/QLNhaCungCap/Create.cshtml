@@ -1,0 +1,106 @@
+﻿@model MotoBikeManage.Models.Supplier
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    /* Tăng khoảng cách, tạo layout bao quanh form */
+    .form-container {
+        margin: 0 auto;
+        max-width: 400px;
+        background-color: #f8f9fa; /* Màu nền nhẹ */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+        /* Tiêu đề */
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff; /* Tùy chỉnh màu chữ */
+        }
+
+    /* Nhãn (label) và input đồng nhất */
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-group input.form-control {
+        margin-bottom: 15px;
+    }
+
+    /* Nút thêm nhân viên */
+    button.btn.btn-primary {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+    }
+
+        /* Tạo hover hiệu ứng cho nút */
+        button.btn.btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+</style>
+
+<div class="form-container">
+    <h2>Thêm Nhà Cung Cấp</h2>
+    @using (Html.BeginForm("Create", "QLNhaCungCap", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.name)
+            @Html.TextBoxFor(m => m.name, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.address)
+            @Html.TextBoxFor(m => m.address, new { @class = "form-control" })
+        </div>
+
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.phone)
+            @Html.TextBoxFor(m => m.phone, new { @class = "form-control" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.email)
+            @Html.TextBoxFor(m => m.email, new { @class = "form-control" })
+        </div>
+
+
+
+
+        <button type="submit" class="btn btn-primary">Thêm</button>
+    }
+</div>
+
+<!-- Giả sử đặt ở cuối file View -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Sau khi trang tải xong, bind sự kiện cho nút submit
+    $(document).ready(function () {
+        $("form").on("submit", function (event) {
+            // Lấy giá trị các trường
+            var name = $("#name").val();
+            var address = $("#address").val();
+            var phone = $("#phone").val();
+            var email = $("#email").val();
+
+            // Ví dụ: Kiểm tra username hoặc password rỗng
+            // (Đảm bảo id="username" và id="password" có thật,
+            //   hoặc dùng name nếu muốn)
+            if (!name || !address || !phone || !email) {
+                alert("Vui lòng điền đủ các thông tin");
+                event.preventDefault(); // Ngăn form gửi đi
+            }
+        });
+    });
+</script>

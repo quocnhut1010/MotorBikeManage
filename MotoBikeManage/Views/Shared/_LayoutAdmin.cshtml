@@ -57,7 +57,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="@Url.Action("ListNCC","QLNCC","Admin")" aria-expanded="false">
+                            <a class="sidebar-link" href="@Url.Action("Index","QLNhaCungCap","Admin")" aria-expanded="false">
                                 <span>
                                     <img src='@Url.Content("~/assets/images/products/supplier.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
@@ -175,7 +175,8 @@
                                             <i class="ti ti-user fs-6"></i>
                                             <p class="mb-0 fs-3">My Profile</p>
                                         </a>
-                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item"
+                                           data-bs-toggle="modal" data-bs-target="#myAccountModal">
                                             <i class="ti ti-mail fs-6"></i>
                                             <p class="mb-0 fs-3">My Account</p>
                                         </a>
@@ -220,18 +221,18 @@
                     <!-- Giữ đường dẫn cũ phòng khi không upload mới -->
                     @Html.Hidden("OldAvatarPath", Session["Image"])
 
-          <!-- Lớp ngoài canh giữa nội dung -->
-<div class="text-center mb-4">
-  <!-- Lớp trong dùng inline-block + position relative để icon camera hiển thị góc -->
-  <div style="position: relative; margin: 0 auto; display: inline-block;">
-      <!-- Ảnh đại diện -->
-      <img id="avatarImg"
-           src="@Url.Content(Session["Image"] as string)"
-           style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"
-           class="mx-auto d-block" />
+                    <!-- Lớp ngoài canh giữa nội dung -->
+                    <div class="text-center mb-4">
+                        <!-- Lớp trong dùng inline-block + position relative để icon camera hiển thị góc -->
+                        <div style="position: relative; margin: 0 auto; display: inline-block;">
+                            <!-- Ảnh đại diện -->
+                            <img id="avatarImg"
+                                 src="@Url.Content(Session["Image"] as string)"
+                                 style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"
+                                 class="mx-auto d-block" />
 
-      <!-- Icon camera nằm ở góc phải dưới -->
-      <label style="
+                            <!-- Icon camera nằm ở góc phải dưới -->
+                            <label style="
          position: absolute;
          bottom: 0;
          right: 0;
@@ -243,22 +244,22 @@
          align-items: center;
          justify-content: center;
          cursor: pointer;
-         box-shadow: 0 0 4px rgba(0,0,0,0.3);" 
-         title="Chỉnh sửa ảnh đại diện">
-        <i class="ti ti-camera"></i>
-        <input type="file" 
-               name="AvatarFile" 
-               style="display: none;" 
-               accept="image/*" 
-               onchange="previewAvatar(event)" />
-      </label>
-  </div>
-</div>
+         box-shadow: 0 0 4px rgba(0,0,0,0.3);"
+                                   title="Chỉnh sửa ảnh đại diện">
+                                <i class="ti ti-camera"></i>
+                                <input type="file"
+                                       name="AvatarFile"
+                                       style="display: none;"
+                                       accept="image/*"
+                                       onchange="previewAvatar(event)" />
+                            </label>
+                        </div>
+                    </div>
                     <!-- Hidden field Id hoặc Username (để tìm user) -->
                     @Html.Hidden("Id", Session["Id"])
 
                     <!-- Thông tin của user (full_name, email, phone, v.v.) -->
-                    <div class="row mb-3" style="margin-left:3px" >
+                    <div class="row mb-3" style="margin-left:3px">
                         <div class="col-6">
                             <label class="form-label"><strong>Họ và tên:</strong></label>
                             <input type="text" name="FullName" class="form-control"
@@ -267,12 +268,12 @@
                         <div class="col-6">
                             <label class="form-label"><strong>Email:</strong></label>
                             <input type="email" name="Email" class="form-control"
-                                   value="@Session["Email"]"  />
+                                   value="@Session["Email"]" />
                         </div>
                     </div>
 
-                    <div class="row mb-3" style="margin-left:3px" >
-                        <div class="col-6" >
+                    <div class="row mb-3" style="margin-left:3px">
+                        <div class="col-6">
                             <label class="form-label"><strong>Số điện thoại:</strong></label>
                             <input type="text" name="Phone" class="form-control"
                                    value="@Session["Phone"]" />
@@ -286,6 +287,47 @@
 
 
                     <!-- Nút Lưu & Đóng -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: My Account -->
+    <div class="modal fade" id="myAccountModal" tabindex="-1" aria-labelledby="myAccountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Tiêu đề Modal -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myAccountModalLabel">Chỉnh sửa tài khoản</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Form: Gửi đến Action EditAccount của AdminController -->
+                @using (Html.BeginForm("EditAccount", "Admin", FormMethod.Post, new { @id = "formEditAccount" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <!-- Trường ẩn Id -->
+                    @Html.Hidden("Id", Session["Id"])
+
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label"><strong>Tài khoản (Username):</strong></label>
+                                <input type="text" name="Username" class="form-control"
+                                       value="@Session["Username"]" readonly />
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label"><strong>Mật khẩu:</strong></label>
+                                <input type="password" name="Password" class="form-control"
+                                       value="@Session["Password"]" />
+                            </div>
+                        </div>
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                         <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
@@ -309,6 +351,8 @@
         }
 
     </script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   
     <!-- Thay đường dẫn tương đối bằng Url.Content cho JS -->
     <script src='@Url.Content("~/assets/libs/jquery/dist/jquery.min.js")'></script>
     <script src='@Url.Content("~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js")'></script>

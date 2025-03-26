@@ -352,3 +352,33 @@
         </div>
     </div>
 </div>
+<!-- SweetAlert JS (nếu chưa thêm) -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+@{
+    if (TempData["SuccessMessage"] != null)
+    {
+        var message = TempData["SuccessMessage"].ToString();
+        <script>
+         swal({
+             title: "Thành công",
+             text: "@Html.Raw(TempData["SuccessMessage"])",
+             icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}
+@{
+    if (TempData["EditProfileMessage"] != null)
+    {
+        var message = TempData["EditProfileMessage"].ToString();
+        <script>
+         swal({
+             title: "Thành công",
+             text: "@Html.Raw(TempData["EditProfileMessage"])",
+             icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}

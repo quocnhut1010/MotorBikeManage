@@ -1,7 +1,7 @@
-﻿@model IEnumerable<MotoBikeManage.Models.User>
+﻿@model IEnumerable<MotoBikeManage.Models.Supplier>
 
 @{
-    ViewBag.Title = "Danh sách nhân viên";
+    ViewBag.Title = "Danh sách nhà cung cấp";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
@@ -74,8 +74,8 @@
         /* Hình ảnh */
         table.table tbody td img {
             border-radius: 10%;
-            width: 90px;
-            height: 100px;
+            width: 100px;
+            height: 120px;
             object-fit: cover; /* Nếu muốn cắt ảnh vừa khung */
         }
 
@@ -146,42 +146,40 @@
 </style>
 <div class="container mt-5" style="width:100%">
     <!-- Nút thêm nhân viên -->
-    <a href="@Url.Action("Create", "QLNhanVien", "Admin")">
-        <button class="btn btn-primary mb-3">Thêm nhân viên</button>
+    <a href="@Url.Action("Create", "QLNhaCungCap", "Admin")">
+        <button class="btn btn-primary mb-3">Thêm nhà cung cấp</button>
     </a>
 
     <!-- Bảng -->
     <table class="table table-bordered text-center">
         <thead>
             <tr>
-                <th>Hình ảnh</th>
-                <th>Tên đăng nhập</th>
-                <th>Họ và Tên</th>
-                <th>Email</th>
+                <th>Tên nhà cung cấp</th>
+                <th>Địa chỉ</th>
                 <th>Số điện thoại</th>
+                <th>Email</th>
                 <th>Hành động</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var emp in Model)
+            @foreach (var sup in Model)
             {
                 <tr>
-                    <td>
-                        <img src="@Url.Content(emp.avatar)" alt="Avatar" width="50" height="50" class="img-thumbnail" />
-                    </td>
-                    <td>@emp.username</td>
-                    <td>@emp.full_name</td>
-                    <td>@(string.IsNullOrEmpty(emp.email) ? "Chưa cập nhật" : emp.email)</td>
-                    <td>@(string.IsNullOrEmpty(emp.phone) ? "Chưa cập nhật" : emp.phone)</td>
+
+                    <td>@sup.name</td>
+                    <td>@sup.address</td>
+                    <td>@(string.IsNullOrEmpty(sup.phone) ? "Chưa cập nhật" : sup.phone)</td>
+                    <td>@(string.IsNullOrEmpty(sup.email) ? "Chưa cập nhật" : sup.email)</td>
+
                     <td>
                         <!-- SỬA: Thêm routeValues { id = emp.id } -->
-                        <a href="@Url.Action("Edit", "QLNhanVien", new { id = emp.id })"
+                        <a href="@Url.Action("Edit", "QLNhaCungCap", new { id = sup.supplier_id })"
                            class="btn btn-sm btn-primary">
                             <i class="fa fa-edit"></i> <!-- Icon sửa -->
                         </a>
 
                         <!-- Xóa (tham khảo) - tùy bạn sửa link cho đúng Controller/Action -->
-                        <a href="@Url.Action("Delete", "QLNhanVien", new { id = emp.id })" class="btn btn-sm btn-danger">
+                        <a href="@Url.Action("Delete", "QLNhaCungCap", new { id = sup.supplier_id })" class="btn btn-sm btn-danger">
                             <i class="fa fa-trash"></i> <!-- Icon xóa -->
                         </a>
                     </td>
@@ -190,6 +188,22 @@
         </tbody>
     </table>
 </div>
+<!-- SweetAlert JS (nếu chưa thêm) -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+@{
+    if (TempData["SuccessMessage"] != null)
+    {
+        var message = TempData["SuccessMessage"].ToString();
+        <script>
+      swal({
+          title: "Thành công",
+          text: "@Html.Raw(TempData["SuccessMessage"])",
+          icon: "success",
+          button: "Đóng"
+      });
+        </script>
+    }
+}
 <!-- Phân trang giả lập -->
 <nav aria-label="Page navigation example">
     <ul class="pagination justify-content-center">
