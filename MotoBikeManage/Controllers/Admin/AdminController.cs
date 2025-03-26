@@ -1,6 +1,7 @@
 ﻿using MotoBikeManage.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -36,11 +37,14 @@ namespace MotoBikeManage.Controllers.Admin
             }
 
             // Gán session
+            Session["Id"] = user.id;
             Session["FullName"] = user.full_name;
             Session["Image"] = user.avatar?.Trim();
             // Trim role để tránh lỗi thừa dấu cách
             var userRole = user.role?.Trim();
             Session["Role"] = userRole;
+            Session["Email"] = user.email;
+            Session["Phone"] = user.phone;
 
             // Kiểm tra quyền
             if (userRole == "Admin")
@@ -74,6 +78,71 @@ namespace MotoBikeManage.Controllers.Admin
                 return View();
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditProfile(int Id, string FullName, string Email, string Phone, string Role,
+                                  HttpPostedFileBase AvatarFile, string OldAvatarPath)
+        {
+            var user = db.Users.FirstOrDefault(u => u.id == Id);
+            if (user == null)
+            {
+                TempData["EditProfileMessage"] = "Không tìm thấy tài khoản cần chỉnh sửa.";
+                return RedirectToAction("Index", "Admin");
+            }
+
+            // Cập nhật trường văn bản
+            user.full_name = FullName;
+            user.email = Email;
+            user.phone = Phone;
+            // user.role = Role; // Nếu cho phép đổi role
+
+            // Nếu có file được upload
+            if (AvatarFile != null && AvatarFile.ContentLength > 0)
+            {
+                // Bước 1: Xóa ảnh cũ (nếu có), chú ý OldAvatarPath != null
+                if (!string.IsNullOrEmpty(user.avatar))
+                {
+                    var oldPhysicalPath = Server.MapPath(user.avatar); // user.avatar = "/Uploads/Avatars/user_1.jpg"...
+                    if (System.IO.File.Exists(oldPhysicalPath))
+                    {
+                        System.IO.File.Delete(oldPhysicalPath);
+                    }
+                }
+
+                // Bước 2: Lưu ảnh mới, đặt tên user_{id}.{ext}
+                var extension = Path.GetExtension(AvatarFile.FileName); // .jpg / .png / ...
+                var newFileName = "user_" + user.id + extension;
+                var saveDir = Server.MapPath("~/Images/Users");
+                if (!Directory.Exists(saveDir))
+                {
+                    Directory.CreateDirectory(saveDir);
+                }
+
+                var newPhysicalPath = Path.Combine(saveDir, newFileName);
+                AvatarFile.SaveAs(newPhysicalPath);
+
+                // Cập nhật avatar = đường dẫn tương đối
+                user.avatar = "~/Images/Users/" + newFileName;
+            }
+            else
+            {
+                // Không upload ảnh mới => Giữ nguyên ảnh cũ
+                user.avatar = OldAvatarPath;
+            }
+
+            db.SaveChanges();
+
+            // Cập nhật Session
+            Session["FullName"] = user.full_name;
+            Session["Email"] = user.email;
+            Session["Phone"] = user.phone;
+            Session["Role"] = user.role;
+            Session["Image"] = user.avatar; // Dùng cho layout hiển thị
+
+            TempData["EditProfileMessage"] = "Cập nhật thông tin thành công.";
+            return RedirectToAction("Index", "Admin");
+        }
+
 
 
         // Logout Functionality

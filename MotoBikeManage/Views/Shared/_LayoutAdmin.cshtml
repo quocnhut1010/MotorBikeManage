@@ -169,7 +169,9 @@
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                                     <div class="message-body">
-                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a class="d-flex align-items-center gap-2 dropdown-item"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#myProfileModal">
                                             <i class="ti ti-user fs-6"></i>
                                             <p class="mb-0 fs-3">My Profile</p>
                                         </a>
@@ -198,6 +200,115 @@
             <p class="mb-0 fs-4">Design and Developed by <a href="https://XeMayN2D.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">XeMayN2D.com</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a></p>
         </div>
     </div>
+    <!-- Modal: My Profile -->
+    <div class="modal fade" id="myProfileModal" tabindex="-1" aria-labelledby="myProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Tiêu đề Modal -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myProfileModalLabel">Chỉnh sửa thông tin tài khoản</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Form: Gửi đến Action EditProfile -->
+                @using (Html.BeginForm("EditProfile", "Admin", "Admin", FormMethod.Post, new { @id = "formEditProfile", enctype = "multipart/form-data" }))
+                {
+                    @Html.AntiForgeryToken()
+
+                    @Html.Hidden("Id", Session["Id"]) <!-- Dùng Id để tìm user -->
+
+                    <!-- Giữ đường dẫn cũ phòng khi không upload mới -->
+                    @Html.Hidden("OldAvatarPath", Session["Image"])
+
+          <!-- Lớp ngoài canh giữa nội dung -->
+<div class="text-center mb-4">
+  <!-- Lớp trong dùng inline-block + position relative để icon camera hiển thị góc -->
+  <div style="position: relative; margin: 0 auto; display: inline-block;">
+      <!-- Ảnh đại diện -->
+      <img id="avatarImg"
+           src="@Url.Content(Session["Image"] as string)"
+           style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"
+           class="mx-auto d-block" />
+
+      <!-- Icon camera nằm ở góc phải dưới -->
+      <label style="
+         position: absolute;
+         bottom: 0;
+         right: 0;
+         background-color: #fff;
+         border-radius: 50%;
+         width: 32px;
+         height: 32px;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         cursor: pointer;
+         box-shadow: 0 0 4px rgba(0,0,0,0.3);" 
+         title="Chỉnh sửa ảnh đại diện">
+        <i class="ti ti-camera"></i>
+        <input type="file" 
+               name="AvatarFile" 
+               style="display: none;" 
+               accept="image/*" 
+               onchange="previewAvatar(event)" />
+      </label>
+  </div>
+</div>
+                    <!-- Hidden field Id hoặc Username (để tìm user) -->
+                    @Html.Hidden("Id", Session["Id"])
+
+                    <!-- Thông tin của user (full_name, email, phone, v.v.) -->
+                    <div class="row mb-3" style="margin-left:3px" >
+                        <div class="col-6">
+                            <label class="form-label"><strong>Họ và tên:</strong></label>
+                            <input type="text" name="FullName" class="form-control"
+                                   value="@Session["FullName"]" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label"><strong>Email:</strong></label>
+                            <input type="email" name="Email" class="form-control"
+                                   value="@Session["Email"]"  />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3" style="margin-left:3px" >
+                        <div class="col-6" >
+                            <label class="form-label"><strong>Số điện thoại:</strong></label>
+                            <input type="text" name="Phone" class="form-control"
+                                   value="@Session["Phone"]" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label"><strong>Quyền (Role):</strong></label>
+                            <input type="text" name="Role" class="form-control"
+                                   value="@Session["Role"]" readonly />
+                        </div>
+                    </div>
+
+
+                    <!-- Nút Lưu & Đóng -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Script preview ảnh -->
+    <script type="text/javascript">
+        function previewAvatar(event) {
+            let fileInput = event.target;
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('avatarImg').src = e.target.result;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+    </script>
     <!-- Thay đường dẫn tương đối bằng Url.Content cho JS -->
     <script src='@Url.Content("~/assets/libs/jquery/dist/jquery.min.js")'></script>
     <script src='@Url.Content("~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js")'></script>

@@ -200,6 +200,7 @@
     <Content Include="assets\images\logos\logo.png" />
     <Content Include="assets\images\logos\logo1.png" />
     <Content Include="assets\images\products\account.png" />
+    <Content Include="assets\images\products\camera.png" />
     <Content Include="assets\images\products\dashboard.png" />
     <Content Include="assets\images\products\import.png" />
     <Content Include="assets\images\products\inventory.png" />
