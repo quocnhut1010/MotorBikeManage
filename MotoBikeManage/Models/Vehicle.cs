@@ -17,28 +17,18 @@ namespace MotoBikeManage.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Vehicle()
         {
-            this.Export_Details = new HashSet<Export_Details>();
-            this.Import_Details = new HashSet<Import_Details>();
             this.Maintenances = new HashSet<Maintenance>();
         }
     
         public int vehicle_id { get; set; }
-        public string name { get; set; }
-        public string brand { get; set; }
-        public string model { get; set; }
-        public string color { get; set; }
+        public int model_id { get; set; }
         public string frame_number { get; set; }
         public string engine_number { get; set; }
-        public int manufacture_year { get; set; }
         public string status { get; set; }
         public Nullable<System.DateTime> created_at { get; set; }
-        public string image { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Export_Details> Export_Details { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Import_Details> Import_Details { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Maintenance> Maintenances { get; set; }
+        public virtual VehicleModel VehicleModel { get; set; }
     }
 }

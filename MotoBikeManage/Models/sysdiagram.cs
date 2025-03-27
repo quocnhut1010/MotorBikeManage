@@ -12,14 +12,12 @@ namespace MotoBikeManage.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class Export_Details
+    public partial class sysdiagram
     {
-        public int export_detail_id { get; set; }
-        public int export_id { get; set; }
-        public int model_id { get; set; }
-        public int quantity { get; set; }
-    
-        public virtual Export_Stock Export_Stock { get; set; }
-        public virtual VehicleModel VehicleModel { get; set; }
+        public string name { get; set; }
+        public int principal_id { get; set; }
+        public int diagram_id { get; set; }
+        public Nullable<int> version { get; set; }
+        public byte[] definition { get; set; }
     }
 }

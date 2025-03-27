@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MotoBikeManage.Models.Vehicle>
+﻿@model IEnumerable<MotoBikeManage.Models.VehicleModel>
 @{
     ViewBag.Title = "Danh sách xe máy";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -155,11 +155,7 @@
                 <th>Nhãn hiệu</th>
                 <th>Loại xe</th>
                 <th>Màu sắc</th>
-                <th>Số khung</th>
-                <th>Số máy</th>
                 <th>Năm sản xuất</th>
-                <th>Hiện trạng</th>
-                <th>Ngày nhập</th>
                 <th>Hành động</th>
             </tr>
         </thead>
@@ -174,30 +170,30 @@
                     <td>@item.brand</td>
                     <td>@item.model</td>
                     <td>@item.color</td>
-                    <td>@item.frame_number</td>
-                    <td>@item.engine_number</td>
                     <td>@item.manufacture_year</td>
-                    <td>@item.status</td>
-                    <td>@item.created_at</td>
                     <td>
                         <!-- Nút chỉnh sửa, xóa... -->
                         <!-- SỬA: Thêm routeValues { id = emp.id } -->
-                        <a href="@Url.Action("Edit", "Vehicles", new { id = item.vehicle_id })"
+                        <a href="@Url.Action("Delete", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-warning">
+                            <i class="fa fa-eye"></i> <!-- Icon xem-->
+                        </a>
+                        <a href="@Url.Action("Edit", "Vehicles", new { id = item.model_id })"
                            class="btn btn-sm btn-primary">
                             <i class="fa fa-edit"></i> <!-- Icon sửa -->
                         </a>
 
                         <!-- Xóa (tham khảo) - tùy bạn sửa link cho đúng Controller/Action -->
-                        <a href="@Url.Action("Delete", "Vehicles", new { id = item.vehicle_id })" class="btn btn-sm btn-danger">
+                        <a href="@Url.Action("Delete", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-danger">
                             <i class="fa fa-trash"></i> <!-- Icon xóa -->
                         </a>
+
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
-                
+
 <!-- Phân trang giả lập -->
 <nav aria-label="Page navigation example">
     <ul class="pagination justify-content-center">

@@ -14,15 +14,14 @@ namespace MotoBikeManage.Models
     
     public partial class Inventory
     {
-        public int vehicle_id { get; set; }
+        public int model_id { get; set; }
         public string name { get; set; }
         public string brand { get; set; }
         public string model { get; set; }
         public string color { get; set; }
         public int manufacture_year { get; set; }
-        public Nullable<int> total_imported { get; set; }
+        public Nullable<int> stock_remaining { get; set; }
         public Nullable<int> total_exported { get; set; }
         public Nullable<int> total_maintenance { get; set; }
-        public Nullable<int> stock_remaining { get; set; }
     }
 }
