@@ -1,4 +1,4 @@
-﻿@model MotoBikeManage.Models.Vehicle
+﻿@model MotoBikeManage.Models.VehicleModel
 @{
     ViewBag.Title = "Xóa thông tin về xe";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -124,7 +124,7 @@
                 {
                     @Html.AntiForgeryToken()
                     <!-- Dùng name="id" để khớp với DeleteConfirmed(int id) -->
-                    <input type="hidden" name="id" value="@Model.vehicle_id" />
+                    <input type="hidden" name="id" value="@Model.model_id" />
                     <button type="submit" class="btn btn-danger">Đồng ý xóa</button>
                 }
             </div>

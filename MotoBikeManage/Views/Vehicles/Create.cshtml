@@ -1,4 +1,4 @@
-﻿@model MotoBikeManage.Models.Vehicle
+﻿@model MotoBikeManage.Models.VehicleModel
 
 @{
     ViewBag.Title = "Create";
@@ -49,59 +49,42 @@
                 {
                     @Html.AntiForgeryToken()
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-<div class="form-group">
-    <label>Hình ảnh</label>
-    <input type="file" name="uploadImage" class="form-control" />
-</div>
+                    <div class="form-group">
+                        <label>Hình ảnh</label>
+                        <input type="file" name="uploadImage" class="form-control" />
+                    </div>
 
-<div class="form-group">
-    <label>Tên xe <span class="text-danger">*</span></label>
-    @Html.TextBoxFor(m => m.name, new { @class = "form-control" })
-    @Html.ValidationMessageFor(m => m.name, "", new { @class = "text-danger" })
-</div>
+                    <div class="form-group">
+                        <label>Tên xe <span class="text-danger">*</span></label>
+                        @Html.TextBoxFor(m => m.name, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.name, "", new { @class = "text-danger" })
+                    </div>
 
-<div class="form-group">
-    <label>Nhãn hiệu</label>
-    @Html.TextBoxFor(m => m.brand, new { @class = "form-control" })
-</div>
+                    <div class="form-group">
+                        <label>Nhãn hiệu</label>
+                        @Html.TextBoxFor(m => m.brand, new { @class = "form-control" })
+                    </div>
 
-<div class="form-group">
-    <label>Loại xe</label>
-    @Html.TextBoxFor(m => m.model, new { @class = "form-control" })
-</div>
+                    <div class="form-group">
+                        <label>Loại xe</label>
+                        @Html.TextBoxFor(m => m.model, new { @class = "form-control" })
+                    </div>
 
-<div class="form-group">
-    <label>Màu sắc</label>
-    @Html.TextBoxFor(m => m.color, new { @class = "form-control" })
-</div>
+                    <div class="form-group">
+                        <label>Màu sắc</label>
+                        @Html.TextBoxFor(m => m.color, new { @class = "form-control" })
+                    </div>
 
-<div class="form-group">
-    <label>Số khung</label>
-    @Html.TextBoxFor(m => m.frame_number, new { @class = "form-control" })
-</div>
+                  
 
-<div class="form-group">
-    <label>Số máy</label>
-    @Html.TextBoxFor(m => m.engine_number, new { @class = "form-control" })
-</div>
+                    <div class="form-group">
+                        <label>Năm sản xuất</label>
+                        @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", type = "number" })
+                    </div>
 
-<div class="form-group">
-    <label>Năm sản xuất</label>
-    @Html.TextBoxFor(m => m.manufacture_year, new { @class = "form-control", type="number" })
-</div>
 
-<div class="form-group">
-    <label>Hiện trạng</label>
-    @Html.TextBoxFor(m => m.status, new { @class = "form-control" })
-</div>
-
-<div class="form-group">
-    <label>Ngày nhập</label>
-    @Html.TextBoxFor(m => m.created_at, new { @class = "form-control", type="date" })
-</div>
-
-<button type="submit" class="btn btn-primary">Lưu</button>
-<a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                    <a href="@Url.Action("Index", "Vehicles")" class="btn btn-secondary">Hủy</a>
                 }
             </div>
         </div>

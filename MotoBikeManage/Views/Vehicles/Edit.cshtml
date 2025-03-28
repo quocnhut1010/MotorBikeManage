@@ -1,4 +1,4 @@
-﻿@model MotoBikeManage.Models.Vehicle
+﻿@model MotoBikeManage.Models.VehicleModel
 
 @{
     ViewBag.Title = "Edit";
@@ -110,44 +110,21 @@
         transition: background-color 0.3s ease-in-out, transform 0.2s ease;
         text-decoration: none; /* Dù button không bị gạch chân, có thể thêm thuộc tính này để chắc chắn */
     }
-
 </style>
 
 <div class="container my-5">
     <div class="edit-form-card">
         <h2 class="mb-4">Chỉnh sửa thông tin xe</h2>
 
-        @using (Html.BeginForm("Edit", "Vehicles", FormMethod.Post, new { id = Model.vehicle_id, enctype = "multipart/form-data" }))
+        @using (Html.BeginForm("Edit", "Vehicles", FormMethod.Post, new { id = Model.model_id, enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
-            @Html.HiddenFor(m => m.vehicle_id)
+            @Html.HiddenFor(m => m.model_id)
 
             <!-- Các trường chỉ xem -->
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label class="form-label">Số khung</label>
-                    @Html.TextBoxFor(m => m.frame_number,
-                                    new { @class = "form-control", @readonly = "readonly" })
-                </div>
-                <div class="form-group col-md-6">
-                    <label class="form-label">Số máy</label>
-                    @Html.TextBoxFor(m => m.engine_number,
-                                    new { @class = "form-control", @readonly = "readonly" })
-                </div>
-            </div>
+            
 
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label class="form-label">Năm sản xuất</label>
-                    @Html.TextBoxFor(m => m.manufacture_year,
-                                    new { @class = "form-control", @readonly = "readonly" })
-                </div>
-                <div class="form-group col-md-6">
-                    <label class="form-label">Ngày nhập</label>
-                    @Html.TextBoxFor(m => m.created_at,
-                                    new { @class = "form-control", @readonly = "readonly" })
-                </div>
-            </div>
+               
 
             <hr />
 
@@ -179,25 +156,25 @@
             </div>
 
             <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label class="form-label">Hiện trạng</label>
-                    @Html.TextBox("status", Model.status,
-                                new { @class = "form-control change-check" })
+                    <div class="form-group col-md-6">
+                        <label class="form-label">Năm sản xuất</label>
+                        @Html.TextBox("manufacture_year", Model.manufacture_year,
+                                        new { @class = "form-control change-check" })
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="form-label">Hình ảnh</label><br />
+                        <img src="@Url.Content(Model.image)" alt="Ảnh xe" width="80" class="mb-2" />
+                        <input type="file" name="uploadImage" class="form-control change-check" />
+                    </div>
                 </div>
-                <div class="form-group col-md-6">
-                    <label class="form-label">Hình ảnh</label><br />
-                    <img src="@Url.Content(Model.image)" alt="Ảnh xe" width="80" class="mb-2" />
-                    <input type="file" name="uploadImage" class="form-control change-check" />
-                </div>
-            </div>
 
-            <button type="submit" id="btnSubmit" class="btn btn-submit" disabled>Lưu</button>
-            <button type="button" class="btn btn-secondary"
-                    onclick="location.href='@Url.Action("Index", "Vehicles")'">
-                Hủy
-            </button>
-        }
-    </div>
+                <button type="submit" id="btnSubmit" class="btn btn-submit" disabled>Lưu</button>
+                <button type="button" class="btn btn-secondary"
+                        onclick="location.href='@Url.Action("Index", "Vehicles")'">
+                    Hủy
+                </button>
+                }
+            </div>
 </div>
 
 
@@ -213,7 +190,8 @@
             brand: '@Model.brand',
             model: '@Model.model',
             color: '@Model.color',
-            status: '@Model.status'
+            manufacture_year: '@Model.manufacture_year',
+            
         };
 
         // Sự kiện change/input
@@ -224,7 +202,8 @@
                 brand: $('input[name="brand"]').val(),
                 model: $('input[name="model"]').val(),
                 color: $('input[name="color"]').val(),
-                status: $('input[name="status"]').val()
+                manufacture_year: $('input[name="manufacture_year"]').val(),
+               
             };
 
             // Kiểm tra file input
@@ -235,8 +214,8 @@
                 currentVals.name !== originalValues.name ||
                 currentVals.brand !== originalValues.brand ||
                 currentVals.model !== originalValues.model ||
-                currentVals.color !== originalValues.color ||
-                currentVals.status !== originalValues.status;
+                currentVals.manufacture_year !== originalValues.manufacture_year ||
+                currentVals.color !== originalValues.color ;
 
             if (textChanged || fileChanged) {
                 $('#btnSubmit').prop('disabled', false);
