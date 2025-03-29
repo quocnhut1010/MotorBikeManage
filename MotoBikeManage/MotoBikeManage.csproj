@@ -179,6 +179,7 @@
       <DependentUpon>QuanLyXeMayModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\VehicleDetailViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\css\icons\tabler-icons\fonts\tabler-icons.svg" />
@@ -929,10 +930,10 @@
     <Content Include="Views\QLNhaCungCap\Create.cshtml" />
     <Content Include="Views\QLNhaCungCap\Edit.cshtml" />
     <Content Include="Views\QLNhaCungCap\Delete.cshtml" />
-    <Content Include="Views\Vehicles\Index.cshtml" />
     <Content Include="Views\Vehicles\Create.cshtml" />
     <Content Include="Views\Vehicles\Edit.cshtml" />
     <Content Include="Views\Vehicles\Delete.cshtml" />
+    <Content Include="Views\Vehicles\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

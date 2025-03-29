@@ -8,6 +8,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using MotoBikeManage.Models;
+using MotoBikeManage.ViewModels;
 
 namespace MotoBikeManage.Controllers
 {
@@ -18,9 +19,55 @@ namespace MotoBikeManage.Controllers
         // GET: Vehicles
         public ActionResult Index()
         {
-            var vehiclemodels = db.VehicleModels.ToList();
-            // Trả về View, và truyền 'vehicles' làm model
-            return View(vehiclemodels);
+            var list = (from v in db.Vehicles
+                        join m in db.VehicleModels on v.model_id equals m.model_id
+                        select new VehicleDetailViewModel
+                        {
+                            vehicle_id = v.vehicle_id,
+                            model_id = m.model_id,
+                            name = m.name,
+                            brand = m.brand,
+                            model = m.model,
+                            color = m.color,
+                            manufacture_year = m.manufacture_year,
+                            frame_number = v.frame_number,
+                            engine_number = v.engine_number,
+                            status = v.status,
+                            created_at = v.created_at,
+                            image = m.image
+                        }).ToList();
+
+            return View(list);
+        }
+        [HttpGet]
+        public JsonResult GetVehicleDetail(int vehicleId)
+        {
+            // JOIN Vehicles với VehicleModels qua model_id
+            var result = (from v in db.Vehicles
+                          join m in db.VehicleModels on v.model_id equals m.model_id
+                          where v.vehicle_id == vehicleId
+                          select new VehicleDetailViewModel
+                          {
+                              vehicle_id = v.vehicle_id,
+                              model_id = m.model_id,
+                              name = m.name,
+                              brand = m.brand,
+                              color = m.color,
+                              model = m.model,
+                              manufacture_year = m.manufacture_year,
+                              frame_number = v.frame_number,
+                              engine_number = v.engine_number,
+                              status = v.status,
+                              created_at = v.created_at,
+                              image = m.image
+                          }).FirstOrDefault();
+
+            if (result == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy." }, JsonRequestBehavior.AllowGet);
+            }
+
+            return Json(new { success = true, data = result }, JsonRequestBehavior.AllowGet);
         }
         // GET: Vehicle/Create
         public ActionResult Create()

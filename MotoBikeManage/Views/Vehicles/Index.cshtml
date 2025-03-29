@@ -1,4 +1,5 @@
-﻿@model IEnumerable<MotoBikeManage.Models.VehicleModel>
+﻿@model IEnumerable<MotoBikeManage.ViewModels.VehicleDetailViewModel>
+
 @{
     ViewBag.Title = "Danh sách xe máy";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
@@ -150,6 +151,7 @@
     <table class="table table-bordered text-center">
         <thead>
             <tr>
+
                 <th>Hình ảnh</th>
                 <th>Tên xe</th>
                 <th>Nhãn hiệu</th>
@@ -163,9 +165,11 @@
             @foreach (var item in Model)
             {
                 <tr>
+
                     <td>
                         <img src="@Url.Content(item.image)" alt="Image" width="80" height="50" class="img-thumbnail" />
                     </td>
+
                     <td>@item.name</td>
                     <td>@item.brand</td>
                     <td>@item.model</td>
@@ -174,9 +178,10 @@
                     <td>
                         <!-- Nút chỉnh sửa, xóa... -->
                         <!-- SỬA: Thêm routeValues { id = emp.id } -->
-                        <a href="@Url.Action("Delete", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-warning">
-                            <i class="fa fa-eye"></i> <!-- Icon xem-->
-                        </a>
+                        <button class="btn btn-warning btn-sm"
+                                onclick="showVehicleDetail(@item.vehicle_id)">
+                            <i class="fa fa-eye"></i>
+                        </button>
                         <a href="@Url.Action("Edit", "Vehicles", new { id = item.model_id })"
                            class="btn btn-sm btn-primary">
                             <i class="fa fa-edit"></i> <!-- Icon sửa -->
@@ -200,3 +205,183 @@
         <li class="page-item active"><a class="page-link" href="#">1</a></li>
     </ul>
 </nav>
+<!-- Modal rỗng: sẽ chèn dữ liệu qua Ajax -->
+<div class="modal fade" id="vehicleDetailModal" tabindex="-1" aria-labelledby="vehicleDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Header của modal -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="vehicleDetailModalLabel">Thông tin xe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Body: Chuẩn bị sẵn placeholder -->
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <img id="vehicleImage"
+                         src=""
+                         alt="Ảnh xe"
+                         style=" border-radius: 30%; width: 120px; height: 120px; object-fit: cover;" />
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <strong>Tên xe:</strong>
+                        <span id="lblName"></span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Nhãn hiệu:</strong>
+                        <span id="lblBrand"></span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <strong>Model:</strong>
+                        <span id="lblModel"></span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Màu sắc:</strong>
+                        <span id="lblColor"></span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <strong>Năm SX:</strong>
+                        <span id="lblManufactureYear"></span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Trạng thái:</strong>
+                        <span id="lblStatus"></span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <strong>Số khung:</strong>
+                        <span id="lblFrameNumber"></span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Số máy:</strong>
+                        <span id="lblEngineNumber"></span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <strong>Ngày nhập kho:</strong>
+                        <span id="lblCreatedAt"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer: Nút đóng -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm jQuery nếu chưa có, Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Script AJAX -->
+<script>
+    function parseNetDate(netDateStr) {
+        // netDateStr thường dạng "/Date(1743091204763)/"
+        // Ta dùng biểu thức chính quy để trích số
+        var match = /\/Date\((\d+)([-+]\d+)?\)\//.exec(netDateStr);
+        if (!match) {
+            // Nếu không khớp, trả null
+            return null;
+        }
+        // Lấy phần millisecond (dấu + hay - múi giờ trong match[2] nếu có)
+        let ticks = parseInt(match[1], 10); // 1743091204763
+        let offset = 0;
+        if (match[2]) {
+            // Xử lý múi giờ nếu có, vd "-0700"
+            offset = parseInt(match[2], 10);
+        }
+        // Tạo đối tượng Date (ticks + offset)
+        let dateObj = new Date(ticks + offset);
+        return dateObj;
+    }
+    function formatDateCustom(dateObj) {
+        if (!(dateObj instanceof Date) || isNaN(dateObj)) {
+            return ""; // Nếu không phải Date hợp lệ, trả về rỗng
+        }
+
+        let dd = dateObj.getDate();
+        let mm = dateObj.getMonth() + 1;
+        let yyyy = dateObj.getFullYear();
+        let hh = dateObj.getHours();
+        let min = dateObj.getMinutes();
+        let ss = dateObj.getSeconds();
+
+        // Chuyển sang hai chữ số (nếu < 10 thì thêm '0')
+        dd = dd < 10 ? '0' + dd : dd;
+        mm = mm < 10 ? '0' + mm : mm;
+        hh = hh < 10 ? '0' + hh : hh;
+        min = min < 10 ? '0' + min : min;
+        ss = ss < 10 ? '0' + ss : ss;
+
+        // Xâu chuỗi thành "27/03/2025 23:00:04"
+        return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
+    }
+    function showVehicleDetail(vehicleId) {
+        // Gọi Ajax GET tới /Vehicles/GetVehicleDetail
+        $.ajax({
+            url: '@Url.Action("GetVehicleDetail", "Vehicles")', // Controller = Vehicles, Action = GetVehicleDetail
+            type: 'GET',
+            data: { vehicleId: vehicleId },
+            success: function (response) {
+                if (response.success) {
+                    // Gán dữ liệu vào modal
+                    var data = response.data;
+
+                    // 1) Kiểm tra đường dẫn ảnh
+                    if (data.image) {
+                        let imageUrl = data.image.replace("~", ""); // Loại bỏ dấu ~
+                        $('#vehicleImage').attr('src', imageUrl);
+                    } else {
+                        $('#vehicleImage').attr('src', '/images/no-image.png');
+                    }
+
+
+                    $('#lblName').text(data.name);
+                    $('#lblBrand').text(data.brand);
+                    $('#lblModel').text(data.model);
+                    $('#lblColor').text(data.color);
+                    $('#lblManufactureYear').text(data.manufacture_year);
+                    $('#lblStatus').text(data.status);
+                    $('#lblFrameNumber').text(data.frame_number);
+                    $('#lblEngineNumber').text(data.engine_number);
+                    var dateObj = new Date(data.created_at);
+
+                    // 2) Xử lý ngày tạo (created_at) an toàn
+                    // Xử lý format ngày
+                    if (data.created_at) {
+                        // Sử dụng parseNetDate thay vì new Date(...)
+                        let dateObj = parseNetDate(data.created_at);
+                        if (dateObj && !isNaN(dateObj)) {
+                            // Gọi hàm format tùy chỉnh
+                            let createdAtStr = formatDateCustom(dateObj);
+                            $('#lblCreatedAt').text(createdAtStr);
+                        } else {
+                            // Nếu không parse được, hiển thị chuỗi gốc hoặc để trống
+                            $('#lblCreatedAt').text(data.created_at);
+                        }
+                    } else {
+                        // Nếu null
+                        $('#lblCreatedAt').text('');
+                    }
+
+                    // Hiển thị modal
+                    $('#vehicleDetailModal').modal('show');
+                } else {
+                    alert(response.message || "Không tìm thấy xe.");
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr);
+                alert("Có lỗi xảy ra khi lấy dữ liệu.");
+            }
+        });
+    }
+</script>
