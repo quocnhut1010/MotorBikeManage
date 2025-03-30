@@ -20,6 +20,7 @@ namespace MotoBikeManage.Models
             this.Export_Stock = new HashSet<Export_Stock>();
             this.Import_Stock = new HashSet<Import_Stock>();
             this.Maintenances = new HashSet<Maintenance>();
+            this.Maintenances1 = new HashSet<Maintenance>();
         }
     
         public int id { get; set; }
@@ -38,5 +39,7 @@ namespace MotoBikeManage.Models
         public virtual ICollection<Import_Stock> Import_Stock { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Maintenance> Maintenances { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Maintenance> Maintenances1 { get; set; }
     }
 }
