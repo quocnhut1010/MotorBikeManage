@@ -16,13 +16,19 @@ namespace MotoBikeManage.Models
     {
         public int maintenance_id { get; set; }
         public int vehicle_id { get; set; }
-        public int user_id { get; set; }
+        public int requested_by { get; set; }
+        public Nullable<int> approved_by { get; set; }
+        public string approval_status { get; set; }
+        public string maintenance_type { get; set; }
+        public string reason { get; set; }
+        public string priority { get; set; }
         public Nullable<System.DateTime> start_date { get; set; }
         public Nullable<System.DateTime> end_date { get; set; }
-        public string status { get; set; }
-        public string note { get; set; }
+        public string completion_status { get; set; }
+        public string completion_approval_status { get; set; }
     
         public virtual User User { get; set; }
+        public virtual User User1 { get; set; }
         public virtual Vehicle Vehicle { get; set; }
     }
 }

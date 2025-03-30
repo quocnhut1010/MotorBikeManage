@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="QLXMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="QLXMModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="Export_Details">
           <Key>
             <PropertyRef Name="export_detail_id" />
@@ -50,11 +50,16 @@
           </Key>
           <Property Name="maintenance_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="vehicle_id" Type="int" Nullable="false" />
-          <Property Name="user_id" Type="int" Nullable="false" />
+          <Property Name="requested_by" Type="int" Nullable="false" />
+          <Property Name="approved_by" Type="int" />
+          <Property Name="approval_status" Type="nvarchar" MaxLength="20" />
+          <Property Name="maintenance_type" Type="nvarchar" MaxLength="50" />
+          <Property Name="reason" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="priority" Type="nvarchar" MaxLength="20" />
           <Property Name="start_date" Type="datetime" />
           <Property Name="end_date" Type="datetime" />
-          <Property Name="status" Type="nvarchar" MaxLength="20" />
-          <Property Name="note" Type="nvarchar" MaxLength="255" />
+          <Property Name="completion_status" Type="nvarchar" MaxLength="20" />
+          <Property Name="completion_approval_status" Type="nvarchar" MaxLength="30" />
         </EntityType>
         <EntityType Name="Suppliers">
           <Key>
@@ -218,7 +223,19 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__user___75A278F5">
+        <Association Name="FK__Maintenan__appro__18EBB532">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Maintenance">
+              <PropertyRef Name="approved_by" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Maintenan__reque__17F790F9">
           <End Role="Users" Type="Self.Users" Multiplicity="1" />
           <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
           <ReferentialConstraint>
@@ -226,11 +243,11 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
               <PropertyRef Name="id" />
             </Principal>
             <Dependent Role="Maintenance">
-              <PropertyRef Name="user_id" />
+              <PropertyRef Name="requested_by" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__vehic__74AE54BC">
+        <Association Name="FK__Maintenan__vehic__17036CC0">
           <End Role="Vehicles" Type="Self.Vehicles" Multiplicity="1" />
           <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
           <ReferentialConstraint>
@@ -308,11 +325,15 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Users" EntitySet="Users" />
             <End Role="Import_Stock" EntitySet="Import_Stock" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__user___75A278F5" Association="Self.FK__Maintenan__user___75A278F5">
+          <AssociationSet Name="FK__Maintenan__appro__18EBB532" Association="Self.FK__Maintenan__appro__18EBB532">
             <End Role="Users" EntitySet="Users" />
             <End Role="Maintenance" EntitySet="Maintenance" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__vehic__74AE54BC" Association="Self.FK__Maintenan__vehic__74AE54BC">
+          <AssociationSet Name="FK__Maintenan__reque__17F790F9" Association="Self.FK__Maintenan__reque__17F790F9">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Maintenance" EntitySet="Maintenance" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Maintenan__vehic__17036CC0" Association="Self.FK__Maintenan__vehic__17036CC0">
             <End Role="Vehicles" EntitySet="Vehicles" />
             <End Role="Maintenance" EntitySet="Maintenance" />
           </AssociationSet>
@@ -321,8 +342,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Vehicles" EntitySet="Vehicles" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="QLXMModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -374,20 +394,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <NavigationProperty Name="Supplier" Relationship="Self.FK__Import_St__suppl__60A75C0F" FromRole="Import_Stock" ToRole="Suppliers" />
           <NavigationProperty Name="User" Relationship="Self.FK__Import_St__user___619B8048" FromRole="Import_Stock" ToRole="Users" />
         </EntityType>
-        <EntityType Name="Maintenance">
-          <Key>
-            <PropertyRef Name="maintenance_id" />
-          </Key>
-          <Property Name="maintenance_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="vehicle_id" Type="Int32" Nullable="false" />
-          <Property Name="user_id" Type="Int32" Nullable="false" />
-          <Property Name="start_date" Type="DateTime" Precision="3" />
-          <Property Name="end_date" Type="DateTime" Precision="3" />
-          <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="note" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="User" Relationship="Self.FK__Maintenan__user___75A278F5" FromRole="Maintenance" ToRole="Users" />
-          <NavigationProperty Name="Vehicle" Relationship="Self.FK__Maintenan__vehic__74AE54BC" FromRole="Maintenance" ToRole="Vehicles" />
-        </EntityType>
         <EntityType Name="Supplier">
           <Key>
             <PropertyRef Name="supplier_id" />
@@ -425,8 +431,9 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="avatar" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Export_Stock" Relationship="Self.FK__Export_St__user___6A30C649" FromRole="Users" ToRole="Export_Stock" />
           <NavigationProperty Name="Import_Stock" Relationship="Self.FK__Import_St__user___619B8048" FromRole="Users" ToRole="Import_Stock" />
-          <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__user___75A278F5" FromRole="Users" ToRole="Maintenance" />
-        </EntityType>
+          <NavigationProperty Name="Maintenances" Relationship="QLXMModel.FK__Maintenan__appro__18EBB532" FromRole="User" ToRole="Maintenance" />
+          <NavigationProperty Name="Maintenances1" Relationship="QLXMModel.FK__Maintenan__reque__17F790F9" FromRole="User" ToRole="Maintenance" />
+          </EntityType>
         <EntityType Name="VehicleModel">
           <Key>
             <PropertyRef Name="model_id" />
@@ -452,8 +459,8 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="engine_number" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
           <Property Name="status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="created_at" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="Maintenances" Relationship="Self.FK__Maintenan__vehic__74AE54BC" FromRole="Vehicles" ToRole="Maintenance" />
           <NavigationProperty Name="VehicleModel" Relationship="Self.FK__Vehicles__model___534D60F1" FromRole="Vehicles" ToRole="VehicleModels" />
+          <NavigationProperty Name="Maintenances" Relationship="QLXMModel.FK__Maintenan__vehic__17036CC0" FromRole="Vehicle" ToRole="Maintenance" />
         </EntityType>
         <EntityType Name="Inventory">
           <Key>
@@ -557,30 +564,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Maintenan__user___75A278F5">
-          <End Role="Users" Type="Self.User" Multiplicity="1" />
-          <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Maintenance">
-              <PropertyRef Name="user_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Maintenan__vehic__74AE54BC">
-          <End Role="Vehicles" Type="Self.Vehicle" Multiplicity="1" />
-          <End Role="Maintenance" Type="Self.Maintenance" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Vehicles">
-              <PropertyRef Name="vehicle_id" />
-            </Principal>
-            <Dependent Role="Maintenance">
-              <PropertyRef Name="vehicle_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Vehicles__model___534D60F1">
           <End Role="VehicleModels" Type="Self.VehicleModel" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -600,7 +583,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySet Name="Export_Stock" EntityType="Self.Export_Stock" />
           <EntitySet Name="Import_Details" EntityType="Self.Import_Details" />
           <EntitySet Name="Import_Stock" EntityType="Self.Import_Stock" />
-          <EntitySet Name="Maintenances" EntityType="Self.Maintenance" />
           <EntitySet Name="Suppliers" EntityType="Self.Supplier" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagram" />
           <EntitySet Name="Users" EntityType="Self.User" />
@@ -635,20 +617,81 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Users" EntitySet="Users" />
             <End Role="Import_Stock" EntitySet="Import_Stock" />
           </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__user___75A278F5" Association="Self.FK__Maintenan__user___75A278F5">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="Maintenance" EntitySet="Maintenances" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Maintenan__vehic__74AE54BC" Association="Self.FK__Maintenan__vehic__74AE54BC">
-            <End Role="Vehicles" EntitySet="Vehicles" />
-            <End Role="Maintenance" EntitySet="Maintenances" />
-          </AssociationSet>
           <AssociationSet Name="FK__Vehicles__model___534D60F1" Association="Self.FK__Vehicles__model___534D60F1">
             <End Role="VehicleModels" EntitySet="VehicleModels" />
             <End Role="Vehicles" EntitySet="Vehicles" />
           </AssociationSet>
-        </EntityContainer>
-      </Schema>
+          <EntitySet Name="Maintenances" EntityType="QLXMModel.Maintenance" />
+          <AssociationSet Name="FK__Maintenan__appro__18EBB532" Association="QLXMModel.FK__Maintenan__appro__18EBB532">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Maintenance" EntitySet="Maintenances" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Maintenan__reque__17F790F9" Association="QLXMModel.FK__Maintenan__reque__17F790F9">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Maintenance" EntitySet="Maintenances" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Maintenan__vehic__17036CC0" Association="QLXMModel.FK__Maintenan__vehic__17036CC0">
+            <End Role="Vehicle" EntitySet="Vehicles" />
+            <End Role="Maintenance" EntitySet="Maintenances" />
+          </AssociationSet>
+          </EntityContainer>
+        <EntityType Name="Maintenance">
+          <Key>
+            <PropertyRef Name="maintenance_id" />
+          </Key>
+          <Property Name="maintenance_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="vehicle_id" Type="Int32" Nullable="false" />
+          <Property Name="requested_by" Type="Int32" Nullable="false" />
+          <Property Name="approved_by" Type="Int32" />
+          <Property Name="approval_status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="maintenance_type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="reason" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="priority" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="start_date" Type="DateTime" Precision="3" />
+          <Property Name="end_date" Type="DateTime" Precision="3" />
+          <Property Name="completion_status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="completion_approval_status" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="User" Relationship="QLXMModel.FK__Maintenan__appro__18EBB532" FromRole="Maintenance" ToRole="User" />
+          <NavigationProperty Name="User1" Relationship="QLXMModel.FK__Maintenan__reque__17F790F9" FromRole="Maintenance" ToRole="User" />
+          <NavigationProperty Name="Vehicle" Relationship="QLXMModel.FK__Maintenan__vehic__17036CC0" FromRole="Maintenance" ToRole="Vehicle" />
+        </EntityType>
+        <Association Name="FK__Maintenan__appro__18EBB532">
+          <End Type="QLXMModel.User" Role="User" Multiplicity="0..1" />
+          <End Type="QLXMModel.Maintenance" Role="Maintenance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Maintenance">
+              <PropertyRef Name="approved_by" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Maintenan__reque__17F790F9">
+          <End Type="QLXMModel.User" Role="User" Multiplicity="1" />
+          <End Type="QLXMModel.Maintenance" Role="Maintenance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Maintenance">
+              <PropertyRef Name="requested_by" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Maintenan__vehic__17036CC0">
+          <End Type="QLXMModel.Vehicle" Role="Vehicle" Multiplicity="1" />
+          <End Type="QLXMModel.Maintenance" Role="Maintenance" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicle">
+              <PropertyRef Name="vehicle_id" />
+            </Principal>
+            <Dependent Role="Maintenance">
+              <PropertyRef Name="vehicle_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
@@ -693,19 +736,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
                 <ScalarProperty Name="supplier_id" ColumnName="supplier_id" />
                 <ScalarProperty Name="user_id" ColumnName="user_id" />
                 <ScalarProperty Name="import_date" ColumnName="import_date" />
-                <ScalarProperty Name="note" ColumnName="note" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Maintenances">
-            <EntityTypeMapping TypeName="QLXMModel.Maintenance">
-              <MappingFragment StoreEntitySet="Maintenance">
-                <ScalarProperty Name="maintenance_id" ColumnName="maintenance_id" />
-                <ScalarProperty Name="vehicle_id" ColumnName="vehicle_id" />
-                <ScalarProperty Name="user_id" ColumnName="user_id" />
-                <ScalarProperty Name="start_date" ColumnName="start_date" />
-                <ScalarProperty Name="end_date" ColumnName="end_date" />
-                <ScalarProperty Name="status" ColumnName="status" />
                 <ScalarProperty Name="note" ColumnName="note" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -785,6 +815,24 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
                 <ScalarProperty Name="stock_remaining" ColumnName="stock_remaining" />
                 <ScalarProperty Name="total_exported" ColumnName="total_exported" />
                 <ScalarProperty Name="total_maintenance" ColumnName="total_maintenance" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Maintenances">
+            <EntityTypeMapping TypeName="QLXMModel.Maintenance">
+              <MappingFragment StoreEntitySet="Maintenance">
+                <ScalarProperty Name="completion_approval_status" ColumnName="completion_approval_status" />
+                <ScalarProperty Name="completion_status" ColumnName="completion_status" />
+                <ScalarProperty Name="end_date" ColumnName="end_date" />
+                <ScalarProperty Name="start_date" ColumnName="start_date" />
+                <ScalarProperty Name="priority" ColumnName="priority" />
+                <ScalarProperty Name="reason" ColumnName="reason" />
+                <ScalarProperty Name="maintenance_type" ColumnName="maintenance_type" />
+                <ScalarProperty Name="approval_status" ColumnName="approval_status" />
+                <ScalarProperty Name="approved_by" ColumnName="approved_by" />
+                <ScalarProperty Name="requested_by" ColumnName="requested_by" />
+                <ScalarProperty Name="vehicle_id" ColumnName="vehicle_id" />
+                <ScalarProperty Name="maintenance_id" ColumnName="maintenance_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

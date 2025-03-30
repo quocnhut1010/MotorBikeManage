@@ -1,0 +1,79 @@
+﻿@model IEnumerable<MotoBikeManage.Models.Maintenance>
+
+@{
+    ViewBag.Title = "Index";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = null;
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.User1.username)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Vehicle.frame_number)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.approval_status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.reason)
+        </th>
+
+        <th>
+            @Html.DisplayNameFor(model => model.start_date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.end_date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.completion_status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.completion_approval_status)
+        </th>
+
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.User1.username)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Vehicle.frame_number)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.approval_status)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.reason)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.start_date)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.end_date)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.completion_status)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.completion_approval_status)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.maintenance_id }) |
+            @Html.ActionLink("Details", "Details", new { id = item.maintenance_id }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.maintenance_id })
+        </td>
+    </tr>
+}
+
+</table>

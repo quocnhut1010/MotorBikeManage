@@ -122,6 +122,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Admin\AdminController.cs" />
+    <Compile Include="Controllers\Admin\BaoTriController.cs" />
     <Compile Include="Controllers\Admin\QLNhaCungCapController.cs" />
     <Compile Include="Controllers\Admin\QLNhanVienController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -934,6 +935,7 @@
     <Content Include="Views\Vehicles\Edit.cshtml" />
     <Content Include="Views\Vehicles\Delete.cshtml" />
     <Content Include="Views\Vehicles\Index.cshtml" />
+    <Content Include="Views\BaoTri\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

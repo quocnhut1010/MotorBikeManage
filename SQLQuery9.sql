@@ -87,14 +87,31 @@ CREATE TABLE Export_Details (
 CREATE TABLE Maintenance (
     maintenance_id INT IDENTITY(1,1) PRIMARY KEY,
     vehicle_id INT NOT NULL,
-    user_id INT NOT NULL,
+    requested_by INT NOT NULL,       -- Người đề xuất bảo trì (tham chiếu Users)
+    approved_by INT NULL,            -- Người phê duyệt (tham chiếu Users)
+    approval_status NVARCHAR(20)     -- Trạng thái phê duyệt
+        CHECK (approval_status IN (N'Chờ phê duyệt', N'Đã phê duyệt', N'Từ chối')) 
+        DEFAULT N'Chờ phê duyệt',
+    maintenance_type NVARCHAR(50)    -- Loại bảo trì
+        CHECK (maintenance_type IN (N'Định kỳ', N'Sửa chữa', N'Nâng cấp')),
+    reason NVARCHAR(255) NOT NULL,  -- Lý do bảo trì
+    priority NVARCHAR(20)           -- Mức ưu tiên
+        CHECK (priority IN (N'Cao', N'Trung bình', N'Thấp')) 
+        DEFAULT N'Trung bình',
     start_date DATETIME DEFAULT GETDATE(),
     end_date DATETIME NULL,
-    status NVARCHAR(20) CHECK (status IN (N'Đang bảo trì', N'Hoàn thành')) DEFAULT N'Đang bảo trì',
-    note NVARCHAR(255),
+    completion_status NVARCHAR(20)  -- Trạng thái hoàn thành
+        CHECK (completion_status IN (N'Đang bảo trì', N'Đã hoàn thành')) 
+        DEFAULT N'Đang bảo trì',
+    -- Khóa ngoại
     FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    FOREIGN KEY (requested_by) REFERENCES Users(id),
+    FOREIGN KEY (approved_by) REFERENCES Users(id)
 );
+ALTER TABLE Maintenance
+ADD completion_approval_status NVARCHAR(30)
+    CHECK (completion_approval_status IN (N'Chờ xác nhận', N'Đã xác nhận', N'Từ chối')) 
+    DEFAULT N'Chờ xác nhận';
 
 -- View tồn kho (đã cập nhật)
 CREATE VIEW Inventory AS
@@ -171,10 +188,88 @@ INSERT INTO Export_Details (export_id, model_id, quantity) VALUES
 (2, 4, 1);
 
 -- Thêm dữ liệu vào bảng Maintenance
-INSERT INTO Maintenance (vehicle_id, user_id, start_date, end_date, status, note) VALUES
-(5, 2, '2023-11-18', '2023-11-25', N'Hoàn thành', N'Bảo trì định kỳ'),
-(4, 2, '2023-11-28', NULL, N'Đang bảo trì', N'Sửa chữa động cơ');
+-- Thêm dữ liệu cho yêu cầu bảo trì đã được phê duyệt và đang thực hiện
+INSERT INTO Maintenance (
+    vehicle_id, 
+    requested_by, 
+    approved_by, 
+    approval_status, 
+    maintenance_type, 
+    reason, 
+    priority, 
+    start_date, 
+    completion_status, 
+    completion_approval_status
+)
+VALUES
+(
+    5,  -- vehicle_id = 5 (Exciter)
+    2,  -- requested_by = 2 (Nhân viên Trần Thị Nhân Viên)
+    1,  -- approved_by = 1 (Admin Nguyễn Văn Admin)
+    N'Đã phê duyệt', 
+    N'Sửa chữa', 
+    N'Hỏng động cơ, cần thay thế phụ tùng', 
+    N'Cao', 
+    GETDATE(), 
+    N'Đang bảo trì', 
+    N'Chờ xác nhận'
+);
 
+-- Thêm dữ liệu cho yêu cầu bảo trì chưa được phê duyệt
+INSERT INTO Maintenance (
+    vehicle_id, 
+    requested_by, 
+    approval_status, 
+    maintenance_type, 
+    reason, 
+    priority, 
+    start_date, 
+    completion_status, 
+    completion_approval_status
+)
+VALUES
+(
+    4,  -- vehicle_id = 4 (Sirius)
+    3,  -- requested_by = 3 (Nhân viên Lê Văn Nhân Viên)
+    N'Chờ phê duyệt', 
+    N'Định kỳ', 
+    N'Bảo dưỡng định kỳ 6 tháng', 
+    N'Trung bình', 
+    GETDATE(), 
+    N'Đang bảo trì', 
+    N'Chờ xác nhận'
+);
+
+-- Thêm dữ liệu cho yêu cầu đã hoàn thành và được xác nhận
+INSERT INTO Maintenance (
+    vehicle_id, 
+    requested_by, 
+    approved_by, 
+    approval_status, 
+    maintenance_type, 
+    reason, 
+    priority, 
+    start_date, 
+    end_date, 
+    completion_status, 
+    completion_approval_status
+)
+VALUES
+(
+    1,  -- vehicle_id = 1 (Vision)
+    2,  -- requested_by = 2 (Nhân viên Trần Thị Nhân Viên)
+    1,  -- approved_by = 1 (Admin Nguyễn Văn Admin)
+    N'Đã phê duyệt', 
+    N'Nâng cấp', 
+    N'Nâng cấp hệ thống phanh ABS', 
+    N'Cao', 
+    '2023-12-01', 
+    '2023-12-05', 
+    N'Đã hoàn thành', 
+    N'Đã xác nhận'
+);
+
+SELECT * FROM Maintenance;
 -- Xem dữ liệu từ view Inventory
 SELECT * FROM Inventory;
 
@@ -206,3 +301,58 @@ UPDATE VehicleModels SET image = '~/Images/Vehicles/lead125.jpg' WHERE model_id 
 -- Kiểm tra kết quả
 SELECT *
 FROM Vehicles;
+
+--UPDATE Maintenance
+--SET requested_by = 2; -- Điền giá trị mặc định (Admin)
+--select * from Maintenance
+
+---- Thay đổi cột thành NOT NULL
+--ALTER TABLE Maintenance
+--ALTER COLUMN requested_by INT NOT NULL;
+
+---- Thêm khóa ngoại tham chiếu đến bảng Users
+--ALTER TABLE Maintenance
+--ADD CONSTRAINT FK_Maintenance_RequestedBy 
+--FOREIGN KEY (requested_by) REFERENCES Users(id);
+
+--ALTER TABLE Maintenance  
+--ADD  
+--    --requested_by INT  NULL,  
+--   -- approved_by INT NULL,  
+--  --  approval_status NVARCHAR(20) CHECK (approval_status IN (N'Chờ phê duyệt', N'Đã phê duyệt', N'Từ chối')) DEFAULT N'Chờ phê duyệt',  
+--  --  maintenance_type NVARCHAR(50) CHECK (maintenance_type IN (N'Định kỳ', N'Sửa chữa', N'Nâng cấp')),  
+--	-- reason NVARCHAR(255) NOT NULL,  
+--    priority NVARCHAR(20) CHECK (priority IN (N'Cao', N'Trung bình', N'Thấp')) DEFAULT N'Trung bình';  
+
+---- Thêm khóa ngoại  
+--ALTER TABLE Maintenance  
+--ADD CONSTRAINT FK_Maintenance_RequestedBy FOREIGN KEY (requested_by) REFERENCES Users(id);  
+
+--ALTER TABLE Maintenance  
+--ADD CONSTRAINT FK_Maintenance_ApprovedBy FOREIGN KEY (approved_by) REFERENCES Users(id);  
+
+---- Cập nhật lại dữ liệu cũ, thêm các trường mới
+--UPDATE Maintenance
+--SET 
+--    requested_by = 2, -- Nhân viên user_id = 2 (Trần Thị Nhân Viên)
+--    approved_by = 1, -- Admin user_id = 1 (Nguyễn Văn Admin)
+--    approval_status = N'Đã phê duyệt',
+--    maintenance_type = N'Định kỳ',
+--    note = N'Bảo trì định kỳ hàng tháng',
+--    priority = N'Trung bình'
+--WHERE maintenance_id = 1;
+
+--UPDATE Maintenance
+--SET 
+--    requested_by = 2, -- Nhân viên user_id = 3 (Lê Văn Nhân Viên)
+--    approved_by = NULL, -- Chưa phê duyệt
+--    approval_status = N'Chờ phê duyệt',
+--    maintenance_type = N'Sửa chữa',
+--    note = N'Sửa chữa động cơ do hỏng bugi',
+--    priority = N'Cao'
+--WHERE maintenance_id = 2;
+---- Xóa toàn bộ dữ liệu trong bảng Maintenance
+--TRUNCATE TABLE Maintenance;
+---- Xóa cột status khỏi bảng Maintenance
+--ALTER TABLE Maintenance
+--DROP COLUMN note;
