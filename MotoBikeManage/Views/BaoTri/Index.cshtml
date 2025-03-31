@@ -2,78 +2,604 @@
 
 @{
     ViewBag.Title = "Index";
-    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
-    Layout = null;
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    //Layout = null;
 }
+<!-- Đảm bảo jQuery load TRƯỚC Bootstrap -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<h2>Index</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.User1.username)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Vehicle.frame_number)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.approval_status)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.reason)
-        </th>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<style>
+    /* Tổng thể */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        /*margin: 20px;*/
+    }
 
-        <th>
-            @Html.DisplayNameFor(model => model.start_date)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.end_date)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.completion_status)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.completion_approval_status)
-        </th>
+    /* Container chính */
+    .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-top: 55px !important;
+        /*width: 100% !important;*/
+        margin: 0 !important;
+    }
 
-        <th></th>
-    </tr>
+    /* Nút thêm xe */
+    /*button.btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 55px !important;
+        margin-bottom: 20px;*/ /* Tạo khoảng cách giữa nút và bảng */
+    /*}
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.User1.username)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Vehicle.frame_number)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.approval_status)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.reason)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.start_date)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.end_date)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.completion_status)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.completion_approval_status)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id = item.maintenance_id }) |
-            @Html.ActionLink("Details", "Details", new { id = item.maintenance_id }) |
-            @Html.ActionLink("Delete", "Delete", new { id = item.maintenance_id })
-        </td>
-    </tr>
+        button.btn-primary:hover {
+            background-color: #0056b3;
+        }*/
+
+    /* Bảng */
+    table.table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        table.table thead {
+            background-color: #f8f9fa;
+        }
+
+            table.table thead th {
+                text-align: center;
+                padding: 12px;
+                font-weight: bold;
+            }
+
+        table.table tbody td {
+            text-align: center;
+            padding: 10px;
+        }
+
+        table.table tbody tr:nth-child(even) {
+            background-color: #f2f2f2; /* Màu nền xen kẽ */
+        }
+
+        table.table tbody tr:hover {
+            background-color: #e9ecef; /* Hiệu ứng hover */
+        }
+
+        /* Hình ảnh */
+        table.table tbody td img {
+            border-radius: 10%;
+            width: 100px;
+            height: 80px;
+            object-fit: cover; /* Nếu muốn cắt ảnh vừa khung */
+        }
+
+    /* Nút hành động */
+    .btn-sm {
+        margin: 25px;
+        /*padding: 6px 10px;*/
+        font-size: 14px;
+    }
+
+    /* Chỉnh sửa màu sắc và hình dạng icon */
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white; /* Màu chữ trắng */
+        margin-right: 5px; /* Khoảng cách giữa icon và chữ */
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: white; /* Màu chữ trắng */
+        margin-right: 5px; /* Khoảng cách giữa icon và chữ */
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    /* Phân trang */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+        .pagination .page-item {
+            margin-right: 5px; /* Khoảng cách giữa các số trang */
+        }
+
+        .pagination .page-link {
+            color: #007bff;
+            border-radius: 5px;
+            padding: 8px 12px;
+        }
+
+            .pagination .page-link:hover {
+                background-color: #e9ecef; /* Hiệu ứng hover */
+            }
+
+        .pagination .active .page-link {
+            background-color: #007bff;
+            color: white !important; /* Màu chữ trong trang hiện tại */
+        }
+
+    /* Loại bỏ dấu chấm <li> ở phân trang */
+    .pagination {
+        list-style: none;
+    }
+
+        /* Xóa gạch chân ở phân trang */
+        .pagination .page-link {
+            text-decoration: none;
+        }
+
+
+    /*--lọc*/
+    .form-inline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        display: flex;
+        align-items: center;
+        margin-top: 25px;
+    }
+
+        .form-group label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+    .form-control {
+        width: 150px;
+        padding: 5px;
+    }
+
+    button.btn {
+        /*padding: 5px 15px;*/
+        border: 1px solid black;
+        background-color: white;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 25px;
+        margin-left: 25px;
+    }
+
+    /* button.btn:hover {
+            background-color: lightgray;
+        }*/
+
+    /*    .filter-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+    .filter-results {
+        width: 400px;
+        height: 100px;
+        border: 1px solid black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }*/
+
+</style>
+
+@{
+    // Giả sử bạn lấy giá trị filterCategory và filterStatus từ Query String.
+    // Nếu không có thì đặt về chuỗi rỗng.
+    var currentFilterCategory = Request.QueryString["filterCategory"] ?? "";
+    var currentFilterStatus = Request.QueryString["filterStatus"] ?? "";
+    string emptyListMessage = TempData["EmptyListMessage"] as string;
 }
+<!--
+  FORM LỌC TRẠNG THÁI
+  - Ô 1: Loại trạng thái (Tất cả, Trạng thái phê duyệt, Trạng thái hoàn thành, Trạng thái phê duyệt hoàn thành)
+  - Ô 2: Trạng thái cụ thể (tự động cập nhật theo ô 1)
+-->
+<form method="get" action="@Url.Action("Index", "BaoTri")" class="form-inline mb-3 justify-content-center">
+    <div class="form-group mr-2">
+        <label for="filterCategory" class="mr-2">Tất cả:</label>
+        <select id="filterCategory"
+                name="filterCategory"
+                class="form-control"
+                onchange="onChangeCategory()">
+            <!-- Mỗi option so sánh với currentFilterCategory để set 'selected' -->
+            <option value="" @(currentFilterCategory == "" ? "selected" : "")>Tất cả</option>
+            <option value="approval_status" @(currentFilterCategory == "approval_status" ? "selected" : "")>
+                Trạng thái phê duyệt
+            </option>
+            <option value="completion_status" @(currentFilterCategory == "completion_status" ? "selected" : "")>
+                Trạng thái hoàn thành
+            </option>
+            <option value="completion_approval_status" @(currentFilterCategory == "completion_approval_status" ? "selected" : "")>
+                Trạng thái phê duyệt hoàn thành
+            </option>
+        </select>
+    </div>
 
-</table>
+    <div class="form-group mr-2">
+        <label for="filterStatus" class="mr-2">Thuộc tính tương ứng:</label>
+        <select id="filterStatus"
+                name="filterStatus"
+                class="form-control"
+                disabled>
+            <!-- Khi onChangeCategory() chạy, nó sẽ đổ dữ liệu dựa trên filterCategory -->
+            <option value="">Tất cả</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lọc</button>
+</form>
+
+
+<div class="container mt-5" style="width:100%">
+
+
+    <table class="table table-bordered text-center">
+        <thead>
+            <tr>
+                <th>Nhân viên</th>
+                <th>Số khung xe</th>
+                <th>Lí do bảo trì</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Trạng thái phê duyệt</th>
+                <th>Trạng thái phê duyệt hoàn thành</th>
+                <th>Trạng thái hoàn thành</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.User1.full_name</td>
+                    <td>@item.Vehicle.frame_number</td>
+
+                    <td>@item.reason</td>
+                    <td>@item.start_date</td>
+                    <td>@item.end_date</td>
+                    <td>@item.approval_status</td>
+
+                    <td>@item.completion_approval_status</td>
+                    <td>@item.completion_status</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm btnShowDetail" data-id="@item.maintenance_id">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="maintenanceDetailModal" tabindex="-1" role="dialog" aria-labelledby="maintenanceDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="maintenanceDetailModalLabel">Chi tiết bảo trì</h5>
+                <!-- Nút đóng modal -->
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Đóng">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Nội dung chi tiết -->
+                <div id="maintenanceInfo">
+                    <p><strong>Nhân viên bảo trì:</strong> <span id="detailFullName"></span></p>
+                    <p><strong>Số khung xe:</strong> <span id="detailFrameNumber"></span></p>
+                    <p><strong>Lí do bảo trì:</strong> <span id="detailReason"></span></p>
+                    <p><strong>Trạng thái phê duyệt:</strong> <span id="detailApprovalStatus"></span></p>
+                    <p><strong>Trạng thái phê duyệt hoàn thành:</strong> <span id="detailCompletionApprovalStatus"></span></p>
+                    <p><strong>Trạng thái hoàn thành:</strong> <span id="detailCompletionStatus"></span></p>
+                    <hr />
+                    <!-- Bọc 3 cột thông tin trong div này -->
+                    <div id="completedInfoContainer" style="display: none;">
+                        <p><strong>Phê duyệt bởi:</strong> <span id="detailApprovedByName"></span></p>
+                        <p><strong>Ngày bắt đầu:</strong> <span id="detailStartDate"></span></p>
+                        <p><strong>Ngày hoàn thành:</strong> <span id="detailEndDate"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- Hai nút phê duyệt / từ chối -->
+                <button type="button" class="btn btn-success" id="btnApprove">
+                    <i class="fa fa-check"></i> Phê duyệt
+                </button>
+                <button type="button" class="btn btn-danger" id="btnReject">
+                    <i class="fa fa-times"></i> Từ chối
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        function onChangeCategory() {
+            var selectedVal = document.getElementById("filterCategory").value;
+            var secondDropdown = document.getElementById("filterStatus");
+
+            // Xóa các item cũ trong dropdown 2
+            secondDropdown.innerHTML = "";
+            // Mặc định cho phép chọn "Tất cả"
+            secondDropdown.options.add(new Option("Tất cả", ""));
+
+            // Nếu không chọn gì (Tất cả), disable dropdown 2
+            if (selectedVal === "") {
+                secondDropdown.disabled = true;
+            } else {
+                secondDropdown.disabled = false;
+
+                // Tùy theo giá trị thuộc tính của dropdown 1
+                // mà gán các option cho dropdown 2
+                if (selectedVal === "approval_status") {
+                    secondDropdown.options.add(new Option("Chờ phê duyệt", "Chờ phê duyệt"));
+                    secondDropdown.options.add(new Option("Đã phê duyệt", "Đã phê duyệt"));
+                    secondDropdown.options.add(new Option("Từ chối", "Từ chối"));
+                } else if (selectedVal === "completion_status") {
+                    secondDropdown.options.add(new Option("Đang bảo trì", "Đang bảo trì"));
+                    secondDropdown.options.add(new Option("Đã hoàn thành", "Đã hoàn thành"));
+                } else if (selectedVal === "completion_approval_status") {
+                    secondDropdown.options.add(new Option("Chờ xác nhận", "Chờ xác nhận"));
+                    secondDropdown.options.add(new Option("Đã xác nhận", "Đã xác nhận"));
+                    secondDropdown.options.add(new Option("Từ chối", "Từ chối"));
+                }
+            }
+        }
+
+        // Hàm thiết lập dropdown 2 khi load trang
+        window.onload = function () {
+            // Gọi hàm onChangeCategory() để đổ các option phù hợp
+            onChangeCategory();
+
+            // Lấy giá trị filterStatus từ Razor
+            var currentFilterStatus = "@currentFilterStatus";
+            // Nếu có giá trị filterStatus, đặt cho dropdown 2
+            if (currentFilterStatus) {
+                document.getElementById("filterStatus").value = currentFilterStatus;
+            }
+        };
+</script>
+
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        // Sự kiện click nút X nhỏ trong modal (nếu muốn làm thêm logic)
+        $(document).on("click", ".btn-close[data-dismiss='modal']", function() {
+            console.log("Modal đóng bằng nút X.");
+            // Nếu bạn muốn làm gì thêm thì thêm ở đây
+        });
+
+        // Bắt sự kiện nút Xem
+        $(document).on("click", ".btnShowDetail", function() {
+            var id = $(this).data("id");
+            // Gọi AJAX lấy chi tiết
+            $.ajax({
+                url: '@Url.Action("GetMaintenanceDetail","BaoTri")',
+                type: 'GET',
+                data: { id: id },
+                success: function (response) {
+                    if (!response.success) {
+                        swal({
+                            title: "Oops...",
+                            text: response.message,
+                            icon: 'error',
+                            button: "Đóng"
+                        });
+                        return;
+                    }
+
+                    //// Nếu đã hoàn thành thì không cho mở modal
+                    //if (response.data.completion_status === "Đã hoàn thành") {
+                    //    swal({
+                    //        title: "Oops...",
+                    //        text: "Mục này đã hoàn thành, không thể cập nhật thêm!",
+                    //        icon: 'error',
+                    //        button: "Đóng"
+                    //    });
+                    //    return;
+                    //}
+
+                    // Hiển thị dữ liệu lên modal
+                    $("#detailFullName").text(response.data.full_name);
+                    $("#detailFrameNumber").text(response.data.frame_number);
+                    $("#detailReason").text(response.data.reason);
+                    $("#detailApprovalStatus").text(response.data.approval_status);
+                    $("#detailCompletionApprovalStatus").text(response.data.completion_approval_status);
+                    $("#detailCompletionStatus").text(response.data.completion_status);
+                    $("#detailApprovedByName").text(response.data.approved_by_name);
+                    $("#detailStartDate").text(response.data.start_date_str);
+                    $("#detailEndDate").text(response.data.end_date_str);
+
+                    // Kiểm tra trạng thái hoàn thành
+                    if (response.data.completion_status === "Đã hoàn thành") {
+                        // Hiển thị khối completedInfoContainer
+                        $("#completedInfoContainer").show();
+                    } else {
+                        // Ẩn khối này nếu chưa hoàn thành
+                        $("#completedInfoContainer").hide();
+                    }
+
+                    // Ghi lại ID vào modal
+                    $("#maintenanceDetailModal").data("maintenance-id", response.data.maintenance_id);
+
+                    // Nếu chưa hoàn thành => hiện nút (hoặc đặt text phù hợp TH1 / TH2)
+                    if (response.data.completion_status !== "Đã hoàn thành") {
+
+                        if (response.data.approval_status === "Đã phê duyệt") {
+                            // TH2
+                            $("#btnApprove").html('<i class="fa fa-check"></i> Xác nhận');
+                            $("#btnReject").html('<i class="fa fa-times"></i> Từ chối');
+                        } else {
+                            // TH1
+                            $("#btnApprove").html('<i class="fa fa-check"></i> Phê duyệt');
+                            $("#btnReject").html('<i class="fa fa-times"></i> Từ chối');
+                        }
+
+                        // Hiển thị hai nút
+                        $("#btnApprove").show();
+                        $("#btnReject").show();
+                    }
+                    else {
+                        // Nếu "Đã hoàn thành", ẩn hai nút để người dùng chỉ xem
+                        $("#btnApprove").hide();
+                        $("#btnReject").hide();
+                    }
+
+                    // Mở modal
+                    $("#maintenanceDetailModal").modal("show");
+                },
+                error: function () {
+                    swal({
+                        title: "Lỗi",
+                        text: "Lỗi khi gọi server!",
+                        icon: 'error',
+                        button: "Đóng"
+                    });
+                }
+            });
+        });
+
+        // Nút Phê duyệt
+        $("#btnApprove").click(function() {
+            var id = $("#maintenanceDetailModal").data("maintenance-id");
+            callUpdateStatus(id, "approve");
+        });
+
+        // Nút Từ chối
+        $("#btnReject").click(function() {
+            var id = $("#maintenanceDetailModal").data("maintenance-id");
+            callUpdateStatus(id, "reject");
+        });
+
+        // Hàm AJAX update
+        function callUpdateStatus(id, actionType) {
+            $.ajax({
+                url: '@Url.Action("UpdateMaintenanceStatus","BaoTri")',
+                type: 'POST',
+                data: { id: id, actionType: actionType },
+                success: function (response) {
+                    if (!response.success) {
+                        swal({
+                            title: "Oops...",
+                            text: response.message,
+                            icon: 'error',
+                            button: "Đóng"
+                        });
+                        return;
+                    }
+
+                    // Hiển thị popup SweetAlert thành công
+                    swal({
+                        title: "Thành công",
+                        text: response.message,
+                        icon: 'success',
+                        button: "Đóng"
+                    }).then(function() {
+                        // Đóng modal, reload
+                        $("#maintenanceDetailModal").modal("hide");
+                        location.reload();
+                    });
+                },
+                error: function() {
+                    swal({
+                        title: "Lỗi",
+                        text: "Lỗi khi cập nhật trạng thái!",
+                        icon: 'error',
+                        button: "Đóng"
+                    });
+                }
+            });
+        }
+    </script>
+
+@{
+        if (TempData["EmptyListMessage"] != null)
+        {
+            var message = TempData["EmptyListMessage"].ToString();
+            <script>
+             swal({
+                 title: "Oops...",
+                 text: "@Html.Raw(TempData["EmptyListMessage"])",
+                 icon: 'error',
+                 button: "Đóng"
+             });
+            </script>
+        }
+        if (TempData["ApproveMessage"] != null)
+        {
+            var message = TempData["ApproveMessage"].ToString();
+            <script>
+             swal({
+                 title: "Thành công",
+                 text: "@Html.Raw(TempData["ApproveMessage"])",
+                 icon: 'success',
+                 button: "Đóng"
+             });
+            </script>
+        }
+        if (TempData["Approve_Message"] != null)
+        {
+            var message = TempData["Approve_Message"].ToString();
+            <script>
+             swal({
+                 title: "Thành công",
+                 text: "@Html.Raw(TempData["Approve_Message"])",
+                 icon: 'success',
+                 button: "Đóng"
+             });
+            </script>
+        }
+        if (TempData["NoApproveMessage"] != null)
+        {
+            var message = TempData["NoApproveMessage"].ToString();
+            <script>
+             swal({
+                 title: "Oops...",
+                 text: "@Html.Raw(TempData["NoApproveMessage"])",
+                 icon: 'error',
+                 button: "Đóng"
+             });
+            </script>
+        }
+        if (TempData["NoApprove_Message"] != null)
+        {
+            var message = TempData["NoApprove_Message"].ToString();
+            <script>
+             swal({
+                 title: "Oops...",
+                 text: "@Html.Raw(TempData["NoApprove_Message"])",
+                 icon: 'error',
+                 button: "Đóng"
+             });
+            </script>
+        }
+    }
