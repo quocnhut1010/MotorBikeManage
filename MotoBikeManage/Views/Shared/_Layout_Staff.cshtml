@@ -1,36 +1,32 @@
 ﻿<!DOCTYPE html>
-
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>N2D SHOP</title>
     <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
     <link rel="stylesheet" href="../assets/css/styles.min.css" />
-    <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
 </head>
+
 <body>
-    <div>
-        @RenderBody()
-    </div>
-    <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
          data-sidebar-position="fixed" data-header-position="fixed">
+
         <!-- Sidebar Start -->
         <aside class="left-sidebar">
-            <!-- Sidebar scroll-->
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
-                    <a href="@Url.Action("Index","NhanVien")" class="text-nowrap logo-img">
-                        @*<img src="../assets/images/logos/dark-logo.svg" width="180" alt="" />*@
-                        <img src="../assets/images/logos/logo.jpg" width="180" height="100" alt="" />
+                    <a href="@Url.Action("Index", "Staff")" class="text-nowrap logo-img">
+                        <img src='@Url.Content("~/assets/images/logos/logo1.png")' width="180" height="80" alt="" />
                     </a>
                     <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
                     </div>
                 </div>
-                <!-- Sidebar navigation-->
+
+                <!-- Sidebar navigation -->
                 <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
                     <ul id="sidebarnav">
                         <li class="nav-small-cap">
@@ -38,7 +34,7 @@
                             <span class="hide-menu">Home</span>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="@Url.Action("Index","Staff")" aria-expanded="false">
+                            <a class="sidebar-link" href="@Url.Action("Index", "Staff")" aria-expanded="false">
                                 <span>
                                     <img src="~/assets/images/products/dashboard.png" alt="" style="width: 40px; height: 40px;" />
                                 </span>
@@ -50,49 +46,21 @@
                             <span class="hide-menu">Quản Lí Chung</span>
                         </li>
                         <li class="sidebar-item">
+                            <a class="sidebar-link" href="@Url.Action("Index","Vehicles")" aria-expanded="false">
+                                <span>
+                                    <img src='@Url.Content("~/assets/images/products/motorbike.png")' alt="" style="width: 40px; height: 40px;" />
+                                </span>
+                                <span class="hide-menu">Xe Máy</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
                             <a class="sidebar-link" href="./ui-buttons.html" aria-expanded="false">
                                 <span>
                                     <img src="~/assets/images/products/account.png" alt="" style="width: 40px; height: 40px;" />
                                 </span>
-                                <span class="hide-menu">Tài Khoảnnn</span>
+                                <span class="hide-menu">Tài Khoản</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="./ui-alerts.html" aria-expanded="false">
-                                <span>
-                                    <img src="~/assets/images/products/supplier.png" alt="" style="width: 40px; height: 40px;" />
-                                </span>
-                                <span class="hide-menu">Nhà Cung Cấp</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="@Url.Action("Index", "Vehicles")" aria-expanded="false">
-
-                                <span>
-                                    <img src="~/assets/images/products/motorbike.png" alt="" style="width: 40px; height: 40px;" />
-                                </span>
-                                <span class="hide-menu">Danh Mục Xe Máy</span>
-                                @*<a class="sidebar-link" href="@Url.Action("Index", "Vehicles")">Danh sách xe</a>*@
-                                @*<a class="sidebar-link" href="@Url.Action("Create", "Vehicles")">Thêm xe</a>
-                                <a class="sidebar-link" href="@Url.Action("Details", "Vehicles")">Loại xe</a>*@
-                            </a>
-                        </li>
-                        @*<li class="sidebar-item">
-                                <a class="sidebar-link" href="./ui-forms.html" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-file-description"></i>
-                                    </span>
-                                    <span class="hide-menu">Forms</span>
-                                </a>
-                            </li>
-                            <li class="sidebar-item">
-                                <a class="sidebar-link" href="./ui-typography.html" aria-expanded="false">
-                                    <span>
-                                        <i class="ti ti-typography"></i>
-                                    </span>
-                                    <span class="hide-menu">Typography</span>
-                                </a>
-                            </li>*@
                         <li class="nav-small-cap">
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                             <span class="hide-menu">Quản Lí Kho</span>
@@ -105,63 +73,15 @@
                                 <span class="hide-menu">Tồn Kho</span>
                             </a>
                         </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
-                                <span>
-                                    <img src="~/assets/images/products/import.png" alt="" style="width: 40px; height: 40px;" />
-                                </span>
-                                <span class="hide-menu">Nhập Kho</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
-                                <span>
-                                    <img src="~/assets/images/products/logistics.png" alt="" style="width: 40px; height: 40px;" />
-                                </span>
-                                <span class="hide-menu">Xuất Kho</span>
-                            </a>
-                        </li>
-                        <li class="nav-small-cap">
-                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-                            <span class="hide-menu">Quản Lí Báo Cáo, Thống Kê</span>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="./icon-tabler.html" aria-expanded="false">
-                                <span>
-                                    <img src="~/assets/images/products/monitor.png" alt="" style="width: 40px; height: 40px;" />
-                                </span>
-                                <span class="hide-menu">Báo Cáo, Thống Kê</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
-                                <span>
-                                    <img src="~/assets/images/products/predictive.png" alt="" style="width: 40px; height: 40px;" />
-                                </span>
-                                <span class="hide-menu">Bảo Trì</span>
-                            </a>
-                        </li>
                     </ul>
-                    <div class="unlimited-access hide-menu bg-light-primary position-relative mb-7 mt-5 rounded">
-                        <div class="d-flex">
-                            <div class="unlimited-access-title me-3">
-                                <h6 class="fw-semibold fs-4 mb-6 text-dark w-85">Upgrade to Vjp pro</h6>
-                                <a href="#" target="_blank" class="btn btn-primary fs-2 fw-semibold lh-sm">Buy Pro</a>
-                            </div>
-                            <div class="unlimited-access-img">
-                                <img src="../assets/images/backgrounds/rocket.png" alt="" class="img-fluid">
-                            </div>
-                        </div>
-                    </div>
                 </nav>
-                <!-- End Sidebar navigation -->
             </div>
-            <!-- End Sidebar scroll-->
         </aside>
-        <!--  Sidebar End -->
-        <!--  Main wrapper -->
+        <!-- Sidebar End -->
+        <!-- Main wrapper -->
         <div class="body-wrapper">
-            <!--  Header Start -->
+
+            <!-- Header Start -->
             <header class="app-header">
                 <nav class="navbar navbar-expand-lg navbar-light">
                     <ul class="navbar-nav">
@@ -177,30 +97,27 @@
                             </a>
                         </li>
                     </ul>
+
                     <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
                         <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-                            @*<a href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/" target="_blank" class="btn btn-primary">Download Free</a>*@
-                            <a href="#" target="_blank" class="btn btn-primary">abc</a>
+                            <span class="navbar-text" style="font:caption">
+                                Xin chào, @Session["FullName"]
+                            </span>
                             <li class="nav-item dropdown">
-                                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
-                                   aria-expanded="false">
-                                    <img src="../assets/images/profile/user-1.jpg" alt="" width="35" height="35" class="rounded-circle">
+                                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="@Url.Content(Session["Image"] != null ? Session["Image"].ToString() : "~/assets/images/default-avatar.png")" alt="" width="45" height="45" class="rounded-circle" />
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                                     <div class="message-body">
-                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a class="d-flex align-items-center gap-2 dropdown-item" data-bs-toggle="modal" data-bs-target="#myProfileModal">
                                             <i class="ti ti-user fs-6"></i>
                                             <p class="mb-0 fs-3">My Profile</p>
                                         </a>
-                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a class="d-flex align-items-center gap-2 dropdown-item" data-bs-toggle="modal" data-bs-target="#myAccountModal">
                                             <i class="ti ti-mail fs-6"></i>
                                             <p class="mb-0 fs-3">My Account</p>
                                         </a>
-                                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                                            <i class="ti ti-list-check fs-6"></i>
-                                            <p class="mb-0 fs-3">My Task</p>
-                                        </a>
-                                        <a href="@Url.Action("Logout","Admin")" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                                        <a href="@Url.Action("Logout", "Admin")" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                                     </div>
                                 </div>
                             </li>
@@ -208,366 +125,148 @@
                     </div>
                 </nav>
             </header>
-            <!--  Header End -->
+            <!-- Header End -->
+
             <div class="container-fluid">
-                <!--  Row 1 -->
-                <div class="row">
-                    <div class="col-lg-8 d-flex align-items-strech">
-                        <div class="card w-100">
-                            <div class="card-body">
-                                <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
-                                    <div class="mb-3 mb-sm-0">
-                                        <h5 class="card-title fw-semibold">Sales Overview</h5>
-                                    </div>
-                                    <div>
-                                        <select class="form-select">
-                                            <option value="1">March 2023</option>
-                                            <option value="2">April 2023</option>
-                                            <option value="3">May 2023</option>
-                                            <option value="4">June 2023</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div id="chart"></div>
-                            </div>
+                @RenderBody()
+            </div>
+            <div class="py-6 px-6 text-center">
+                <p class="mb-0 fs-4">Design and Developed by <a href="https://XeMayN2D.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">XeMayN2D.com</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a></p>
+            </div>
+
+            <!-- Modal: My Profile -->
+            <div class="modal fade" id="myProfileModal" tabindex="-1" aria-labelledby="myProfileModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="myProfileModalLabel">Chỉnh sửa thông tin tài khoản</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <!-- Yearly Breakup -->
-                                <div class="card overflow-hidden">
-                                    <div class="card-body p-4">
-                                        <h5 class="card-title mb-9 fw-semibold">Yearly Breakup</h5>
-                                        <div class="row align-items-center">
-                                            <div class="col-8">
-                                                <h4 class="fw-semibold mb-3">$36,358</h4>
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-arrow-up-left text-success"></i>
-                                                    </span>
-                                                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                                                    <p class="fs-3 mb-0">last year</p>
-                                                </div>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-4">
-                                                        <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                                        <span class="fs-2">2023</span>
-                                                    </div>
-                                                    <div>
-                                                        <span class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
-                                                        <span class="fs-2">2023</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-4">
-                                                <div class="d-flex justify-content-center">
-                                                    <div id="breakup"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                        @using (Html.BeginForm("EditProfile", "Staff", FormMethod.Post, new { @id = "formEditProfile", enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="Id" value="@Session["Id"]" /> <!-- Thêm input ẩn cho Id -->
+                            <input type="hidden" name="OldAvatarPath" value="@Session["Image"]" /> <!-- Giữ đường dẫn cũ -->
+
+                            <div class="text-center mb-4">
+                                <div style="position: relative; margin: 0 auto; display: inline-block;">
+                                    <img id="avatarImg"
+                                         src="@Url.Content(Session["Image"] != null ? Session["Image"].ToString() : "~/assets/images/default-avatar.png")"
+                                         style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;"
+                                         class="mx-auto d-block" />
+
+                                    <!-- Icon camera nằm ở góc phải dưới -->
+                                    <label style="
+                                        position: absolute;
+                                        bottom: 0;
+                                        right: 0;
+                                        background-color: #fff;
+                                        border-radius: 50%;
+                                        width: 32px;
+                                        height: 32px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        cursor: pointer;
+                                        box-shadow: 0 0 4px rgba(0,0,0,0.3);"
+                                           title="Chỉnh sửa ảnh đại diện">
+                                        <i class="ti ti-camera"></i>
+                                        <input type="file"
+                                               name="AvatarFile"
+                                               style="display: none;"
+                                               accept="image/*"
+                                               onchange="previewAvatar(event)" />
+                                    </label>
                                 </div>
                             </div>
-                            <div class="col-lg-12">
-                                <!-- Monthly Earnings -->
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="row alig n-items-start">
-                                            <div class="col-8">
-                                                <h5 class="card-title mb-9 fw-semibold"> Monthly Earnings </h5>
-                                                <h4 class="fw-semibold mb-3">$6,820</h4>
-                                                <div class="d-flex align-items-center pb-1">
-                                                    <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-arrow-down-right text-danger"></i>
-                                                    </span>
-                                                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
-                                                    <p class="fs-3 mb-0">last year</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-4">
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                        <i class="ti ti-currency-dollar fs-6"></i>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div id="earning"></div>
+
+                            <div class="row mb-3" style="margin-left:3px">
+                                <div class="col-6">
+                                    <label class="form-label"><strong>Họ và tên:</strong></label>
+                                    <input type="text" name="FullName" class="form-control" value="@Session["FullName"]" />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label"><strong>Email:</strong></label>
+                                    <input type="email" name="Email" class="form-control" value="@Session["Email"]" />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 d-flex align-items-stretch">
-                        <div class="card w-100">
-                            <div class="card-body p-4">
-                                <div class="mb-4">
-                                    <h5 class="card-title fw-semibold">Recent Transactions</h5>
+
+                            <div class="row mb-3" style="margin-left:3px">
+                                <div class="col-6">
+                                    <label class="form-label"><strong>Số điện thoại:</strong></label>
+                                    <input type="text" name="Phone" class="form-control" value="@Session["Phone"]" />
                                 </div>
-                                <ul class="timeline-widget mb-0 position-relative mb-n5">
-                                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                                        <div class="timeline-time text-dark flex-shrink-0 text-end">09:30</div>
-                                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                            <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
-                                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                        </div>
-                                        <div class="timeline-desc fs-3 text-dark mt-n1">Payment received from John Doe of $385.90</div>
-                                    </li>
-                                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                                        <div class="timeline-time text-dark flex-shrink-0 text-end">10:00 am</div>
-                                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                            <span class="timeline-badge border-2 border border-info flex-shrink-0 my-8"></span>
-                                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                        </div>
-                                        <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
-                                            New sale recorded <a href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
-                                        </div>
-                                    </li>
-                                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                                        <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
-                                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                            <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                        </div>
-                                        <div class="timeline-desc fs-3 text-dark mt-n1">Payment was made of $64.95 to Michael</div>
-                                    </li>
-                                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                                        <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
-                                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                            <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
-                                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                        </div>
-                                        <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
-                                            New sale recorded <a href="javascript:void(0)" class="text-primary d-block fw-normal">#ML-3467</a>
-                                        </div>
-                                    </li>
-                                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                                        <div class="timeline-time text-dark flex-shrink-0 text-end">09:30 am</div>
-                                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                            <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                        </div>
-                                        <div class="timeline-desc fs-3 text-dark mt-n1 fw-semibold">
-                                            New arrival recorded
-                                        </div>
-                                    </li>
-                                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                                        <div class="timeline-time text-dark flex-shrink-0 text-end">12:00 am</div>
-                                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                            <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                                        </div>
-                                        <div class="timeline-desc fs-3 text-dark mt-n1">Payment Done</div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8 d-flex align-items-stretch">
-                        <div class="card w-100">
-                            <div class="card-body p-4">
-                                <h5 class="card-title fw-semibold mb-4">Recent Transactions</h5>
-                                <div class="table-responsive">
-                                    <table class="table text-nowrap mb-0 align-middle">
-                                        <thead class="text-dark fs-4">
-                                            <tr>
-                                                <th class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0">Id</h6>
-                                                </th>
-                                                <th class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0">Assigned</h6>
-                                                </th>
-                                                <th class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0">Name</h6>
-                                                </th>
-                                                <th class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0">Priority</h6>
-                                                </th>
-                                                <th class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0">Budget</h6>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">1</h6></td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-1">Sunil Joshi</h6>
-                                                    <span class="fw-normal">Web Designer</span>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <p class="mb-0 fw-normal">Elite Admin</p>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-primary rounded-3 fw-semibold">Low</span>
-                                                    </div>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0 fs-4">$3.9</h6>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">2</h6></td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-1">Andrew McDownland</h6>
-                                                    <span class="fw-normal">Project Manager</span>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <p class="mb-0 fw-normal">Real Homes WP Theme</p>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-secondary rounded-3 fw-semibold">Medium</span>
-                                                    </div>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0 fs-4">$24.5k</h6>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">3</h6></td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-1">Christopher Jamil</h6>
-                                                    <span class="fw-normal">Project Manager</span>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <p class="mb-0 fw-normal">MedicalPro WP Theme</p>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-danger rounded-3 fw-semibold">High</span>
-                                                    </div>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0 fs-4">$12.8k</h6>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">4</h6></td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-1">Nirav Joshi</h6>
-                                                    <span class="fw-normal">Frontend Engineer</span>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <p class="mb-0 fw-normal">Hosting Press HTML</p>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-success rounded-3 fw-semibold">Critical</span>
-                                                    </div>
-                                                </td>
-                                                <td class="border-bottom-0">
-                                                    <h6 class="fw-semibold mb-0 fs-4">$2.4k</h6>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="col-6">
+                                    <label class="form-label"><strong>Quyền (Role):</strong></label>
+                                    <input type="text" name="Role" class="form-control" value="@Session["Role"]" readonly />
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            </div>
+                        }
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card overflow-hidden rounded-2">
-                            <div class="position-relative">
-                                <a href="javascript:void(0)"><img src="../assets/images/products/s4.jpg" class="card-img-top rounded-0" alt="..."></a>
-                                <a href="javascript:void(0)" class="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i class="ti ti-basket fs-4"></i></a>
-                            </div>
-                            <div class="card-body pt-3 p-4">
-                                <h6 class="fw-semibold fs-4">Boat Headphone</h6>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-semibold fs-4 mb-0">$50 <span class="ms-2 fw-normal text-muted fs-3"><del>$65</del></span></h6>
-                                    <ul class="list-unstyled d-flex align-items-center mb-0">
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card overflow-hidden rounded-2">
-                            <div class="position-relative">
-                                <a href="javascript:void(0)"><img src="../assets/images/products/s5.jpg" class="card-img-top rounded-0" alt="..."></a>
-                                <a href="javascript:void(0)" class="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i class="ti ti-basket fs-4"></i></a>
-                            </div>
-                            <div class="card-body pt-3 p-4">
-                                <h6 class="fw-semibold fs-4">MacBook Air Pro</h6>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-semibold fs-4 mb-0">$650 <span class="ms-2 fw-normal text-muted fs-3"><del>$900</del></span></h6>
-                                    <ul class="list-unstyled d-flex align-items-center mb-0">
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card overflow-hidden rounded-2">
-                            <div class="position-relative">
-                                <a href="javascript:void(0)"><img src="../assets/images/products/s7.jpg" class="card-img-top rounded-0" alt="..."></a>
-                                <a href="javascript:void(0)" class="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i class="ti ti-basket fs-4"></i></a>
-                            </div>
-                            <div class="card-body pt-3 p-4">
-                                <h6 class="fw-semibold fs-4">Red Valvet Dress</h6>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-semibold fs-4 mb-0">$150 <span class="ms-2 fw-normal text-muted fs-3"><del>$200</del></span></h6>
-                                    <ul class="list-unstyled d-flex align-items-center mb-0">
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-3">
-                        <div class="card overflow-hidden rounded-2">
-                            <div class="position-relative">
-                                <a href="javascript:void(0)"><img src="../assets/images/products/s11.jpg" class="card-img-top rounded-0" alt="..."></a>
-                                <a href="javascript:void(0)" class="bg-primary rounded-circle p-2 text-white d-inline-flex position-absolute bottom-0 end-0 mb-n3 me-3" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Add To Cart"><i class="ti ti-basket fs-4"></i></a>
-                            </div>
-                            <div class="card-body pt-3 p-4">
-                                <h6 class="fw-semibold fs-4">Cute Soft Teddybear</h6>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-semibold fs-4 mb-0">$285 <span class="ms-2 fw-normal text-muted fs-3"><del>$345</del></span></h6>
-                                    <ul class="list-unstyled d-flex align-items-center mb-0">
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="me-1" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                        <li><a class="" href="javascript:void(0)"><i class="ti ti-star text-warning"></i></a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="py-6 px-6 text-center">
-                    <p class="mb-0 fs-4">Design and Developed by <a href="https://XeMayN2D.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">XeMayN2D.com</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a></p>
                 </div>
             </div>
+
+            <!-- Modal: My Account -->
+            <div class="modal fade" id="myAccountModal" tabindex="-1" aria-labelledby="myAccountModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="myAccountModalLabel">Chỉnh sửa tài khoản</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        @using (Html.BeginForm("EditAccount", "Staff", FormMethod.Post, new { @id = "formEditAccount" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label"><strong>Tài khoản (Username):</strong></label>
+                                        <input type="text" name="Username" class="form-control" value="@Session["Username"]" readonly />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label"><strong>Mật khẩu:</strong></label>
+                                        <input type="password" name="Password" class="form-control" value="@Session["Password"]" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-    <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-    <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/sidebarmenu.js"></script>
-    <script src="../assets/js/app.min.js"></script>
-    <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-    <script src="../assets/libs/simplebar/dist/simplebar.js"></script>
-    <script src="../assets/js/dashboard.js"></script>
+
+    <script src='@Url.Content("~/assets/libs/jquery/dist/jquery.min.js")'></script>
+    <script src='@Url.Content("~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js")'></script>
+    <script src='@Url.Content("~/assets/js/sidebarmenu.js")'></script>
+    <script src='@Url.Content("~/assets/js/app.min.js")'></script>
+    <script src='@Url.Content("~/assets/libs/apexcharts/dist/apexcharts.min.js")'></script>
+    <script src='@Url.Content("~/assets/libs/simplebar/dist/simplebar.js")'></script>
+    <script src='@Url.Content("~/assets/js/dashboard.js")'></script>
+
+    <script>
+        function previewAvatar(event) {
+            let fileInput = event.target;
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('avatarImg').src = e.target.result;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+    </script>
+
 </body>
+
 </html>
