@@ -1,4 +1,5 @@
 ﻿using MotoBikeManage.Models;
+using MotoBikeManage.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,6 +19,7 @@ namespace MotoBikeManage.Controllers
         private QLXMEntities db = new QLXMEntities();
         // GET: Account
         // GET: Account
+
         public ActionResult Login()
         {
             return View();
@@ -190,4 +192,4 @@ namespace MotoBikeManage.Controllers
             return RedirectToAction("Login", "Staff", "Staff");
         }
     }
-}
+    }

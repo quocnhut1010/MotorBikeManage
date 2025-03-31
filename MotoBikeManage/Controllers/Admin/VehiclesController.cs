@@ -17,8 +17,11 @@ namespace MotoBikeManage.Controllers
         private QLXMEntities db = new QLXMEntities();
 
         // GET: Vehicles
+        // Cả Staff và Admin có thể truy cập để xem danh sách
+        // GET: Vehicles
         public ActionResult Index()
         {
+            // Lấy danh sách xe từ DB
             var list = (from v in db.Vehicles
                         join m in db.VehicleModels on v.model_id equals m.model_id
                         select new VehicleDetailViewModel
@@ -35,14 +38,17 @@ namespace MotoBikeManage.Controllers
                             status = v.status,
                             created_at = v.created_at,
                             image = m.image
-                        }).ToList();
+                        })
+                        .ToList();
 
+            // Trả về View Index, chèn thêm đoạn hiển thị pop-up (alert)
             return View(list);
         }
+
+        // GET: Vehicles/GetVehicleDetail - Ai cũng xem được chi tiết qua Ajax
         [HttpGet]
         public JsonResult GetVehicleDetail(int vehicleId)
         {
-            // JOIN Vehicles với VehicleModels qua model_id
             var result = (from v in db.Vehicles
                           join m in db.VehicleModels on v.model_id equals m.model_id
                           where v.vehicle_id == vehicleId
@@ -60,19 +66,30 @@ namespace MotoBikeManage.Controllers
                               status = v.status,
                               created_at = v.created_at,
                               image = m.image
-                          }).FirstOrDefault();
+                          })
+                          .FirstOrDefault();
 
             if (result == null)
             {
-                return Json(new { success = false, message = "Không tìm thấy." }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, message = "Không tìm thấy." },
+                            JsonRequestBehavior.AllowGet);
             }
 
-            return Json(new { success = true, data = result }, JsonRequestBehavior.AllowGet);
+            return Json(new { success = true, data = result },
+                        JsonRequestBehavior.AllowGet);
         }
-        // GET: Vehicle/Create
+
+        // GET: Vehicle/Create - Chỉ Admin được quyền thêm xe
         public ActionResult Create()
         {
-            // Trả về form Create
+            // Kiểm tra nếu không phải Admin thì cảnh báo, điều hướng
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền thêm xe.";
+                return RedirectToAction("Index");
+            }
+
+            // Nếu là Admin, hiển thị form Create
             return View(new VehicleModel());
         }
 
@@ -81,22 +98,23 @@ namespace MotoBikeManage.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(VehicleModel newVehicle, HttpPostedFileBase uploadImage)
         {
+            // Kiểm tra nếu không phải Admin thì cảnh báo, điều hướng
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền thêm xe.";
+                return RedirectToAction("Index");
+            }
+
             try
             {
-
-                // Chỉ khi ModelState hợp lệ mới lưu
                 if (ModelState.IsValid)
                 {
-           
-
-                    // 2) Xử lý upload ảnh
+                    // Xử lý upload ảnh
                     if (uploadImage != null && uploadImage.ContentLength > 0)
                     {
                         var fileName = Path.GetFileName(uploadImage.FileName);
                         var path = Path.Combine(Server.MapPath("~/Images/Vehicles"), fileName);
                         uploadImage.SaveAs(path);
-
-                        // Gán đường dẫn ảo hiển thị
                         newVehicle.image = "~/Images/Vehicles/" + fileName;
                     }
                     else
@@ -105,11 +123,10 @@ namespace MotoBikeManage.Controllers
                         newVehicle.image = "~/Images/Vehicles/default.jpg";
                     }
 
-                    // 3) Lưu DB
+                    // Lưu DB
                     db.VehicleModels.Add(newVehicle);
                     db.SaveChanges();
 
-                    // 4) Về trang Index
                     return RedirectToAction("Index");
                 }
             }
@@ -118,22 +135,27 @@ namespace MotoBikeManage.Controllers
                 ModelState.AddModelError("", "Không thể thêm xe: " + ex.Message);
             }
 
-            // Nếu ModelState không valid, trả về view Create kèm Model => hiển thị lỗi
+            // Nếu lỗi, quay lại form
             return View(newVehicle);
         }
-        // GET: Vehicles/Edit/5
+
+        // GET: Vehicles/Edit/5 - Chỉ Admin được sửa
         [HttpGet]
         public ActionResult Edit(int? id)
         {
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền sửa xe.";
+                return RedirectToAction("Index");
+            }
+
             if (id == null)
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.BadRequest);
 
-            // Lấy bản ghi trong DB theo id
-            VehicleModel vehicle = db.VehicleModels.Find(id);
+            var vehicle = db.VehicleModels.Find(id);
             if (vehicle == null)
                 return HttpNotFound();
 
-            // Trả về form Edit, đưa vehicle vào Model
             return View(vehicle);
         }
 
@@ -141,17 +163,22 @@ namespace MotoBikeManage.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, HttpPostedFileBase uploadImage,
-     string name, string brand, string model,
-     string color, int manufacture_year)
+                                 string name, string brand, string model,
+                                 string color, int manufacture_year)
         {
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền sửa xe.";
+                return RedirectToAction("Index");
+            }
+
             try
             {
-                // 1) Tìm đối tượng cũ trong DB
                 var oldVehicle = db.VehicleModels.Find(id);
                 if (oldVehicle == null)
                     return HttpNotFound();
 
-                // 2) Lưu lại dữ liệu cũ để so sánh
+                // Lưu dữ liệu cũ
                 var oldName = oldVehicle.name;
                 var oldBrand = oldVehicle.brand;
                 var oldModel = oldVehicle.model;
@@ -159,15 +186,14 @@ namespace MotoBikeManage.Controllers
                 var oldManufactureYear = oldVehicle.manufacture_year;
                 var oldImage = oldVehicle.image;
 
-                // 3) Cập nhật các trường với giá trị mới (lấy từ tham số)
+                // Cập nhật
                 oldVehicle.name = name;
                 oldVehicle.brand = brand;
                 oldVehicle.model = model;
                 oldVehicle.color = color;
-                // Sửa chỗ này:
                 oldVehicle.manufacture_year = manufacture_year;
 
-                // 4) Upload ảnh mới
+                // Upload ảnh nếu có
                 if (uploadImage != null && uploadImage.ContentLength > 0)
                 {
                     var fileName = Path.GetFileName(uploadImage.FileName);
@@ -176,7 +202,7 @@ namespace MotoBikeManage.Controllers
                     oldVehicle.image = "~/Images/Vehicles/" + fileName;
                 }
 
-                // 5) Kiểm tra changed
+                // Kiểm tra có thay đổi gì không
                 bool hasChanged =
                     (oldVehicle.name != oldName) ||
                     (oldVehicle.brand != oldBrand) ||
@@ -191,10 +217,7 @@ namespace MotoBikeManage.Controllers
                     return View(oldVehicle);
                 }
 
-                // 6) Lưu DB
                 db.SaveChanges();
-
-                // 7) Điều hướng
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -204,21 +227,34 @@ namespace MotoBikeManage.Controllers
                 return View(vehicle);
             }
         }
-        // Hiển thị trang xác nhận xóa (tùy chọn)
+
+        // GET: Vehicles/Delete/5 - Chỉ Admin được xóa
         public ActionResult Delete(int id)
         {
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền xóa xe.";
+                return RedirectToAction("Index");
+            }
+
             var vehicle = db.VehicleModels.FirstOrDefault(u => u.model_id == id);
             if (vehicle == null)
-            {
                 return HttpNotFound();
-            }
+
             return View(vehicle);
         }
 
+        // POST: Vehicles/DeleteConfirmed/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
+            if (!IsAdmin())
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền xóa xe.";
+                return RedirectToAction("Index");
+            }
+
             try
             {
                 var vehicle = db.VehicleModels.FirstOrDefault(u => u.model_id == id);
@@ -237,5 +273,13 @@ namespace MotoBikeManage.Controllers
                 return RedirectToAction("Delete", new { id = id });
             }
         }
+
+        // Hàm tiện ích kiểm tra role admin
+        private bool IsAdmin()
+        {
+            if (Session["Role"] == null) return false;
+            return Session["Role"].ToString().Trim().Equals("Admin", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }
+
