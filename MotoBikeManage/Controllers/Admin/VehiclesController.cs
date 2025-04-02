@@ -21,9 +21,26 @@ namespace MotoBikeManage.Controllers
         // GET: Vehicles
         public ActionResult Index()
         {
-            // Lấy danh sách xe từ DB
+            // Lấy danh sách xe từ DB và kết hợp với thông tin bảo trì mới nhất
             var list = (from v in db.Vehicles
                         join m in db.VehicleModels on v.model_id equals m.model_id
+                        // Left join với bảng Maintenance để lấy thông tin bảo trì mới nhất
+                        join mt in (
+                            from m in db.Maintenances
+                            where m.end_date == null || m.end_date == (
+                                from mx in db.Maintenances
+                                where mx.vehicle_id == m.vehicle_id
+                                orderby mx.start_date descending
+                                select mx.end_date
+                            ).FirstOrDefault()
+                            group m by m.vehicle_id into g
+                            select new
+                            {
+                                vehicle_id = g.Key,
+                                completion_status = g.OrderByDescending(m => m.start_date).FirstOrDefault().completion_status
+                            }
+                        ) on v.vehicle_id equals mt.vehicle_id into mtJoin
+                        from maintenance in mtJoin.DefaultIfEmpty()
                         select new VehicleDetailViewModel
                         {
                             vehicle_id = v.vehicle_id,
@@ -35,12 +52,14 @@ namespace MotoBikeManage.Controllers
                             manufacture_year = m.manufacture_year,
                             frame_number = v.frame_number,
                             engine_number = v.engine_number,
-                            status = v.status,
+                            // Hiển thị trạng thái dựa trên completion_status từ Maintenance
+                            status = maintenance != null && maintenance.completion_status == "Đang bảo trì"
+                                     ? "Đang bảo trì"
+                                     : v.status, // Giữ nguyên trạng thái xe nếu không có bảo trì hoặc đã hoàn thành
                             created_at = v.created_at,
                             image = m.image
                         })
                         .ToList();
-
             // Trả về View Index, chèn thêm đoạn hiển thị pop-up (alert)
             return View(list);
         }
@@ -51,6 +70,18 @@ namespace MotoBikeManage.Controllers
         {
             var result = (from v in db.Vehicles
                           join m in db.VehicleModels on v.model_id equals m.model_id
+                          // Left join với Maintenance để lấy thông tin bảo trì mới nhất
+                          join mt in (
+                              from m in db.Maintenances
+                              where m.vehicle_id == vehicleId
+                              orderby m.start_date descending
+                              select new
+                              {
+                                  m.vehicle_id,
+                                  m.completion_status
+                              }
+                          ) on v.vehicle_id equals mt.vehicle_id into mtJoin
+                          from maintenance in mtJoin.DefaultIfEmpty()
                           where v.vehicle_id == vehicleId
                           select new VehicleDetailViewModel
                           {
@@ -63,20 +94,105 @@ namespace MotoBikeManage.Controllers
                               manufacture_year = m.manufacture_year,
                               frame_number = v.frame_number,
                               engine_number = v.engine_number,
-                              status = v.status,
+                              // Hiển thị trạng thái dựa trên completion_status từ Maintenance
+                              status = maintenance != null && maintenance.completion_status == "Đang bảo trì"
+                                       ? "Đang bảo trì"
+                                       : v.status, // Giữ nguyên trạng thái xe nếu không có bảo trì hoặc đã hoàn thành
                               created_at = v.created_at,
                               image = m.image
                           })
-                          .FirstOrDefault();
-
+                         .FirstOrDefault();
             if (result == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy." },
                             JsonRequestBehavior.AllowGet);
             }
-
             return Json(new { success = true, data = result },
                         JsonRequestBehavior.AllowGet);
+        }
+        public ActionResult UpdateVehicleStatusFromMaintenance(int vehicleId)
+        {
+            try
+            {
+                // 1. Lấy ra bản ghi Maintenance mới nhất (dựa trên start_date mới nhất) của xe
+                var latestMaintenance = db.Maintenances
+                                          .Where(m => m.vehicle_id == vehicleId)
+                                          .OrderByDescending(m => m.start_date)
+                                          .FirstOrDefault();
+
+                // 2. Nếu chưa có lịch bảo trì hoặc xe không tồn tại thì báo lỗi
+                if (latestMaintenance == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy lịch bảo trì gần nhất." },
+                                JsonRequestBehavior.AllowGet);
+                }
+
+                // 3. Lấy thông tin xe tương ứng
+                var vehicle = db.Vehicles.Find(vehicleId);
+                if (vehicle == null)
+                {
+                    return Json(new { success = false, message = "Xe không tồn tại." },
+                                JsonRequestBehavior.AllowGet);
+                }
+
+                // 4. Dựa trên completion_status, ta xác định status mới
+                //    - "Đang bảo trì" <=> chuyển Vehicles.status = "Bảo trì"
+                //    - "Đã hoàn thành" <=> chuyển Vehicles.status = "Trong kho"
+                // Bạn có thể mở rộng logic chuyển đổi tùy theo yêu cầu thực tế,
+                // ví dụ nếu "Đã xuất kho" thì không thay đổi nữa, v.v.
+                if (latestMaintenance.completion_status == "Đang bảo trì")
+                {
+                    vehicle.status = "Bảo trì";
+                }
+                else if (latestMaintenance.completion_status == "Đã hoàn thành")
+                {
+                    // Có thể trả lại trạng thái ban đầu hoặc đặt cứng "Trong kho"
+                    // Tùy yêu cầu của hệ thống
+                    vehicle.status = "Trong kho";
+                }
+
+                // 5. Lưu thay đổi vào DB
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Cập nhật trạng thái thành công." },
+                            JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message },
+                            JsonRequestBehavior.AllowGet);
+            }
+        }
+        [HttpPost]
+        public ActionResult UpdateVehicle(VehicleDetailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Nếu có lỗi validation...
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+            }
+
+            try
+            {
+                // 1. Tìm đối tượng Vehicles tương ứng trong DB
+                var vehicle = db.Vehicles.Find(model.vehicle_id);
+                if (vehicle == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy xe" });
+                }
+
+                // 2. Map (gán) giá trị từ ViewModel sang entity Vehicles
+                vehicle.status = model.status;
+
+                // 3. Lưu thay đổi
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Cập nhật trạng thái thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         // GET: Vehicle/Create - Chỉ Admin được quyền thêm xe
