@@ -163,9 +163,5 @@ namespace MotoBikeManage.Controllers.Admin
 
             return Json(new { success = true, message = "Cập nhật thành công." });
         }
-
     }
 }
-
-
-//demoooooooo

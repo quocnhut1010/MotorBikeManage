@@ -1,17 +1,16 @@
-﻿@model IEnumerable<MotoBikeManage.ViewModels.VehicleDetailViewModel>
+﻿﻿@model IEnumerable<MotoBikeManage.ViewModels.VehicleDetailViewModel>
 
 @{
     ViewBag.Title = "Danh sách xe máy";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
 <style>
     /* Tổng thể */
     body {
         font-family: Arial, sans-serif;
         background-color: #f9f9f9;
+        /*margin: 20px;*/
     }
 
     /* Container chính */
@@ -21,6 +20,7 @@
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         margin-top: 55px !important;
+        /*width: 100% !important;*/
         margin: 0 !important;
     }
 
@@ -34,7 +34,7 @@
         font-size: 16px;
         cursor: pointer;
         margin-top: 55px !important;
-        margin-bottom: 20px;
+        margin-bottom: 20px; /* Tạo khoảng cách giữa nút và bảng */
     }
 
         button.btn-primary:hover {
@@ -84,6 +84,7 @@
         font-size: 14px;
     }
 
+    /* Chỉnh sửa màu sắc và hình dạng icon */
     .btn-primary {
         background-color: #007bff;
         border-color: #007bff;
@@ -91,27 +92,26 @@
         margin-right: 5px; /* Khoảng cách giữa icon và chữ */
     }
 
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-
     .btn-danger {
         background-color: #dc3545;
         border-color: #dc3545;
-        color: white;
-        margin-right: 5px;
+        color: white; /* Màu chữ trắng */
+        margin-right: 5px; /* Khoảng cách giữa icon và chữ */
     }
 
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
 
     /* Phân trang */
     .pagination {
         display: flex;
         justify-content: center;
         margin-top: 20px;
-        list-style: none; /* Loại bỏ dấu chấm <li> */
     }
 
         .pagination .page-item {
@@ -122,36 +122,42 @@
             color: #007bff;
             border-radius: 5px;
             padding: 8px 12px;
-            text-decoration: none; /* Xóa gạch chân */
         }
 
             .pagination .page-link:hover {
-                background-color: #e9ecef;
+                background-color: #e9ecef; /* Hiệu ứng hover */
             }
 
         .pagination .active .page-link {
             background-color: #007bff;
-            color: white !important;
+            color: white !important; /* Màu chữ trong trang hiện tại */
+        }
+
+    /* Loại bỏ dấu chấm <li> ở phân trang */
+    .pagination {
+        list-style: none;
+    }
+
+        /* Xóa gạch chân ở phân trang */
+        .pagination .page-link {
+            text-decoration: none;
         }
 </style>
-
-<!-- Container hiển thị danh sách -->
 <div class="container mt-5" style="width:100%">
     <!-- Nút thêm xe -->
     <a href="@Url.Action("Create", "Vehicles")">
         <button class="btn btn-primary mb-3">Thêm xe</button>
     </a>
-
     <table class="table table-bordered text-center">
         <thead>
             <tr>
+
                 <th>Hình ảnh</th>
                 <th>Tên xe</th>
                 <th>Nhãn hiệu</th>
                 <th>Loại xe</th>
                 <th>Màu sắc</th>
                 <th>Năm sản xuất</th>
-                <th>Trạng thái</th>
                 <th>Hành động</th>
             </tr>
         </thead>
@@ -159,28 +165,33 @@
             @foreach (var item in Model)
             {
                 <tr>
+
                     <td>
                         <img src="@Url.Content(item.image)" alt="Image" width="80" height="50" class="img-thumbnail" />
                     </td>
+
                     <td>@item.name</td>
                     <td>@item.brand</td>
                     <td>@item.model</td>
                     <td>@item.color</td>
                     <td>@item.manufacture_year</td>
-                    <td>@item.status</td>
                     <td>
-                        <!-- Nút xem chi tiết -->
-                        <button class="btn btn-warning btn-sm" onclick="showVehicleDetail(@item.vehicle_id)">
+                        <!-- Nút chỉnh sửa, xóa... -->
+                        <!-- SỬA: Thêm routeValues { id = emp.id } -->
+                        <button class="btn btn-warning btn-sm"
+                                onclick="showVehicleDetail(@item.vehicle_id)">
                             <i class="fa fa-eye"></i>
                         </button>
-                        <!-- Nút sửa -->
-                        <a href="@Url.Action("Edit", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-primary">
-                            <i class="fa fa-edit"></i>
+                        <a href="@Url.Action("Edit", "Vehicles", new { id = item.model_id })"
+                           class="btn btn-sm btn-primary">
+                            <i class="fa fa-edit"></i> <!-- Icon sửa -->
                         </a>
-                        <!-- Nút xóa (tham khảo) -->
+
+                        <!-- Xóa (tham khảo) - tùy bạn sửa link cho đúng Controller/Action -->
                         <a href="@Url.Action("Delete", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-danger">
-                            <i class="fa fa-trash"></i>
+                            <i class="fa fa-trash"></i> <!-- Icon xóa -->
                         </a>
+
                     </td>
                 </tr>
             }
@@ -194,7 +205,6 @@
         <li class="page-item active"><a class="page-link" href="#">1</a></li>
     </ul>
 </nav>
-
 <!-- Modal rỗng: sẽ chèn dữ liệu qua Ajax -->
 <div class="modal fade" id="vehicleDetailModal" tabindex="-1" aria-labelledby="vehicleDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -205,72 +215,65 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <!-- Body: chứa các trường hiển thị và chỉnh sửa -->
+            <!-- Body: Chuẩn bị sẵn placeholder -->
             <div class="modal-body">
-                <!-- Ảnh xe -->
                 <div class="text-center mb-3">
-                    <img id="vehicleImage" src="" alt="Ảnh xe"
-                         style="border-radius: 40%; width: 150px; height: 150px; object-fit: cover;" />
-                </div>
-
-                <div class="row mb-2">
-                    <div class="col-6">
-                        <strong>Tên xe:</strong> <span id="lblName"></span>
-                    </div>
-                    <div class="col-6">
-                        <strong>Nhãn hiệu:</strong> <span id="lblBrand"></span>
-                    </div>
+                    <img id="vehicleImage"
+                         src=""
+                         alt="Ảnh xe"
+                         style=" border-radius: 30%; width: 120px; height: 120px; object-fit: cover;" />
                 </div>
                 <div class="row mb-2">
                     <div class="col-6">
-                        <strong>Model:</strong> <span id="lblModel"></span>
+                        <strong>Tên xe:</strong>
+                        <span id="lblName"></span>
                     </div>
                     <div class="col-6">
-                        <strong>Màu sắc:</strong> <span id="lblColor"></span>
+                        <strong>Nhãn hiệu:</strong>
+                        <span id="lblBrand"></span>
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-6">
-                        <strong>Năm SX:</strong> <span id="lblManufactureYear"></span>
+                        <strong>Model:</strong>
+                        <span id="lblModel"></span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Màu sắc:</strong>
+                        <span id="lblColor"></span>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">
+                        <strong>Năm SX:</strong>
+                        <span id="lblManufactureYear"></span>
                     </div>
                     <div class="col-6">
                         <strong>Trạng thái:</strong>
-                        <!-- Hiển thị trạng thái cũ -->
                         <span id="lblStatus"></span>
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-6">
-                        <strong>Số khung:</strong> <span id="lblFrameNumber"></span>
+                        <strong>Số khung:</strong>
+                        <span id="lblFrameNumber"></span>
                     </div>
                     <div class="col-6">
-                        <strong>Số máy:</strong> <span id="lblEngineNumber"></span>
+                        <strong>Số máy:</strong>
+                        <span id="lblEngineNumber"></span>
                     </div>
                 </div>
                 <div class="row mb-2">
                     <div class="col-12">
-                        <strong>Ngày nhập kho:</strong> <span id="lblCreatedAt"></span>
+                        <strong>Ngày nhập kho:</strong>
+                        <span id="lblCreatedAt"></span>
                     </div>
-                </div>
-
-                <!-- Thêm hidden input và select để sửa status -->
-                <input type="hidden" id="vehicleIdInput" />
-                <div class="mb-3">
-                    <label for="statusInput"><strong>Chọn trạng thái mới:</strong></label>
-                    <select id="statusInput" class="form-select">
-                        <option value="Trong kho">Trong kho</option>
-                        <option value="Bảo trì">Bảo trì</option>
-                        <option value="Đã bán">Đã bán</option>
-                        <!-- Thêm tùy ý -->
-                    </select>
                 </div>
             </div>
 
-            <!-- Footer của modal -->
+            <!-- Footer: Nút đóng -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <!-- Nút gọi hàm saveVehicle() để gửi yêu cầu cập nhật -->
-                <button type="button" class="btn btn-primary" onclick="saveVehicle()">Cập nhật</button>
             </div>
         </div>
     </div>
@@ -278,27 +281,32 @@
 
 <!-- Thêm jQuery nếu chưa có, Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<!-- Script AJAX -->
 <script>
-    // Hàm parse kiểu "/Date(...)/"
     function parseNetDate(netDateStr) {
+        // netDateStr thường dạng "/Date(1743091204763)/"
+        // Ta dùng biểu thức chính quy để trích số
         var match = /\/Date\((\d+)([-+]\d+)?\)\//.exec(netDateStr);
         if (!match) {
+            // Nếu không khớp, trả null
             return null;
         }
-        let ticks = parseInt(match[1], 10);
+        // Lấy phần millisecond (dấu + hay - múi giờ trong match[2] nếu có)
+        let ticks = parseInt(match[1], 10); // 1743091204763
         let offset = 0;
         if (match[2]) {
+            // Xử lý múi giờ nếu có, vd "-0700"
             offset = parseInt(match[2], 10);
         }
+        // Tạo đối tượng Date (ticks + offset)
         let dateObj = new Date(ticks + offset);
         return dateObj;
     }
-
     function formatDateCustom(dateObj) {
         if (!(dateObj instanceof Date) || isNaN(dateObj)) {
-            return "";
+            return ""; // Nếu không phải Date hợp lệ, trả về rỗng
         }
+
         let dd = dateObj.getDate();
         let mm = dateObj.getMonth() + 1;
         let yyyy = dateObj.getFullYear();
@@ -306,33 +314,35 @@
         let min = dateObj.getMinutes();
         let ss = dateObj.getSeconds();
 
+        // Chuyển sang hai chữ số (nếu < 10 thì thêm '0')
         dd = dd < 10 ? '0' + dd : dd;
         mm = mm < 10 ? '0' + mm : mm;
         hh = hh < 10 ? '0' + hh : hh;
         min = min < 10 ? '0' + min : min;
         ss = ss < 10 ? '0' + ss : ss;
 
-        // Trả về dạng dd/MM/yyyy HH:mm:ss
+        // Xâu chuỗi thành "27/03/2025 23:00:04"
         return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}`;
     }
-
-    // Hàm hiển thị modal, gọi AJAX lấy chi tiết xe
     function showVehicleDetail(vehicleId) {
+        // Gọi Ajax GET tới /Vehicles/GetVehicleDetail
         $.ajax({
-            url: '@Url.Action("GetVehicleDetail", "Vehicles")',
+            url: '@Url.Action("GetVehicleDetail", "Vehicles")', // Controller = Vehicles, Action = GetVehicleDetail
             type: 'GET',
             data: { vehicleId: vehicleId },
             success: function (response) {
                 if (response.success) {
-                    let data = response.data;
+                    // Gán dữ liệu vào modal
+                    var data = response.data;
 
-                    // Gán dữ liệu vào các phần tử trong modal
+                    // 1) Kiểm tra đường dẫn ảnh
                     if (data.image) {
-                        let imageUrl = data.image.replace("~", "");
+                        let imageUrl = data.image.replace("~", ""); // Loại bỏ dấu ~
                         $('#vehicleImage').attr('src', imageUrl);
                     } else {
                         $('#vehicleImage').attr('src', '/images/no-image.png');
                     }
+
 
                     $('#lblName').text(data.name);
                     $('#lblBrand').text(data.brand);
@@ -342,25 +352,27 @@
                     $('#lblStatus').text(data.status);
                     $('#lblFrameNumber').text(data.frame_number);
                     $('#lblEngineNumber').text(data.engine_number);
+                    var dateObj = new Date(data.created_at);
 
-                    // Xử lý created_at
+                    // 2) Xử lý ngày tạo (created_at) an toàn
+                    // Xử lý format ngày
                     if (data.created_at) {
+                        // Sử dụng parseNetDate thay vì new Date(...)
                         let dateObj = parseNetDate(data.created_at);
                         if (dateObj && !isNaN(dateObj)) {
-                            $('#lblCreatedAt').text(formatDateCustom(dateObj));
+                            // Gọi hàm format tùy chỉnh
+                            let createdAtStr = formatDateCustom(dateObj);
+                            $('#lblCreatedAt').text(createdAtStr);
                         } else {
+                            // Nếu không parse được, hiển thị chuỗi gốc hoặc để trống
                             $('#lblCreatedAt').text(data.created_at);
                         }
                     } else {
+                        // Nếu null
                         $('#lblCreatedAt').text('');
                     }
 
-                    // Gán cho input ẩn và select
-                    $('#vehicleIdInput').val(data.vehicle_id);
-                    // Chọn option trong select hợp với status cũ
-                    $('#statusInput').val(data.status);
-
-                    // Mở modal
+                    // Hiển thị modal
                     $('#vehicleDetailModal').modal('show');
                 } else {
                     alert(response.message || "Không tìm thấy xe.");
@@ -369,33 +381,6 @@
             error: function (xhr) {
                 console.log(xhr);
                 alert("Có lỗi xảy ra khi lấy dữ liệu.");
-            }
-        });
-    }
-
-    // Hàm gửi yêu cầu cập nhật sang Controller
-    function saveVehicle() {
-        var model = {
-            vehicle_id: $('#vehicleIdInput').val(),
-            status: $('#statusInput').val()
-        };
-
-        $.ajax({
-            url: '@Url.Action("UpdateVehicle", "Vehicles")',
-            type: 'POST',
-            data: model,
-            success: function (response) {
-                if (response.success) {
-                    alert(response.message);
-                    // Reload trang để thấy status mới
-                    location.reload();
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function (xhr) {
-                console.log(xhr);
-                alert("Đã có lỗi xảy ra.");
             }
         });
     }

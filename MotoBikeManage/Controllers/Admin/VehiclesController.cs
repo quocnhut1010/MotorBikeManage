@@ -17,70 +17,88 @@ namespace MotoBikeManage.Controllers
         private QLXMEntities db = new QLXMEntities();
 
         // GET: Vehicles
-        // Cả Staff và Admin có thể truy cập để xem danh sách
-        // GET: Vehicles
+        // Phương thức này sẽ tự động đối chiếu completion_status từ Maintenance
+        // rồi cập nhật lại trường status của Vehicles trước khi đổ ra View.
         public ActionResult Index()
         {
-            // Lấy danh sách xe từ DB và kết hợp với thông tin bảo trì mới nhất
-            var list = (from v in db.Vehicles
-                        join m in db.VehicleModels on v.model_id equals m.model_id
-                        // Left join với bảng Maintenance để lấy thông tin bảo trì mới nhất
-                        join mt in (
-                            from m in db.Maintenances
-                            where m.end_date == null || m.end_date == (
-                                from mx in db.Maintenances
-                                where mx.vehicle_id == m.vehicle_id
-                                orderby mx.start_date descending
-                                select mx.end_date
-                            ).FirstOrDefault()
-                            group m by m.vehicle_id into g
-                            select new
-                            {
-                                vehicle_id = g.Key,
-                                completion_status = g.OrderByDescending(m => m.start_date).FirstOrDefault().completion_status
-                            }
-                        ) on v.vehicle_id equals mt.vehicle_id into mtJoin
-                        from maintenance in mtJoin.DefaultIfEmpty()
-                        select new VehicleDetailViewModel
-                        {
-                            vehicle_id = v.vehicle_id,
-                            model_id = m.model_id,
-                            name = m.name,
-                            brand = m.brand,
-                            model = m.model,
-                            color = m.color,
-                            manufacture_year = m.manufacture_year,
-                            frame_number = v.frame_number,
-                            engine_number = v.engine_number,
-                            // Hiển thị trạng thái dựa trên completion_status từ Maintenance
-                            status = maintenance != null && maintenance.completion_status == "Đang bảo trì"
-                                     ? "Đang bảo trì"
-                                     : v.status, // Giữ nguyên trạng thái xe nếu không có bảo trì hoặc đã hoàn thành
-                            created_at = v.created_at,
-                            image = m.image
-                        })
-                        .ToList();
-            // Trả về View Index, chèn thêm đoạn hiển thị pop-up (alert)
+            // B1: Lấy tất cả Vehicles (kèm navigation VehicleModel nếu cần)
+            var vehicles = db.Vehicles
+                             .Include(v => v.VehicleModel)
+                             .ToList();
+
+            // B2: Với mỗi vehicle, tìm Maintenance mới nhất để đối chiếu và cập nhật
+            foreach (var v in vehicles)
+            {
+                var latestMaintenance = db.Maintenances
+                                          .Where(m => m.vehicle_id == v.vehicle_id)
+                                          .OrderByDescending(m => m.start_date)
+                                          .FirstOrDefault();
+
+                if (latestMaintenance != null)
+                {
+                    // Tùy thuộc completion_status, ta đặt status tương ứng
+                    // Lưu ý: cột status có CHECK constraint => chỉ chấp nhận giá trị 'Trong kho',
+                    // 'Đã xuất kho' hoặc 'Đang bảo trì' (tùy cấu hình).
+                    if (latestMaintenance.completion_status == "Đang bảo trì")
+                    {
+                        // Nếu cột status yêu cầu 'Đang bảo trì' ta gán luôn; 
+                        // hoặc nếu cột status chỉ chấp nhận 'Bảo trì' thì đổi lại
+                        v.status = "Đang bảo trì";
+                    }
+                    else if (latestMaintenance.completion_status == "Đã hoàn thành")
+                    {
+                        // Ở đây quy ước 'Đã hoàn thành' => chuyển về 'Trong kho'
+                        // (trừ khi bạn có logic khác như 'Đã xuất kho' chẳng hạn)
+                        v.status = "Trong kho";
+                    }
+                }
+            }
+
+            // B3: Lưu thay đổi xuống DB
+            db.SaveChanges();
+
+            // B4: Sau khi Vehicles đã được cập nhật, ta build danh sách ViewModel để hiển thị
+            var list = vehicles.Select(v => new VehicleDetailViewModel
+            {
+                vehicle_id = v.vehicle_id,
+                model_id = v.model_id,
+                name = v.VehicleModel.name,
+                brand = v.VehicleModel.brand,
+                model = v.VehicleModel.model,
+                color = v.VehicleModel.color,
+                manufacture_year = v.VehicleModel.manufacture_year,
+                frame_number = v.frame_number,
+                engine_number = v.engine_number,
+                status = v.status,           // Đã được đồng bộ bên trên
+                created_at = v.created_at,
+                // Nếu VehicleModel có cột image thì gán
+                image = v.VehicleModel.image
+            })
+            .ToList();
+
+            // B5: Trả về View
             return View(list);
         }
 
-        // GET: Vehicles/GetVehicleDetail - Ai cũng xem được chi tiết qua Ajax
+        // --------------------------------------------------------------------------------------
+        // GET: Vehicles/GetVehicleDetail - Lấy chi tiết theo Ajax (mẫu)
         [HttpGet]
         public JsonResult GetVehicleDetail(int vehicleId)
         {
+            // Tìm 1 vehicle + Maintenance gần nhất
             var result = (from v in db.Vehicles
                           join m in db.VehicleModels on v.model_id equals m.model_id
-                          // Left join với Maintenance để lấy thông tin bảo trì mới nhất
-                          join mt in (
-                              from m in db.Maintenances
-                              where m.vehicle_id == vehicleId
-                              orderby m.start_date descending
-                              select new
-                              {
-                                  m.vehicle_id,
-                                  m.completion_status
-                              }
-                          ) on v.vehicle_id equals mt.vehicle_id into mtJoin
+                          join mt in
+                              (from x in db.Maintenances
+                               where x.vehicle_id == vehicleId
+                               orderby x.start_date descending
+                               select new
+                               {
+                                   x.vehicle_id,
+                                   x.completion_status
+                               }
+                              )
+                              on v.vehicle_id equals mt.vehicle_id into mtJoin
                           from maintenance in mtJoin.DefaultIfEmpty()
                           where v.vehicle_id == vehicleId
                           select new VehicleDetailViewModel
@@ -89,102 +107,128 @@ namespace MotoBikeManage.Controllers
                               model_id = m.model_id,
                               name = m.name,
                               brand = m.brand,
-                              color = m.color,
                               model = m.model,
+                              color = m.color,
                               manufacture_year = m.manufacture_year,
                               frame_number = v.frame_number,
                               engine_number = v.engine_number,
-                              // Hiển thị trạng thái dựa trên completion_status từ Maintenance
-                              status = maintenance != null && maintenance.completion_status == "Đang bảo trì"
-                                       ? "Đang bảo trì"
-                                       : v.status, // Giữ nguyên trạng thái xe nếu không có bảo trì hoặc đã hoàn thành
+                              status = (maintenance != null
+                                                 && maintenance.completion_status == "Đang bảo trì")
+                                                 ? "Đang bảo trì"
+                                                 : v.status,
                               created_at = v.created_at,
                               image = m.image
-                          })
-                         .FirstOrDefault();
+                          }).FirstOrDefault();
+
             if (result == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy." },
                             JsonRequestBehavior.AllowGet);
             }
+
             return Json(new { success = true, data = result },
                         JsonRequestBehavior.AllowGet);
         }
+
+        // --------------------------------------------------------------------------------------
+        // Phương thức bổ sung để cập nhật manual / AJAX (nếu cần)
+        // Ở đây: nếu user cần 1 nút "xem/xử lý" => gọi trực tiếp, 
+        // còn nếu bạn muốn auto update ở Index thì không cần gọi
+
         public ActionResult UpdateVehicleStatusFromMaintenance(int vehicleId)
         {
             try
             {
-                // 1. Lấy ra bản ghi Maintenance mới nhất (dựa trên start_date mới nhất) của xe
                 var latestMaintenance = db.Maintenances
-                                          .Where(m => m.vehicle_id == vehicleId)
-                                          .OrderByDescending(m => m.start_date)
-                                          .FirstOrDefault();
+                    .Where(m => m.vehicle_id == vehicleId)
+                    .OrderByDescending(m => m.start_date)
+                    .FirstOrDefault();
 
-                // 2. Nếu chưa có lịch bảo trì hoặc xe không tồn tại thì báo lỗi
                 if (latestMaintenance == null)
                 {
-                    return Json(new { success = false, message = "Không tìm thấy lịch bảo trì gần nhất." },
-                                JsonRequestBehavior.AllowGet);
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy lịch bảo trì gần nhất."
+                    }, JsonRequestBehavior.AllowGet);
                 }
 
-                // 3. Lấy thông tin xe tương ứng
                 var vehicle = db.Vehicles.Find(vehicleId);
                 if (vehicle == null)
                 {
-                    return Json(new { success = false, message = "Xe không tồn tại." },
-                                JsonRequestBehavior.AllowGet);
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Xe không tồn tại."
+                    }, JsonRequestBehavior.AllowGet);
                 }
 
-                // 4. Dựa trên completion_status, ta xác định status mới
-                //    - "Đang bảo trì" <=> chuyển Vehicles.status = "Bảo trì"
-                //    - "Đã hoàn thành" <=> chuyển Vehicles.status = "Trong kho"
-                // Bạn có thể mở rộng logic chuyển đổi tùy theo yêu cầu thực tế,
-                // ví dụ nếu "Đã xuất kho" thì không thay đổi nữa, v.v.
                 if (latestMaintenance.completion_status == "Đang bảo trì")
                 {
-                    vehicle.status = "Bảo trì";
+                    vehicle.status = "Đang bảo trì";
                 }
                 else if (latestMaintenance.completion_status == "Đã hoàn thành")
                 {
-                    // Có thể trả lại trạng thái ban đầu hoặc đặt cứng "Trong kho"
-                    // Tùy yêu cầu của hệ thống
                     vehicle.status = "Trong kho";
                 }
 
-                // 5. Lưu thay đổi vào DB
                 db.SaveChanges();
 
-                return Json(new { success = true, message = "Cập nhật trạng thái thành công." },
-                            JsonRequestBehavior.AllowGet);
+                var updatedViewModel = new VehicleDetailViewModel
+                {
+                    vehicle_id = vehicle.vehicle_id,
+                    model_id = vehicle.model_id,
+                    name = vehicle.VehicleModel?.name,
+                    brand = vehicle.VehicleModel?.brand,
+                    model = vehicle.VehicleModel?.model,
+                    color = vehicle.VehicleModel?.color,
+                    manufacture_year = vehicle.VehicleModel?.manufacture_year ?? 0,
+                    frame_number = vehicle.frame_number,
+                    engine_number = vehicle.engine_number,
+                    status = vehicle.status,
+                    created_at = vehicle.created_at,
+                    image = vehicle.VehicleModel?.image
+                };
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Cập nhật trạng thái thành công.",
+                    data = updatedViewModel
+                }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message },
-                            JsonRequestBehavior.AllowGet);
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
             }
         }
+
+        //---------------------------------------------------------------------------------------
+        // Phương thức này chủ yếu minh hoạ cách cập nhật Vehicles từ form (nếu cần).
+        // Trong trường hợp "đối chiếu completion_status" tự động, bạn có thể không sử dụng.
         [HttpPost]
         public ActionResult UpdateVehicle(VehicleDetailViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                // Nếu có lỗi validation...
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
             }
 
             try
             {
-                // 1. Tìm đối tượng Vehicles tương ứng trong DB
                 var vehicle = db.Vehicles.Find(model.vehicle_id);
                 if (vehicle == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy xe" });
                 }
 
-                // 2. Map (gán) giá trị từ ViewModel sang entity Vehicles
+                // Gán status = model.status -> do người dùng nhập, 
+                // chứ không từ completion_status
                 vehicle.status = model.status;
-
-                // 3. Lưu thay đổi
                 db.SaveChanges();
 
                 return Json(new { success = true, message = "Cập nhật trạng thái thành công" });

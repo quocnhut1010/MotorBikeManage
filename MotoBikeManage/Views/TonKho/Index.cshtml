@@ -1,4 +1,4 @@
-﻿@model IEnumerable<MotoBikeManage.ViewModels.InventoryViewModel>
+﻿@model IEnumerable<MotoBikeManage.Models.Inventory>
 
 @{
     ViewBag.Title = "Index";
@@ -7,157 +7,12 @@
 }
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-@*<style>
-        /* Tổng thể */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            /*margin: 20px;*/
-        }
-
-        /* Container chính */
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-top: 55px !important;
-            /*width: 100% !important;*/
-            margin: 0 !important;
-        }
-
-        /* Nút thêm nhân viên */
-        button.btn-primary {
-            background-color: #007bff;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 55px !important;
-            margin-bottom: 20px; /* Tạo khoảng cách giữa nút và bảng */
-        }
-
-            button.btn-primary:hover {
-                background-color: #0056b3;
-            }
-
-        /* Bảng */
-        table.table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-            table.table thead {
-                background-color: #f8f9fa;
-            }
-
-                table.table thead th {
-                    text-align: center;
-                    padding: 12px;
-                    font-weight: bold;
-                }
-
-            table.table tbody td {
-                text-align: center;
-                padding: 10px;
-            }
-
-            table.table tbody tr:nth-child(even) {
-                background-color: #f2f2f2; /* Màu nền xen kẽ */
-            }
-
-            table.table tbody tr:hover {
-                background-color: #e9ecef; /* Hiệu ứng hover */
-            }
-
-            /* Hình ảnh */
-            table.table tbody td img {
-                border-radius: 10%;
-                width: 100px;
-                height: 120px;
-                object-fit: cover; /* Nếu muốn cắt ảnh vừa khung */
-            }
-
-        /* Nút hành động */
-        .btn-sm {
-            padding: 6px 10px;
-            font-size: 14px;
-        }
-
-        /* Chỉnh sửa màu sắc và hình dạng icon */
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-            color: white; /* Màu chữ trắng */
-            margin-right: 5px; /* Khoảng cách giữa icon và chữ */
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: white; /* Màu chữ trắng */
-            margin-right: 5px; /* Khoảng cách giữa icon và chữ */
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-
-        /* Phân trang */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-            .pagination .page-item {
-                margin-right: 5px; /* Khoảng cách giữa các số trang */
-            }
-
-            .pagination .page-link {
-                color: #007bff;
-                border-radius: 5px;
-                padding: 8px 12px;
-            }
-
-                .pagination .page-link:hover {
-                    background-color: #e9ecef; /* Hiệu ứng hover */
-                }
-
-            .pagination .active .page-link {
-                background-color: #007bff;
-                color: white !important; /* Màu chữ trong trang hiện tại */
-            }
-
-        /* Loại bỏ dấu chấm <li> ở phân trang */
-        .pagination {
-            list-style: none;
-        }
-
-            /* Xóa gạch chân ở phân trang */
-            .pagination .page-link {
-                text-decoration: none;
-            }
-    </style>*@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-md-6">
             <h2>Quản lý tồn kho</h2>
         </div>
-        <div class="col-md-6 text-right">
-            <a href="@Url.Action("Index", "Vehicles")" class="btn btn-primary">
-                <i class="fa fa-motorcycle"></i> Quản lý xe
-            </a>
-            <a href="@Url.Action("ExportExcel")" class="btn btn-success">
-                <i class="fa fa-file-excel"></i> Xuất Excel
-            </a>
-        </div>
+
     </div>
 
     <!-- Phần tìm kiếm và lọc -->
@@ -213,82 +68,170 @@
         <div class="col-xl-3 col-md-6">
             <div class="card bg-info text-white mb-4">
                 <div class="card-body">
-                    <h4>@Model.Sum(i => i.total_vehicles)</h4>
-                    <div>Tổng số xe</div>
+                    <div>
+                        <h4>@ViewBag.TotalVehicleCount1</h4>
+                        Tổng số xe vừa lọc: @ViewBag.TotalVehicleCount1
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Bảng dữ liệu -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-table mr-1"></i> Danh sách tồn kho
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <div class="d-flex justify-content-between">
+                <div class="mr-auto">
+                    <a href="@Url.Action("Index", "Vehicles")" class="btn btn-primary mr-3">
+                        <i class="fa fa-motorcycle"></i> Quản lý xe
+                    </a>
+                </div>
+                <a href="@Url.Action("ExportExcel")" class="btn btn-success">
+                    <i class="fa fa-file-excel"></i> Xuất Excel
+                </a>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover text-center" id="inventoryTable">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Tên xe</th>
-                            <th>Thương hiệu</th>
-                            <th>Kiểu xe</th>
-                            <th>Màu xe</th>
-                            <th>Năm SX</th>
-                            <th>Trong kho</th>
-                            <th>Đã xuất kho</th>
-                            <th>Đang bảo trì</th>
-                            <th>Tổng</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var inv in Model)
-                        {
-                            <tr>
-                                <td>@inv.name</td>
-                                <td>@inv.brand</td>
-                                <td>@inv.model</td>
-                                <td>@inv.color</td>
-                                <td>@inv.manufacture_year</td>
-                                <td>
-                                    <span @*class="badge badge-primary"*@>@inv.stock_remaining</span>
-                                </td>
-                                <td>
-                                    <span @*class="badge badge-success"*@>@inv.total_exported</span>
-                                </td>
-                                <td>
-                                    <span @*class="badge badge-warning"*@>@inv.total_maintenance</span>
-                                </td>
-                                <td>
-                                    <span @*class="badge badge-info"*@>@inv.total_vehicles</span>
-                                </td>
-                                <td>
-                                    <a href="@Url.Action("Details", "VehicleModels", new { id = inv.model_id })"
-                                       class="btn btn-sm btn-primary" title="Xem chi tiết model">
-                                        <i class="fa fa-info-circle"></i>
-                                    </a>
-                                    <a href="@Url.Action("ModelVehicles", "Vehicles", new { modelId = inv.model_id })"
-                                       class="btn btn-sm btn-info" title="Xem danh sách xe">
-                                        <i class="fa fa-list"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table mr-1"></i> Danh sách tồn kho
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover text-center" id="inventoryTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Tên xe</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Kiểu xe</th>
+                                    <th>Màu xe</th>
+                                    <th>Năm SX</th>
+                                    <th>Trong kho</th>
+                                    <th>Đã xuất kho</th>
+                                    <th>Đang bảo trì</th>
+                                    <th>Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var inv in Model)
+                                {
+                                    <tr>
+                                        <td>@inv.name</td>
+                                        <td>@inv.brand</td>
+                                        <td>@inv.model</td>
+                                        <td>@inv.color</td>
+                                        <td>@inv.manufacture_year</td>
+                                        <td>
+                                            <span>@inv.stock_remaining</span>
+                                        </td>
+                                        <td>
+                                            <span>@inv.total_exported</span>
+                                        </td>
+                                        <td>
+                                            <span>@inv.total_maintenance</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-between">
+                                                <a href="javascript:void(0);"
+                                                   class="btn btn-sm btn-primary"
+                                                   title="Xem chi tiết model"
+                                                   onclick="showModelDetail(@inv.model_id)">
+                                                    <i class="fa fa-info-circle"></i>
+                                                </a>
+                                                <a href="@Url.Action("ModelVehicles", "Vehicles", new { modelId = inv.model_id })"
+                                                   class="btn btn-sm btn-info" title="Xem danh sách xe">
+                                                    <i class="fa fa-list"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal hiển thị chi tiết model (nếu muốn) -->
+<div class="modal fade" id="modelDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Chi tiết model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <img id="vehicleImage"
+                         src=""
+                         alt="Ảnh xe"
+                         style=" border-radius: 30%; width: 120px; height: 120px; object-fit: cover;" />
+                </div>
+                <p><strong>Tên xe: </strong><span id="detailName"></span></p>
+                <p><strong>Hãng: </strong><span id="detailBrand"></span></p>
+                <p><strong>Model: </strong><span id="detailModel"></span></p>
+                <p><strong>Màu sắc: </strong><span id="detailColor"></span></p>
+                <p><strong>Năm SX: </strong><span id="detailYear"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            $('#inventoryTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
+<!-- Thêm jquery + script ajax -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function showModelDetail(modelId) {
+    $.ajax({
+        url: '@Url.Action("GetModelDetail", "TonKho")',
+        type: 'GET',
+        data: { modelId: modelId },
+        success: function (response) {
+            if (response.success) {
+                // Lấy ảnh từ response.data.image
+                if (response.data.image) {
+                    // Nếu có "~" (ví dụ "~/images/..."), ta replace nó:
+                    let imageUrl = response.data.image.replace("~", "");
+                    $('#vehicleImage').attr('src', imageUrl);
+                } else {
+                    // Không có image => dùng ảnh mặc định
+                    $('#vehicleImage').attr('src', '/images/no-image.png');
                 }
-            });
+
+                // Hiển thị các thông tin khác
+                $('#detailName').text(response.data.name);
+                $('#detailBrand').text(response.data.brand);
+                $('#detailModel').text(response.data.modelName);
+                $('#detailColor').text(response.data.color);
+                $('#detailYear').text(response.data.manufacture_year);
+
+                // Mở popup (nếu dùng Bootstrap 5)
+                $('#modelDetailModal').modal('show');
+            } else {
+                alert(response.message || "Không tìm thấy thông tin model.");
+            }
+        },
+        error: function (xhr, status, error) {
+            alert("Có lỗi xảy ra khi lấy dữ liệu model.");
+            console.log(xhr);
+        }
+    });
+}
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#inventoryTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
+            }
         });
-    </script>
+    });
+</script>
