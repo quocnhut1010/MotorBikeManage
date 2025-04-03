@@ -356,3 +356,40 @@ FROM Vehicles;
 ---- Xóa cột status khỏi bảng Maintenance
 --ALTER TABLE Maintenance
 --DROP COLUMN note;
+
+-- Bước 1: Tìm tên constraint
+SELECT name
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Vehicles')
+  AND col_name(parent_object_id, parent_column_id) = 'status';
+
+-- Bước 2: Xóa constraint (thay thế <constraint_name> bằng tên thực tế)
+ALTER TABLE Vehicles
+DROP CONSTRAINT CK__Vehicles__status__5070F446;
+
+-- Bước 3: Thêm constraint mới
+ALTER TABLE Vehicles
+ADD CONSTRAINT CK_Vehicles_status CHECK (status IN (N'Trong kho', N'Đã xuất kho', N'Đang bảo trì'));
+
+-- Bước 4: (Tùy chọn) Cập nhật dữ liệu
+UPDATE Vehicles
+SET status = N'Đang bảo trì'
+WHERE status = N'Bảo trì';
+
+-- Bước 1: Kiểm tra dữ liệu không hợp lệ
+SELECT status
+FROM Vehicles
+WHERE status IN (N'Trong kho', N'Đã xuất kho', N'Đang bảo trì');
+
+-- Bước 2: Cập nhật dữ liệu (nếu cần)
+UPDATE Vehicles
+SET status = N'Đang bảo trì'
+WHERE status = N'Bảo trì';
+
+-- Bước 3: Xóa ràng buộc cũ (nếu cần thiết)
+ALTER TABLE Vehicles
+DROP CONSTRAINT  CK__Vehicles__status__5070F446;
+
+-- Bước 4: Thêm ràng buộc mới
+ALTER TABLE Vehicles
+ADD CONSTRAINT CK_Vehicles_status CHECK (status IN (N'Trong kho', N'Đã xuất kho', N'Đang bảo trì'));
