@@ -302,60 +302,6 @@ UPDATE VehicleModels SET image = '~/Images/Vehicles/lead125.jpg' WHERE model_id 
 SELECT *
 FROM Vehicles;
 
---UPDATE Maintenance
---SET requested_by = 2; -- Điền giá trị mặc định (Admin)
---select * from Maintenance
-
----- Thay đổi cột thành NOT NULL
---ALTER TABLE Maintenance
---ALTER COLUMN requested_by INT NOT NULL;
-
----- Thêm khóa ngoại tham chiếu đến bảng Users
---ALTER TABLE Maintenance
---ADD CONSTRAINT FK_Maintenance_RequestedBy 
---FOREIGN KEY (requested_by) REFERENCES Users(id);
-
---ALTER TABLE Maintenance  
---ADD  
---    --requested_by INT  NULL,  
---   -- approved_by INT NULL,  
---  --  approval_status NVARCHAR(20) CHECK (approval_status IN (N'Chờ phê duyệt', N'Đã phê duyệt', N'Từ chối')) DEFAULT N'Chờ phê duyệt',  
---  --  maintenance_type NVARCHAR(50) CHECK (maintenance_type IN (N'Định kỳ', N'Sửa chữa', N'Nâng cấp')),  
---	-- reason NVARCHAR(255) NOT NULL,  
---    priority NVARCHAR(20) CHECK (priority IN (N'Cao', N'Trung bình', N'Thấp')) DEFAULT N'Trung bình';  
-
----- Thêm khóa ngoại  
---ALTER TABLE Maintenance  
---ADD CONSTRAINT FK_Maintenance_RequestedBy FOREIGN KEY (requested_by) REFERENCES Users(id);  
-
---ALTER TABLE Maintenance  
---ADD CONSTRAINT FK_Maintenance_ApprovedBy FOREIGN KEY (approved_by) REFERENCES Users(id);  
-
----- Cập nhật lại dữ liệu cũ, thêm các trường mới
---UPDATE Maintenance
---SET 
---    requested_by = 2, -- Nhân viên user_id = 2 (Trần Thị Nhân Viên)
---    approved_by = 1, -- Admin user_id = 1 (Nguyễn Văn Admin)
---    approval_status = N'Đã phê duyệt',
---    maintenance_type = N'Định kỳ',
---    note = N'Bảo trì định kỳ hàng tháng',
---    priority = N'Trung bình'
---WHERE maintenance_id = 1;
-
---UPDATE Maintenance
---SET 
---    requested_by = 2, -- Nhân viên user_id = 3 (Lê Văn Nhân Viên)
---    approved_by = NULL, -- Chưa phê duyệt
---    approval_status = N'Chờ phê duyệt',
---    maintenance_type = N'Sửa chữa',
---    note = N'Sửa chữa động cơ do hỏng bugi',
---    priority = N'Cao'
---WHERE maintenance_id = 2;
----- Xóa toàn bộ dữ liệu trong bảng Maintenance
---TRUNCATE TABLE Maintenance;
----- Xóa cột status khỏi bảng Maintenance
---ALTER TABLE Maintenance
---DROP COLUMN note;
 
 -- Bước 1: Tìm tên constraint
 SELECT name
@@ -393,3 +339,17 @@ DROP CONSTRAINT  CK__Vehicles__status__5070F446;
 -- Bước 4: Thêm ràng buộc mới
 ALTER TABLE Vehicles
 ADD CONSTRAINT CK_Vehicles_status CHECK (status IN (N'Trong kho', N'Đã xuất kho', N'Đang bảo trì'));
+
+--update bảng nhập kho
+ALTER TABLE Import_Stock
+ADD approval_status NVARCHAR(20) 
+    CHECK (approval_status IN (N'Chờ duyệt', N'Đã duyệt', N'Từ chối')) 
+    DEFAULT N'Chờ duyệt';
+	ALTER TABLE Import_Stock
+ADD 
+    approved_date DATETIME NULL;               -- Thời điểm Admin duyệt
+select * from Import_Stock
+select * from Import_Details
+
+select * from VehicleModels
+select * from Vehicles

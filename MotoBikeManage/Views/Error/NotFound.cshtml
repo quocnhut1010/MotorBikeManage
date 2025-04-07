@@ -1,0 +1,48 @@
+﻿@{
+    Layout = null; // Không sử dụng layout nào
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không tìm thấy trang</title>
+
+    @* Nhúng TẤT CẢ CSS cần thiết *@
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/css/error-page.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .error-container {
+            margin-top: 10%;
+            text-align: center;
+        }
+
+        .error-code {
+            font-size: 150px;
+            color:red;
+            /*color: #6c757d;*/
+        
+        }
+    </style>
+</head>
+<body>
+    <div class="container error-container">
+        <div class="error-code">404</div>
+        <h2>Trang không tồn tại</h2>
+        <p>Xin lỗi, chúng tôi không thể tìm thấy trang bạn yêu cầu.</p>
+        <a href="@Url.Action("Login", "Admin")" class="btn btn-secondary" style="background-color:blue ">Về Trang chủ đăng nhập</a>
+    </div>
+
+    @* Nhúng TẤT CẢ JS cần thiết (nếu có) *@
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script>
+        console.log('Trang lỗi 404 độc lập đã tải.');
+    </script>
+</body>
+</html>

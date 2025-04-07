@@ -186,6 +186,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\Admin\AdminController.cs" />
     <Compile Include="Controllers\Admin\BaoTriController.cs" />
+    <Compile Include="Controllers\Admin\ErrorController.cs" />
     <Compile Include="Controllers\Admin\QLNhaCungCapController.cs" />
     <Compile Include="Controllers\Admin\QLNhanVienController.cs" />
     <Compile Include="Controllers\Admin\TonKhoController.cs" />
@@ -1003,6 +1004,7 @@
     <Content Include="Views\Vehicles\Index.cshtml" />
     <Content Include="Views\BaoTri\Index.cshtml" />
     <Content Include="Views\TonKho\Index.cshtml" />
+    <Content Include="Views\Error\NotFound.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

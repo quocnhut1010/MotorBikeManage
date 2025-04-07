@@ -21,12 +21,69 @@ namespace MotoBikeManage.Controllers
         // rồi cập nhật lại trường status của Vehicles trước khi đổ ra View.
         public ActionResult Index()
         {
-            // B1: Lấy tất cả Vehicles (kèm navigation VehicleModel nếu cần)
+            // Bước 0.0: Lấy toàn bộ Vehicle trước
+            var allVehicles = db.Vehicles.ToList();
+
+            // Bước 0.1: Đồng bộ created_at từ approved_date (nếu Import_Stock đã duyệt)
+            //           và ghi nhận danh sách vehicle_id đã được cập nhật
+            var updatedVehicleIds = new HashSet<int>(); // để đánh dấu xe nào "thuộc nhập kho"
+
+            try
+            {
+                // Lấy danh sách phiếu nhập đã duyệt
+                var approvedImports = db.Import_Stock
+                                        .Where(i => i.approval_status == "Đã duyệt" && i.approved_date.HasValue)
+                                        .ToList();
+
+                // Với mỗi phiếu nhập đã duyệt, update created_at cho Vehicles phù hợp model_id
+                foreach (var import in approvedImports)
+                {
+                    var details = db.Import_Details
+                                    .Where(d => d.import_id == import.import_id)
+                                    .ToList();
+
+                    foreach (var detail in details)
+                    {
+                        var vehiclesToUpdate = allVehicles
+                            .Where(v => v.model_id == detail.model_id)
+                            .ToList();
+
+                        foreach (var vehicle in vehiclesToUpdate)
+                        {
+                            vehicle.created_at = import.approved_date.Value;
+                            updatedVehicleIds.Add(vehicle.vehicle_id);
+                        }
+                    }
+                }
+
+                // Sau khi cập nhật cho các xe "thuộc nhập kho", 
+                // ta đặt created_at = null cho xe "không thuộc nhập kho" nào chưa được cập nhật
+                var notInImport = allVehicles
+                    .Where(v => !updatedVehicleIds.Contains(v.vehicle_id))
+                    .ToList();
+
+                foreach (var vehicle in notInImport)
+                {
+                    vehicle.created_at = null;
+                }
+
+                // Lưu thay đổi xuống DB trước khi xử lý Maintenance
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                // Log hoặc xử lý lỗi nếu cần
+                // Ví dụ: ViewBag.Error = ex.Message;
+            }
+
+            // Bước 1: (Lại) Lấy tất cả Vehicles (kèm navigation VehicleModel nếu cần)
+            // Hoặc bạn có thể tiếp tục dùng biến allVehicles đã có sẵn, nhưng phải Include VehicleModel
+            // nên ta truy vấn lại:
             var vehicles = db.Vehicles
                              .Include(v => v.VehicleModel)
                              .ToList();
 
-            // B2: Với mỗi vehicle, tìm Maintenance mới nhất để đối chiếu và cập nhật
+            // Bước 2: Với mỗi vehicle, tìm Maintenance mới nhất để đối chiếu và cập nhật status
             foreach (var v in vehicles)
             {
                 var latestMaintenance = db.Maintenances
@@ -36,28 +93,22 @@ namespace MotoBikeManage.Controllers
 
                 if (latestMaintenance != null)
                 {
-                    // Tùy thuộc completion_status, ta đặt status tương ứng
-                    // Lưu ý: cột status có CHECK constraint => chỉ chấp nhận giá trị 'Trong kho',
-                    // 'Đã xuất kho' hoặc 'Đang bảo trì' (tùy cấu hình).
                     if (latestMaintenance.completion_status == "Đang bảo trì")
                     {
-                        // Nếu cột status yêu cầu 'Đang bảo trì' ta gán luôn; 
-                        // hoặc nếu cột status chỉ chấp nhận 'Bảo trì' thì đổi lại
                         v.status = "Đang bảo trì";
                     }
                     else if (latestMaintenance.completion_status == "Đã hoàn thành")
                     {
-                        // Ở đây quy ước 'Đã hoàn thành' => chuyển về 'Trong kho'
-                        // (trừ khi bạn có logic khác như 'Đã xuất kho' chẳng hạn)
                         v.status = "Trong kho";
                     }
+                    // Nếu cần logic khác cho "Đã xuất kho", thêm else if
                 }
             }
 
-            // B3: Lưu thay đổi xuống DB
+            // Bước 3: Lưu thay đổi status
             db.SaveChanges();
 
-            // B4: Sau khi Vehicles đã được cập nhật, ta build danh sách ViewModel để hiển thị
+            // Bước 4: Build danh sách ViewModel để hiển thị
             var list = vehicles.Select(v => new VehicleDetailViewModel
             {
                 vehicle_id = v.vehicle_id,
@@ -69,17 +120,15 @@ namespace MotoBikeManage.Controllers
                 manufacture_year = v.VehicleModel.manufacture_year,
                 frame_number = v.frame_number,
                 engine_number = v.engine_number,
-                status = v.status,           // Đã được đồng bộ bên trên
-                created_at = v.created_at,
-                // Nếu VehicleModel có cột image thì gán
+                status = v.status,
+                created_at = v.created_at,  // Xe “không thuộc nhập kho” sẽ là null
                 image = v.VehicleModel.image
             })
             .ToList();
 
-            // B5: Trả về View
+            // Bước 5: Trả về View
             return View(list);
         }
-
         // --------------------------------------------------------------------------------------
         // GET: Vehicles/GetVehicleDetail - Lấy chi tiết theo Ajax (mẫu)
         [HttpGet]
@@ -232,6 +281,51 @@ namespace MotoBikeManage.Controllers
                 db.SaveChanges();
 
                 return Json(new { success = true, message = "Cập nhật trạng thái thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public ActionResult ApproveImport(int importId)
+        {
+            try
+            {
+                // B1: Tìm import stock
+                var importStock = db.Import_Stock.Find(importId);
+                if (importStock == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phiếu nhập." });
+                }
+
+                // B2: Cập nhật approval_status, approved_date
+                importStock.approval_status = "Đã duyệt";
+                importStock.approved_date = DateTime.Now;
+
+                // B3: Lấy tất cả Import_Details của importId
+                var details = db.Import_Details.Where(d => d.import_id == importId).ToList();
+
+                // B4: Với mỗi Import_Details, tìm tất cả Vehicles có model_id tương ứng rồi cập nhật created_at
+                // Chú ý: Tùy logic của bạn, có thể chỉ cập nhật những xe mới thêm
+                // hoặc cập nhật toàn bộ xe đang “exec” – tuỳ nhu cầu.
+                foreach (var detail in details)
+                {
+                    var vehicles = db.Vehicles
+                                     .Where(v => v.model_id == detail.model_id)
+                                     .ToList();
+
+                    foreach (var vehicle in vehicles)
+                    {
+                        vehicle.created_at = importStock.approved_date;
+                        // Nếu bạn muốn chỉ ghi đè khi created_at còn null, có thể thêm if (...)
+                    }
+                }
+
+                // B5: Lưu thay đổi
+                db.SaveChanges();
+
+                return Json(new { success = true, message = "Duyệt nhập kho & đồng bộ created_at thành công." });
             }
             catch (Exception ex)
             {
