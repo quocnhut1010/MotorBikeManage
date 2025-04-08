@@ -1,0 +1,255 @@
+﻿@model List<MotoBikeManage.ViewModels.ImportStockViewModel>
+@{
+    ViewBag.Title = "Danh sách Phiếu Nhập Kho";
+    // Đảm bảo bạn sử dụng Layout phù hợp (ví dụ: _AdminLayout.cshtml)
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2>@ViewBag.Title</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <div class="d-flex justify-content-between">
+                <div class="mr-auto">
+                    <a href="@Url.Action("ExportCsv", "TonKho")" class="btn btn-primary mr-3">
+                        <i class="fa fa-info-circle"></i> Tạo Phiếu Nhập Mới
+                    </a>
+                </div>
+                <a href="@Url.Action("ExportCsv", "TonKho")" class="btn btn-success">
+                    <i class="fa fa-file-excel"></i> Xuất Excel
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table mr-1"></i> Danh sách tồn kho
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped"
+                                   id="inventoryTable"
+                                   width="100%"
+                                   cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>ID Phiếu</th>
+                                        <th>Nhà Cung Cấp</th>
+                                        <th>Người Tạo</th>
+                                        <th>Ngày Tạo</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Ngày Duyệt</th>
+                                        <th>Ghi Chú</th>
+                                        <th>Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(m => item.ImportId)</td>
+                                            <td>@Html.DisplayFor(m => item.SupplierName)</td>
+                                            <td>@Html.DisplayFor(m => item.UserName)</td>
+                                            <td>@Html.DisplayFor(m => item.ImportDate)</td>
+                                            <td>
+                                                @{
+                                                    string statusClass = "";
+                                                    if (item.ApprovalStatus == "Chờ duyệt")
+                                                    {
+                                                        statusClass = "badge bg-warning";
+                                                    }
+                                                    else if (item.ApprovalStatus == "Đã duyệt")
+                                                    {
+                                                        statusClass = "badge bg-success";
+                                                    }
+                                                    else if (item.ApprovalStatus == "Từ chối")
+                                                    {
+                                                        statusClass = "badge bg-danger";
+                                                    }
+                                                    else
+                                                    {
+                                                        statusClass = "badge bg-secondary";
+                                                    }
+                                                }
+                                                <span class="@statusClass">
+                                                    @Html.DisplayFor(m => item.ApprovalStatus)
+                                                </span>
+                                            </td>
+                                            <td>@Html.DisplayFor(m => item.ApprovedDate)</td>
+                                            <td>@Html.DisplayFor(m => item.Note)</td>
+                                            <td>
+                                                <div class="d-flex justify-content-start">
+                                                    <!-- Icon Chi tiết -->
+                                                    <a onclick="showImportDetail(@item.ImportId)"
+                                                       class="btn btn-sm btn-primary me-2"
+                                                       title="Xem chi tiết phiếu">
+                                                        <i class="fa fa-info-circle"></i>
+                                                    </a>
+
+                                                    @if (item.ApprovalStatus == "Chờ duyệt")
+                                                    {
+                                                        <!-- Icon Duyệt -->
+                                                        <a href="@Url.Action("Approve", new { id = item.ImportId })"
+                                                           class="btn btn-success btn-sm me-2"
+                                                           title="Duyệt phiếu này"
+                                                           onclick="return confirm('Bạn chắc chắn muốn duyệt phiếu này?');">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+
+                                                        <!-- Icon Từ chối -->
+                                                        <a href="@Url.Action("Reject", new { id = item.ImportId })"
+                                                           class="btn btn-danger btn-sm"
+                                                           title="Từ chối phiếu này"
+                                                           onclick="return confirm('Bạn chắc chắn muốn từ chối phiếu này?');">
+                                                            <i class="fas fa-times"></i>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Bootstrap để hiển thị chi tiết (nếu muốn) -->
+<div class="modal fade" id="importDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết phiếu nhập</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Khu vực hiển thị thông tin chi tiết (Ajax đổ dữ liệu vào) -->
+                <div id="importDetailContent">
+                    <!-- Nội dung được thêm qua JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src='@Url.Content("~/assets/libs/DataTables/jquery.dataTables.min.js")'></script>
+<script src='@Url.Content("~/assets/libs/DataTables/dataTables.bootstrap5.min.js")'></script>
+
+<script>
+    // Hàm gọi Ajax
+    function showImportDetail(importId) {
+        $.ajax({
+            url: '@Url.Action("Details", "NhapKho")', // Đảm bảo Action này trả về JSON
+            type: 'GET',
+            data: { id: importId },
+            success: function (response) {
+                if (response.success) {
+                    // Trích ra data từ response
+                    let data = response.data;
+
+                    // Phần HTML chung cho phiếu nhập
+                    let html = `
+                        <p><strong>Mã Phiếu:</strong> ${data.ImportId}</p>
+                        <p><strong>Nhà Cung Cấp:</strong> ${data.SupplierName}</p>
+                        <p><strong>Người Tạo:</strong> ${data.UserName}</p>
+                        <p><strong>Ngày Tạo:</strong> ${data.ImportDate}</p>
+                        <p><strong>Trạng Thái:</strong> ${data.ApprovalStatus}</p>
+                        <p><strong>Ngày Duyệt:</strong> ${data.ApprovedDate}</p>
+                        <p><strong>Ghi chú:</strong> ${data.Note}</p>
+                        <p><strong>Tổng Giá trị (toàn phiếu):</strong> ${data.TotalValue}</p>
+                        <hr>
+                        <h5>Chi tiết nhập:</h5>
+                    `;
+
+                    // Bắt đầu table
+                    html += `
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Tên xe</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá nhập</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    // Kiểm tra mảng Details có tồn tại không
+                    if (data.Details && data.Details.length > 0) {
+                        data.Details.forEach(function (detail) {
+                            html += `
+                                <tr>
+                                    <td>${detail.ModelName}</td>
+                                    <td>${detail.Quantity}</td>
+                                    <td>${detail.Price}</td>
+                                    <td>${detail.LineValue}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        // Trường hợp không có dòng chi tiết nào
+                        html += `
+                            <tr>
+                                <td colspan="3">Không có chi tiết nhập</td>
+                            </tr>
+                        `;
+                    }
+
+                    // Kết thúc table
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+
+                    // Gán kết quả vào div hiển thị
+                    $('#importDetailContent').html(html);
+
+                    // Hiển thị modal
+                    // Nếu bạn dùng Bootstrap 4: $('#importDetailModal').modal('show');
+                    // Nếu bạn dùng Bootstrap 5:
+                    var modalElem = document.getElementById('importDetailModal');
+                    var modalObj = new bootstrap.Modal(modalElem);
+                    modalObj.show();
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("Đã xảy ra lỗi khi tải chi tiết phiếu.");
+            }
+        });
+    }
+</script>
+@* Script khởi tạo DataTables với ngôn ngữ tiếng Việt *@
+<script>
+    $(document).ready(function () {
+        $('#inventoryTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
+            },
+            "order": [[3, "desc"]] // Ví dụ: Sắp xếp mặc định theo cột Ngày tạo (index 3) giảm dần
+            // Thêm các cấu hình khác của DataTables nếu cần
+        });
+    });
+</script>

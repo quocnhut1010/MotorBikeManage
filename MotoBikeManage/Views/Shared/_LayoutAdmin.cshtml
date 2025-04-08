@@ -10,6 +10,7 @@
     <link rel="stylesheet" href='@Url.Content("~/assets/css/styles.min.css")' />
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
+   
 </head>
 <body>
     <!--  Body Wrapper -->
@@ -85,7 +86,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">
+                            <a class="sidebar-link" href="@Url.Action("Index","NhapKho")" aria-expanded="false">
                                 <span>
                                     <img src='@Url.Content("~/assets/images/products/import.png")' alt="" style="width: 40px; height: 40px;" />
                                 </span>
@@ -352,8 +353,8 @@
 
     </script>
 
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
    
+
     <!-- Thay đường dẫn tương đối bằng Url.Content cho JS -->
     <script src='@Url.Content("~/assets/libs/jquery/dist/jquery.min.js")'></script>
     <script src='@Url.Content("~/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js")'></script>
