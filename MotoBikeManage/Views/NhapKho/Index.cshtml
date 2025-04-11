@@ -253,3 +253,18 @@
         });
     });
 </script>
+
+@{
+    if (TempData["SuccessImport"] != null)
+    {
+        var message = TempData["SuccessImport"].ToString();
+        <script>
+         swal({
+             title: "Thành công",
+             text: "@Html.Raw(TempData["SuccessImport"])",
+             icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}

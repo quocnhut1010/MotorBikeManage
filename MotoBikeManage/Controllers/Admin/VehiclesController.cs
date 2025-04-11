@@ -73,7 +73,8 @@ namespace MotoBikeManage.Controllers
             catch (Exception ex)
             {
                 // Log hoặc xử lý lỗi nếu cần
-                // Ví dụ: ViewBag.Error = ex.Message;
+                // Ví dụ:
+                ViewBag.Error = ex.Message;
             }
 
             // Bước 1: (Lại) Lấy tất cả Vehicles (kèm navigation VehicleModel nếu cần)
