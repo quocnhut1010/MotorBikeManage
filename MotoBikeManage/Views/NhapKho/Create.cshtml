@@ -1,0 +1,136 @@
+﻿@model MotoBikeManage.ViewModels.ImportStockViewModel
+@{
+    ViewBag.Title = "Tạo phiếu nhập";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4 p-4 border rounded bg-white shadow">
+    <h2 class="mb-4">PHIẾU NHẬP KHO</h2>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="font-weight-bold">Nhà cung cấp</label>
+                @Html.DropDownListFor(m => m.SupplierId, ViewBag.Suppliers as SelectList, "-- Chọn nhà cung cấp --", new { @class = "form-control", id = "supplierDropdown" })
+            </div>
+            <div class="col-md-6">
+                <label class="font-weight-bold">Ghi chú</label>
+                @Html.TextAreaFor(m => m.Note, new { @class = "form-control", rows = 2 })
+                @Html.ValidationMessageFor(m => m.Note, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <h5 class="mt-4">Chi tiết sản phẩm</h5>
+        <table class="table table-bordered table-sm text-center" id="detailsTable">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width: 30%">Tên xe</th>
+                    <th style="width: 15%">Số lượng</th>
+                    <th style="width: 20%">Giá nhập</th>
+                    <th style="width: 20%">Thành tiền</th>
+                    <th style="width: 10%">Xóa</th>
+                </tr>
+            </thead>
+            <tbody id="detailRows">
+            </tbody>
+        </table>
+
+        <div class="mb-3">
+            <button type="button" id="addRow" class="btn btn-outline-primary btn-sm">+ Thêm dòng</button>
+        </div>
+
+        <div class="text-right mb-4">
+            <h5 class="font-weight-bold">Tổng cộng: <span id="grandTotal">0</span> VNĐ</h5>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success px-5">Lưu phiếu</button>
+        </div>
+    }
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let rowIndex = 0;
+
+    function updateTotals() {
+        let grandTotal = 0;
+        $("#detailsTable tbody tr").each(function () {
+            const qty = parseFloat($(this).find(".qty").val()) || 0;
+            const price = parseFloat($(this).find(".price").val()) || 0;
+            const lineTotal = qty * price;
+            $(this).find(".line-total").text(lineTotal.toLocaleString('vi-VN') + " VNĐ");
+            grandTotal += lineTotal;
+        });
+        $("#grandTotal").text(grandTotal.toLocaleString('vi-VN'));
+    }
+
+    function addRow(models) {
+        let modelOptions = '<option value="">-- Chọn --</option>';
+        $.each(models, function (i, model) {
+            modelOptions += `<option value="${model.name}">${model.name}</option>`;
+        });
+
+        const row = `
+            <tr>
+                <td>
+                    <select class="form-control model-select" name="Details[${rowIndex}].ModelName">
+                        ${modelOptions}
+                    </select>
+                </td>
+                <td><input type="number" name="Details[${rowIndex}].Quantity" class="form-control text-center qty" value="1" /></td>
+                <td><input type="number" name="Details[${rowIndex}].Price" class="form-control text-right price" value="0" /></td>
+                <td class="line-total text-right">0</td>
+                <td><button type="button" class="btn btn-danger btn-sm remove-row">X</button></td>
+            </tr>`;
+
+        $("#detailRows").append(row);
+        rowIndex++;
+        updateTotals();
+    }
+
+    $(document).on("click", "#addRow", function () {
+        const supplierId = $("#supplierDropdown").val();
+        if (!supplierId) {
+            alert("Vui lòng chọn nhà cung cấp trước.");
+            return;
+        }
+
+        $.getJSON("/VehicleModels/GetModelsBySupplier", { supplierId: supplierId }, function (models) {
+            if (models.length === 0) {
+                alert("Nhà cung cấp này không có mẫu xe nào.");
+                return;
+            }
+            addRow(models);
+        });
+    });
+
+    $(document).on("click", ".remove-row", function () {
+        $(this).closest("tr").remove();
+        updateTotals();
+    });
+
+    $(document).on("input", ".qty, .price", updateTotals);
+
+    $("#supplierDropdown").change(function () {
+        $("#detailRows").html("");
+        rowIndex = 0;
+        updateTotals();
+
+        const supplierId = $(this).val();
+        if (!supplierId) return;
+
+        $.getJSON("/Vehicles/GetModelsBySupplier", { supplierId: supplierId }, function (models) {
+            if (models.length === 0) {
+                alert("Nhà cung cấp này không có mẫu xe nào.");
+                return;
+            }
+            addRow(models);
+        });
+    });
+
+    $(document).ready(updateTotals);
+</script>

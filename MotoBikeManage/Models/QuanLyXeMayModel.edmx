@@ -63,6 +63,14 @@
           <Property Name="completion_status" Type="nvarchar" MaxLength="20" />
           <Property Name="completion_approval_status" Type="nvarchar" MaxLength="30" />
         </EntityType>
+        <EntityType Name="Supplier_Brand">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="supplier_id" Type="int" Nullable="false" />
+          <Property Name="brand" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
         <EntityType Name="Suppliers">
           <Key>
             <PropertyRef Name="supplier_id" />
@@ -261,6 +269,18 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__Supplier___suppl__236943A5">
+          <End Role="Suppliers" Type="Self.Suppliers" Multiplicity="1" />
+          <End Role="Supplier_Brand" Type="Self.Supplier_Brand" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Suppliers">
+              <PropertyRef Name="supplier_id" />
+            </Principal>
+            <Dependent Role="Supplier_Brand">
+              <PropertyRef Name="supplier_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Vehicles__model___534D60F1">
           <End Role="VehicleModels" Type="Self.VehicleModels" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -281,6 +301,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySet Name="Import_Details" EntityType="Self.Import_Details" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Import_Stock" EntityType="Self.Import_Stock" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Maintenance" EntityType="Self.Maintenance" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Supplier_Brand" EntityType="Self.Supplier_Brand" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Suppliers" EntityType="Self.Suppliers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
@@ -338,6 +359,10 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <AssociationSet Name="FK__Maintenan__vehic__17036CC0" Association="Self.FK__Maintenan__vehic__17036CC0">
             <End Role="Vehicles" EntitySet="Vehicles" />
             <End Role="Maintenance" EntitySet="Maintenance" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Supplier___suppl__236943A5" Association="Self.FK__Supplier___suppl__236943A5">
+            <End Role="Suppliers" EntitySet="Suppliers" />
+            <End Role="Supplier_Brand" EntitySet="Supplier_Brand" />
           </AssociationSet>
           <AssociationSet Name="FK__Vehicles__model___534D60F1" Association="Self.FK__Vehicles__model___534D60F1">
             <End Role="VehicleModels" EntitySet="VehicleModels" />
@@ -409,6 +434,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
           <Property Name="created_at" Type="DateTime" Precision="3" />
           <NavigationProperty Name="Import_Stock" Relationship="Self.FK__Import_St__suppl__60A75C0F" FromRole="Suppliers" ToRole="Import_Stock" />
+          <NavigationProperty Name="Supplier_Brand" Relationship="QLXMModel.FK__Supplier___suppl__236943A5" FromRole="Supplier" ToRole="Supplier_Brand" />
         </EntityType>
         <EntityType Name="sysdiagram">
           <Key>
@@ -638,6 +664,11 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="Vehicle" EntitySet="Vehicles" />
             <End Role="Maintenance" EntitySet="Maintenances" />
           </AssociationSet>
+          <EntitySet Name="Supplier_Brand" EntityType="QLXMModel.Supplier_Brand" />
+          <AssociationSet Name="FK__Supplier___suppl__236943A5" Association="QLXMModel.FK__Supplier___suppl__236943A5">
+            <End Role="Supplier" EntitySet="Suppliers" />
+            <End Role="Supplier_Brand" EntitySet="Supplier_Brand" />
+          </AssociationSet>
           </EntityContainer>
         <EntityType Name="Maintenance">
           <Key>
@@ -692,6 +723,27 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Principal>
             <Dependent Role="Maintenance">
               <PropertyRef Name="vehicle_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Supplier_Brand">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="supplier_id" Type="Int32" Nullable="false" />
+          <Property Name="brand" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Supplier" Relationship="QLXMModel.FK__Supplier___suppl__236943A5" FromRole="Supplier_Brand" ToRole="Supplier" />
+        </EntityType>
+        <Association Name="FK__Supplier___suppl__236943A5">
+          <End Type="QLXMModel.Supplier" Role="Supplier" Multiplicity="1" />
+          <End Type="QLXMModel.Supplier_Brand" Role="Supplier_Brand" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Supplier">
+              <PropertyRef Name="supplier_id" />
+            </Principal>
+            <Dependent Role="Supplier_Brand">
+              <PropertyRef Name="supplier_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -839,6 +891,15 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
                 <ScalarProperty Name="requested_by" ColumnName="requested_by" />
                 <ScalarProperty Name="vehicle_id" ColumnName="vehicle_id" />
                 <ScalarProperty Name="maintenance_id" ColumnName="maintenance_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Supplier_Brand">
+            <EntityTypeMapping TypeName="QLXMModel.Supplier_Brand">
+              <MappingFragment StoreEntitySet="Supplier_Brand">
+                <ScalarProperty Name="brand" ColumnName="brand" />
+                <ScalarProperty Name="supplier_id" ColumnName="supplier_id" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -535,6 +535,22 @@ namespace MotoBikeManage.Controllers
             if (Session["Role"] == null) return false;
             return Session["Role"].ToString().Trim().Equals("Admin", StringComparison.OrdinalIgnoreCase);
         }
+
+        public JsonResult GetModelsBySupplier(int supplierId)
+        {
+            var brands = db.Supplier_Brand
+                           .Where(sb => sb.supplier_id == supplierId)
+                           .Select(sb => sb.brand)
+                           .ToList();
+
+            var models = db.VehicleModels
+                           .Where(vm => brands.Contains(vm.brand))
+                           .Select(vm => new { vm.model_id, vm.name })
+                           .ToList();
+
+            return Json(models, JsonRequestBehavior.AllowGet);
+        }
+
     }
 }
 

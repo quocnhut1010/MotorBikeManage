@@ -105,6 +105,102 @@ namespace MotoBikeManage.Controllers.Admin
                 }
             }, JsonRequestBehavior.AllowGet);
         }
+        // GET: NhapKho/Create
+        public ActionResult Create()
+        {
+            ViewBag.Suppliers = new SelectList(db.Suppliers.ToList(), "supplier_id", "name");
+
+            var viewModel = new ImportStockViewModel
+            {
+                ImportDate = DateTime.Now,
+                Details = new List<ImportDetailViewModel>()
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: NhapKho/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(ImportStockViewModel model)
+        {
+            ViewBag.Suppliers = new SelectList(db.Suppliers.ToList(), "supplier_id", "name", model.SupplierId);
+
+            if (string.IsNullOrWhiteSpace(model.Note))
+                ModelState.AddModelError("Note", "Ghi chú không được để trống.");
+
+            foreach (var item in model.Details)
+            {
+                if (item.Quantity <= 0)
+                    ModelState.AddModelError("", "Số lượng phải lớn hơn 0.");
+                if (item.Price <= 0)
+                    ModelState.AddModelError("", "Đơn giá phải lớn hơn 0.");
+            }
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var username = Session["Username"]?.ToString();
+            var user = db.Users.FirstOrDefault(u => u.username == username);
+            if (user == null)
+            {
+                TempData["Error"] = "Không xác định người dùng.";
+                return RedirectToAction("Index");
+            }
+
+            var import = new Import_Stock
+            {
+                supplier_id = model.SupplierId,
+                user_id = user.id,
+                import_date = DateTime.Now,
+                note = model.Note,
+                approval_status = user.role == "Admin" ? "Đã duyệt" : "Chờ duyệt",
+                approved_date = user.role == "Admin" ? DateTime.Now : (DateTime?)null
+            };
+
+            db.Import_Stock.Add(import);
+            db.SaveChanges();
+
+            foreach (var detail in model.Details)
+            {
+                var modelId = db.VehicleModels
+                                .Where(m => m.name == detail.ModelName)
+                                .Select(m => m.model_id)
+                                .FirstOrDefault();
+
+                if (modelId > 0)
+                {
+                    db.Import_Details.Add(new Import_Details
+                    {
+                        import_id = import.import_id,
+                        model_id = modelId,
+                        quantity = detail.Quantity,
+                        price = detail.Price
+                    });
+                }
+            }
+
+            db.SaveChanges();
+
+            // Tự động duyệt nếu là Admin
+            var importWithDetails = db.Import_Stock
+                                      .Include(i => i.Import_Details)
+                                      .FirstOrDefault(i => i.import_id == import.import_id);
+
+            if (user.role == "Admin" && importWithDetails != null)
+            {
+                ApproveImportStock(importWithDetails);
+                db.SaveChanges();
+                TempData["Success"] = "Phiếu nhập đã được tạo và duyệt thành công.";
+            }
+            else
+            {
+                TempData["Success"] = "Tạo phiếu nhập kho thành công (chờ duyệt).";
+            }
+
+            return RedirectToAction("Index");
+        }
+        // GET: NhapKho/Approve/5
         public ActionResult Approve(int id)
         {
             var import = db.Import_Stock
@@ -120,63 +216,48 @@ namespace MotoBikeManage.Controllers.Admin
                 return RedirectToAction("Index");
             }
 
+            ApproveImportStock(import);
+            db.SaveChanges();
+
+            TempData["SuccessImport"] = "Duyệt nhập kho thành công!";
+            return RedirectToAction("Index");
+        }
+
+        // Logic dùng chung để duyệt phiếu nhập và sinh xe mới
+        private void ApproveImportStock(Import_Stock import)
+        {
             foreach (var detail in import.Import_Details)
             {
                 var modelId = detail.model_id;
                 var quantity = detail.quantity;
-
                 var model = db.VehicleModels.FirstOrDefault(m => m.model_id == modelId);
                 if (model == null) continue;
 
-                var existingModelVehicles = db.Vehicles
-                                              .Where(v => v.model_id == modelId)
-                                              .ToList();
+                var existingVehicles = db.Vehicles.Where(v => v.model_id == modelId).ToList();
 
                 for (int i = 0; i < quantity; i++)
                 {
                     string frame, engine;
 
-                    if (existingModelVehicles.Any())
+                    if (existingVehicles.Any())
                     {
-                        // TH1: Đã có model này → dùng prefix như TH1 cũ
-                        string prefix = existingModelVehicles.First().frame_number.Substring(0, 5);
-                        string suffix;
-                        do
-                        {
-                            suffix = GenerateUniqueSuffix(i);
-                            frame = prefix + suffix;
-                        }
+                        string prefix = existingVehicles.First().frame_number.Substring(0, 5);
+                        do { frame = prefix + GenerateUniqueSuffix(i); }
                         while (db.Vehicles.Any(v => v.frame_number == frame));
 
-                        string enginePrefix = existingModelVehicles.First().engine_number.Substring(0, 5);
-                        string engineSuffix;
-                        do
-                        {
-                            engineSuffix = GenerateUniqueSuffix(i, true); // số nhiều hơn chữ
-                            engine = enginePrefix + engineSuffix;
-                        }
+                        string enginePrefix = existingVehicles.First().engine_number.Substring(0, 5);
+                        do { engine = enginePrefix + GenerateUniqueSuffix(i, true); }
                         while (db.Vehicles.Any(v => v.engine_number == engine));
                     }
                     else
                     {
-                        // TH2: Model mới chưa từng có xe nào
                         string framePrefix = GenerateFramePrefix(model.name, model.manufacture_year);
                         string enginePrefix = GenerateNextEnginePrefix();
 
-                        string frameSuffix, engineSuffix;
-
-                        do
-                        {
-                            frameSuffix = GenerateUniqueSuffix(i);
-                            frame = framePrefix + frameSuffix;
-                        }
+                        do { frame = framePrefix + GenerateUniqueSuffix(i); }
                         while (db.Vehicles.Any(v => v.frame_number == frame));
 
-                        do
-                        {
-                            engineSuffix = GenerateEngineSuffixWithMoreNumbers(9);
-                            engine = enginePrefix + engineSuffix;
-                        }
+                        do { engine = enginePrefix + GenerateEngineSuffixWithMoreNumbers(9); }
                         while (db.Vehicles.Any(v => v.engine_number == engine));
                     }
 
@@ -193,13 +274,7 @@ namespace MotoBikeManage.Controllers.Admin
 
             import.approval_status = "Đã duyệt";
             import.approved_date = DateTime.Now;
-
-            db.SaveChanges();
-
-            TempData["Success"] = "Duyệt nhập kho thành công!";
-            return RedirectToAction("Index");
         }
-
         private static readonly char[] ValidLetters = "ABCDEFGHJKLMNPRSTUVWXYZ".ToCharArray(); // Loại I, O, Q
 
         private string GenerateFramePrefix(string name, int year)
@@ -278,6 +353,6 @@ namespace MotoBikeManage.Controllers.Admin
             string formD = input.Normalize(NormalizationForm.FormD);
             return regex.Replace(formD, "").Replace('đ', 'd').Replace('Đ', 'D');
         }
-
     }
+
 }

@@ -353,3 +353,19 @@ select * from Import_Details
 
 select * from VehicleModels
 select * from Vehicles
+
+
+
+CREATE TABLE Supplier_Brand (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    supplier_id INT NOT NULL,
+    brand NVARCHAR(50) NOT NULL,
+    FOREIGN KEY (supplier_id) REFERENCES Suppliers(supplier_id)
+);
+INSERT INTO Supplier_Brand (supplier_id, brand) VALUES (1, 'Honda');
+INSERT INTO Supplier_Brand (supplier_id, brand) VALUES (2, 'Yamaha');
+
+INSERT INTO Supplier_Brand (supplier_id, brand) VALUES (3, 'Honda');
+INSERT INTO Supplier_Brand (supplier_id, brand) VALUES (3, 'Yamaha');
+
+select * from Supplier_Brand

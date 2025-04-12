@@ -9,6 +9,7 @@ namespace MotoBikeManage.ViewModels
 {
     public class ImportDetailViewModel
     {
+
         public string ModelName { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
@@ -17,6 +18,8 @@ namespace MotoBikeManage.ViewModels
     }
     public class ImportStockViewModel
     {
+        public int SupplierId { get; set; }
+
         [Display(Name = "Mã Phiếu")]
         public int ImportId { get; set; }
 

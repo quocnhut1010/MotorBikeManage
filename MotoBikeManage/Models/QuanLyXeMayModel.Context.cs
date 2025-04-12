@@ -36,5 +36,6 @@ namespace MotoBikeManage.Models
         public virtual DbSet<Vehicle> Vehicles { get; set; }
         public virtual DbSet<Inventory> Inventories { get; set; }
         public virtual DbSet<Maintenance> Maintenances { get; set; }
+        public virtual DbSet<Supplier_Brand> Supplier_Brand { get; set; }
     }
 }

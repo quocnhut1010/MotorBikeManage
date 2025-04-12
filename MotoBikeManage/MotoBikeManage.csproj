@@ -233,6 +233,9 @@
     <Compile Include="Models\Supplier.cs">
       <DependentUpon>QuanLyXeMayModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\Supplier_Brand.cs">
+      <DependentUpon>QuanLyXeMayModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Models\sysdiagram.cs">
       <DependentUpon>QuanLyXeMayModel.tt</DependentUpon>
     </Compile>
@@ -1008,9 +1011,11 @@
     <Content Include="Views\TonKho\Index.cshtml" />
     <Content Include="Views\Error\NotFound.cshtml" />
     <Content Include="Views\NhapKho\Index.cshtml" />
+    <Content Include="Views\NhapKho\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\VehicleModels\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />

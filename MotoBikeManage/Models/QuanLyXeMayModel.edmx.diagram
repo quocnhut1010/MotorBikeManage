@@ -27,6 +27,8 @@
         <AssociationConnector Association="QLXMModel.FK__Maintenan__appro__18EBB532" />
         <AssociationConnector Association="QLXMModel.FK__Maintenan__reque__17F790F9" />
         <AssociationConnector Association="QLXMModel.FK__Maintenan__vehic__17036CC0" />
+        <EntityTypeShape EntityType="QLXMModel.Supplier_Brand" Width="1.5" PointX="3.75" PointY="18.625" />
+        <AssociationConnector Association="QLXMModel.FK__Supplier___suppl__236943A5" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
