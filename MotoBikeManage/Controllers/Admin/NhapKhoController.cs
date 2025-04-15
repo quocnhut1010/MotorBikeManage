@@ -7,6 +7,8 @@ using System.Web.Mvc;
 using System.Data.Entity;
 using MotoBikeManage.ViewModels;
 using System.Text;
+using System.Web.Services.Description;
+using System.Windows.Media.Imaging;
 
 namespace MotoBikeManage.Controllers.Admin
 {
@@ -30,7 +32,8 @@ namespace MotoBikeManage.Controllers.Admin
                                ImportDate = i.import_date,
                                ApprovalStatus = i.approval_status,
                                ApprovedDate = i.approved_date,
-                               Note = i.note
+                               Note = i.note,
+                               ApprovedByUser = i.User1.full_name
                                // Nếu muốn tính tổng SL/Giá trị (có thể ảnh hưởng hiệu năng nếu dữ liệu lớn):
                                // TotalQuantity = i.Import_Details.Sum(d => (int?)d.quantity) ?? 0,
                                // TotalValue = i.Import_Details.Sum(d => (decimal?)(d.quantity * d.price)) ?? 0m
@@ -46,6 +49,7 @@ namespace MotoBikeManage.Controllers.Admin
                  .Include(i => i.Supplier)
                  .Include(i => i.User)
                  .Include(i => i.Import_Details.Select(d => d.VehicleModel))
+                 .Include(i => i.User1) // Include người duyệt
                  .Where(i => i.import_id == id)
                  .Select(i => new ImportStockViewModel
                  {
@@ -56,21 +60,17 @@ namespace MotoBikeManage.Controllers.Admin
                      ApprovalStatus = i.approval_status,
                      ApprovedDate = i.approved_date,
                      Note = i.note,
-
-                     // Tổng số lượng & Tổng giá trị toàn phiếu
+                     ApprovedByUser = i.User1.full_name != null ? i.User1.full_name : null,
                      TotalQuantity = i.Import_Details.Sum(d => (int?)d.quantity) ?? 0,
                      TotalValue = i.Import_Details.Sum(d => (decimal?)(d.quantity * d.price)) ?? 0m,
-
-                     // Map từng dòng chi tiết
                      Details = i.Import_Details
                                 .Select(d => new ImportDetailViewModel
                                 {
                                     ModelName = d.VehicleModel.name,
                                     Quantity = d.quantity,
                                     Price = d.price,
-                                    LineValue = d.quantity * d.price // Tính giá trị cho từng dòng
-                                })
-                                .ToList()
+                                    LineValue = d.quantity * d.price
+                                }).ToList()
                  })
                  .FirstOrDefault();
 
@@ -79,7 +79,6 @@ namespace MotoBikeManage.Controllers.Admin
                 return Json(new { success = false, message = "Không tìm thấy phiếu nhập." }, JsonRequestBehavior.AllowGet);
             }
 
-            // Trả về JSON
             return Json(new
             {
                 success = true,
@@ -92,15 +91,14 @@ namespace MotoBikeManage.Controllers.Admin
                     item.ApprovalStatus,
                     ApprovedDate = item.ApprovedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-",
                     item.Note,
+                    ApproverName = item.ApprovedByUser ?? "-",
                     item.TotalQuantity,
-                    TotalValue = item.TotalValue.ToString("#,##0") + " VNĐ",
-
-                    // Trả về toàn bộ chi tiết, bao gồm LineValue
+                    TotalValue = item.TotalValue,
                     Details = item.Details.Select(d => new {
                         d.ModelName,
                         d.Quantity,
-                        Price =  d.Price.ToString("#,##0") + " VNĐ",
-                        LineValue =  d.LineValue.ToString("#,##0") + " VNĐ"
+                        Price = d.Price,
+                        LineValue = d.LineValue
                     })
                 }
             }, JsonRequestBehavior.AllowGet);
@@ -154,6 +152,7 @@ namespace MotoBikeManage.Controllers.Admin
                 user_id = user.id,
                 import_date = DateTime.Now,
                 note = model.Note,
+                approved_by = user.id,
                 approval_status = user.role == "Admin" ? "Đã duyệt" : "Chờ duyệt",
                 approved_date = user.role == "Admin" ? DateTime.Now : (DateTime?)null
             };
@@ -191,7 +190,7 @@ namespace MotoBikeManage.Controllers.Admin
             {
                 ApproveImportStock(importWithDetails);
                 db.SaveChanges();
-                TempData["Success"] = "Phiếu nhập đã được tạo và duyệt thành công.";
+                TempData["SuccessImport1"] = "Phiếu nhập đã được tạo thành công.";
             }
             else
             {
@@ -217,6 +216,7 @@ namespace MotoBikeManage.Controllers.Admin
             }
 
             ApproveImportStock(import);
+
             db.SaveChanges();
 
             TempData["SuccessImport"] = "Duyệt nhập kho thành công!";
@@ -267,11 +267,11 @@ namespace MotoBikeManage.Controllers.Admin
                         frame_number = frame,
                         engine_number = engine,
                         status = "Trong kho",
-                        created_at = DateTime.Now
+                        created_at = DateTime.Now,
+                        import_id = import.import_id // <- thêm dòng này
                     });
                 }
             }
-
             import.approval_status = "Đã duyệt";
             import.approved_date = DateTime.Now;
         }
@@ -353,6 +353,42 @@ namespace MotoBikeManage.Controllers.Admin
             string formD = input.Normalize(NormalizationForm.FormD);
             return regex.Replace(formD, "").Replace('đ', 'd').Replace('Đ', 'D');
         }
+        public ActionResult Print(int id)
+        {
+            var item = db.Import_Stock
+                 .Include(i => i.Supplier)
+                 .Include(i => i.User)
+                 .Include(i => i.User1)
+                 .Include(i => i.Import_Details.Select(d => d.VehicleModel))
+                 .FirstOrDefault(i => i.import_id == id);
+
+            if (item == null)
+                return HttpNotFound();
+
+            var viewModel = new ImportStockViewModel
+            {
+                ImportId = item.import_id,
+                SupplierName = item.Supplier?.name,
+                UserName = item.User?.full_name,
+                ImportDate = item.import_date,
+                ApprovalStatus = item.approval_status,
+                ApprovedDate = item.approved_date,
+                ApprovedByUser = item.User1?.full_name,
+                Note = item.note,
+                TotalQuantity = item.Import_Details.Sum(d => (int?)d.quantity) ?? 0,
+                TotalValue = item.Import_Details.Sum(d => (decimal?)(d.quantity * d.price)) ?? 0,
+                Details = item.Import_Details.Select(d => new ImportDetailViewModel
+                {
+                    ModelName = d.VehicleModel.name,
+                    Quantity = d.quantity,
+                    Price = d.price,
+                    LineValue = d.quantity * d.price
+                }).ToList()
+            };
+
+            return View(); // Hoặc bạn tạo View riêng tên là Print.cshtml
+        }
+
     }
 
 }

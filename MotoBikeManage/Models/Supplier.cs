@@ -17,8 +17,8 @@ namespace MotoBikeManage.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Supplier()
         {
-            this.Import_Stock = new HashSet<Import_Stock>();
             this.Supplier_Brand = new HashSet<Supplier_Brand>();
+            this.Import_Stock = new HashSet<Import_Stock>();
         }
     
         public int supplier_id { get; set; }
@@ -29,8 +29,8 @@ namespace MotoBikeManage.Models
         public Nullable<System.DateTime> created_at { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Import_Stock> Import_Stock { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Supplier_Brand> Supplier_Brand { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Import_Stock> Import_Stock { get; set; }
     }
 }

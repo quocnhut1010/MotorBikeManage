@@ -20,7 +20,7 @@ namespace MotoBikeManage.Models
         public int quantity { get; set; }
         public decimal price { get; set; }
     
-        public virtual Import_Stock Import_Stock { get; set; }
         public virtual VehicleModel VehicleModel { get; set; }
+        public virtual Import_Stock Import_Stock { get; set; }
     }
 }

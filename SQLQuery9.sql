@@ -369,3 +369,15 @@ INSERT INTO Supplier_Brand (supplier_id, brand) VALUES (3, 'Honda');
 INSERT INTO Supplier_Brand (supplier_id, brand) VALUES (3, 'Yamaha');
 
 select * from Supplier_Brand
+
+ALTER TABLE Vehicles
+ADD import_id INT;
+
+ALTER TABLE Vehicles
+ADD CONSTRAINT FK_Vehicles_Import_Stock
+FOREIGN KEY (import_id) REFERENCES Import_Stock(import_id);
+
+
+ALTER TABLE Import_Stock ADD approved_by INT NULL;
+ALTER TABLE Import_Stock 
+ADD CONSTRAINT FK_ImportStock_Users_ApprovedBy FOREIGN KEY (approved_by) REFERENCES Users(id);

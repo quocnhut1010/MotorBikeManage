@@ -99,7 +99,7 @@
             return;
         }
 
-        $.getJSON("/VehicleModels/GetModelsBySupplier", { supplierId: supplierId }, function (models) {
+        $.getJSON("/Vehicles/GetModelsBySupplier", { supplierId: supplierId }, function (models) {
             if (models.length === 0) {
                 alert("Nhà cung cấp này không có mẫu xe nào.");
                 return;

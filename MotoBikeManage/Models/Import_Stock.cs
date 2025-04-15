@@ -18,6 +18,7 @@ namespace MotoBikeManage.Models
         public Import_Stock()
         {
             this.Import_Details = new HashSet<Import_Details>();
+            this.Vehicles = new HashSet<Vehicle>();
         }
     
         public int import_id { get; set; }
@@ -27,10 +28,14 @@ namespace MotoBikeManage.Models
         public string note { get; set; }
         public string approval_status { get; set; }
         public Nullable<System.DateTime> approved_date { get; set; }
+        public Nullable<int> approved_by { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Import_Details> Import_Details { get; set; }
         public virtual Supplier Supplier { get; set; }
         public virtual User User { get; set; }
+        public virtual User User1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Vehicle> Vehicles { get; set; }
     }
 }

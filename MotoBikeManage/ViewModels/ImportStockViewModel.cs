@@ -19,6 +19,7 @@ namespace MotoBikeManage.ViewModels
     public class ImportStockViewModel
     {
         public int SupplierId { get; set; }
+        public int? approved_by { get; set; }
 
         [Display(Name = "Mã Phiếu")]
         public int ImportId { get; set; }
@@ -28,6 +29,7 @@ namespace MotoBikeManage.ViewModels
 
         [Display(Name = "Người Tạo")]
         public string UserName { get; set; }
+        public string ApprovedByUser { get; set; }
 
         [Display(Name = "Ngày Tạo")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = true)]

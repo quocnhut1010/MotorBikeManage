@@ -6,6 +6,8 @@
 
 }
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-md-6">
@@ -127,22 +129,23 @@
     </div>
 </div>
 <!-- Modal Bootstrap để hiển thị chi tiết (nếu muốn) -->
-<div class="modal fade" id="importDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
+<div class="modal fade" id="importDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chi tiết phiếu nhập</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+        <div class="modal-content border rounded shadow">
+            <div class="modal-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="modal-title">PHIẾU NHẬP KHO</h5>
+                <div class="d-flex gap-2">
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
             </div>
-            <div class="modal-body">
-                <!-- Khu vực hiển thị thông tin chi tiết (Ajax đổ dữ liệu vào) -->
-                <div id="importDetailContent">
-                    <!-- Nội dung được thêm qua JavaScript -->
+            <div class="modal-body p-4" id="printArea">
+                <div id="importDetailContent" class="font-monospace">
+                    <!-- Nội dung AJAX đổ vào -->
                 </div>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="exportModalToPdf()">Xuất PDF</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
@@ -151,87 +154,121 @@
 
 
 
+
 <script src='@Url.Content("~/assets/libs/DataTables/jquery.dataTables.min.js")'></script>
 <script src='@Url.Content("~/assets/libs/DataTables/dataTables.bootstrap5.min.js")'></script>
 
 <script>
-    // Hàm gọi Ajax
+    function exportModalToPdf() {
+        const element = document.getElementById("printArea");
+
+        const opt = {
+            margin: 0.5,
+            filename: 'PhieuNhap_' + new Date().getTime() + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(element).save();
+    }
+</script>
+
+<script>
+    function formatCurrency(value) {
+        return parseFloat(value).toLocaleString('vi-VN') + ' VNĐ';
+    }
+
     function showImportDetail(importId) {
         $.ajax({
-            url: '@Url.Action("Details", "NhapKho")', // Đảm bảo Action này trả về JSON
+            url: '@Url.Action("Details", "NhapKho")',
             type: 'GET',
             data: { id: importId },
             success: function (response) {
                 if (response.success) {
-                    // Trích ra data từ response
                     let data = response.data;
 
-                    // Phần HTML chung cho phiếu nhập
                     let html = `
-                        <p><strong>Mã Phiếu:</strong> ${data.ImportId}</p>
-                        <p><strong>Nhà Cung Cấp:</strong> ${data.SupplierName}</p>
-                        <p><strong>Người Tạo:</strong> ${data.UserName}</p>
-                        <p><strong>Ngày Tạo:</strong> ${data.ImportDate}</p>
-                        <p><strong>Trạng Thái:</strong> ${data.ApprovalStatus}</p>
-                        <p><strong>Ngày Duyệt:</strong> ${data.ApprovedDate}</p>
-                        <p><strong>Ghi chú:</strong> ${data.Note}</p>
-                        <p><strong>Tổng Giá trị (toàn phiếu):</strong> ${data.TotalValue}</p>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>Mã phiếu:</strong> ${data.ImportId}</p>
+                                <p><strong>Nhà cung cấp:</strong> ${data.SupplierName}</p>
+                                <p><strong>Người tạo:</strong> ${data.UserName}</p>
+                                <p><strong>Người duyệt:</strong> ${data.ApproverName}</p>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <p><strong>Ngày tạo:</strong> ${data.ImportDate}</p>
+                                <p><strong>Ngày duyệt:</strong> ${data.ApprovedDate}</p>
+                                <p><strong>Trạng thái:</strong> <span class="badge bg-info text-dark">${data.ApprovalStatus}</span></p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <p><strong>Ghi chú:</strong> ${data.Note}</p>
+                        </div>
                         <hr>
-                        <h5>Chi tiết nhập:</h5>
-                    `;
-
-                    // Bắt đầu table
-                    html += `
-                        <table class="table table-sm">
-                            <thead>
+                        <h5 class="mb-3">Danh sách sản phẩm nhập</h5>
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light text-center">
                                 <tr>
-                                    <th>Tên xe</th>
-                                    <th>Số lượng</th>
-                                    <th>Giá nhập</th>
-                                    <th>Thành tiền</th>
+                                    <th style="width: 40%">Tên xe</th>
+                                    <th style="width: 15%">Số lượng</th>
+                                    <th style="width: 20%">Giá nhập</th>
+                                    <th style="width: 25%">Thành tiền</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                    `;
+                            <tbody>`;
 
-                    // Kiểm tra mảng Details có tồn tại không
                     if (data.Details && data.Details.length > 0) {
                         data.Details.forEach(function (detail) {
                             html += `
-                                <tr>
-                                    <td>${detail.ModelName}</td>
+                                <tr class="text-center">
+                                    <td class="text-start">${detail.ModelName}</td>
                                     <td>${detail.Quantity}</td>
-                                    <td>${detail.Price}</td>
-                                    <td>${detail.LineValue}</td>
-                                </tr>
-                            `;
+                                    <td>${formatCurrency(detail.Price)}</td>
+                                    <td>${formatCurrency(detail.LineValue)}</td>
+                                </tr>`;
                         });
                     } else {
-                        // Trường hợp không có dòng chi tiết nào
-                        html += `
-                            <tr>
-                                <td colspan="3">Không có chi tiết nhập</td>
-                            </tr>
-                        `;
+                        html += `<tr><td colspan="4" class="text-center">Không có chi tiết nhập</td></tr>`;
                     }
 
-                    // Kết thúc table
-                    html += `
-                            </tbody>
+                    html += `</tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tổng giá trị:</strong></td>
+                                    <td class="text-center fw-bold">${formatCurrency(data.TotalValue)}</td>
+                                </tr>
+                            </tfoot>
                         </table>
-                    `;
 
-                    // Gán kết quả vào div hiển thị
+                        <div class="text-end mb-4">
+                            <p><em>..., ngày ... tháng ... năm ...</em></p>
+                          </div>
+
+                          <div class="row text-center mb-5">
+                            <div class="col">
+                              <strong>Người lập phiếu</strong><br>
+                              <br>
+                              <span class="text-muted" style="margin-top: 25px; display: inline-block;">${data.UserName}</span>
+                            </div>
+                            <div class="col">
+                              <strong>Người duyệt</strong><br>
+
+                              <br>
+                              <span class="text-muted" style="margin-top: 25px; display: inline-block;">${data.ApproverName}</span>
+                            </div>
+                            <div class="col">
+                              <strong>Kế toán</strong><br>
+                              <span class="text-muted">(Ghi rõ họ tên)</span>
+                            </div>
+                        </div>`;
+
                     $('#importDetailContent').html(html);
 
-                    // Hiển thị modal
-                    // Nếu bạn dùng Bootstrap 4: $('#importDetailModal').modal('show');
-                    // Nếu bạn dùng Bootstrap 5:
-                    var modalElem = document.getElementById('importDetailModal');
-                    var modalObj = new bootstrap.Modal(modalElem);
+                    const modalElem = document.getElementById('importDetailModal');
+                    const modalObj = new bootstrap.Modal(modalElem);
                     modalObj.show();
-                }
-                else {
+                } else {
                     alert(response.message);
                 }
             },
@@ -239,6 +276,16 @@
                 alert("Đã xảy ra lỗi khi tải chi tiết phiếu.");
             }
         });
+    }
+
+    function printImportDetail() {
+        const printContent = document.getElementById("printArea").innerHTML;
+        const originalContent = document.body.innerHTML;
+
+        document.body.innerHTML = printContent;
+        window.print();
+        document.body.innerHTML = originalContent;
+        location.reload(); // Tải lại trang để khôi phục sự kiện
     }
 </script>
 @* Script khởi tạo DataTables với ngôn ngữ tiếng Việt *@
@@ -262,6 +309,20 @@
          swal({
              title: "Thành công",
              text: "@Html.Raw(TempData["SuccessImport"])",
+             icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}
+@{
+    if (TempData["SuccessImport1"] != null)
+    {
+        var message = TempData["SuccessImport1"].ToString();
+        <script>
+         swal({
+             title: "Thành công",
+             text: "@Html.Raw(TempData["SuccessImport1"])",
              icon: "success",
              button: "Đóng"
          });

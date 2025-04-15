@@ -38,29 +38,22 @@ namespace MotoBikeManage.Controllers
                 // Với mỗi phiếu nhập đã duyệt, update created_at cho Vehicles phù hợp model_id
                 foreach (var import in approvedImports)
                 {
-                    var details = db.Import_Details
-                                    .Where(d => d.import_id == import.import_id)
-                                    .ToList();
+                    var vehiclesToUpdate = allVehicles
+               .Where(v => v.import_id == import.import_id)
+               .ToList();
 
-                    foreach (var detail in details)
+                    foreach (var vehicle in vehiclesToUpdate)
                     {
-                        var vehiclesToUpdate = allVehicles
-                            .Where(v => v.model_id == detail.model_id)
-                            .ToList();
-
-                        foreach (var vehicle in vehiclesToUpdate)
-                        {
-                            vehicle.created_at = import.approved_date.Value;
-                            updatedVehicleIds.Add(vehicle.vehicle_id);
-                        }
+                        vehicle.created_at = import.approved_date.Value;
+                        updatedVehicleIds.Add(vehicle.vehicle_id);
                     }
                 }
 
                 // Sau khi cập nhật cho các xe "thuộc nhập kho", 
                 // ta đặt created_at = null cho xe "không thuộc nhập kho" nào chưa được cập nhật
                 var notInImport = allVehicles
-                    .Where(v => !updatedVehicleIds.Contains(v.vehicle_id))
-                    .ToList();
+            .Where(v => v.import_id == null || !updatedVehicleIds.Contains(v.vehicle_id))
+            .ToList();
 
                 foreach (var vehicle in notInImport)
                 {
@@ -288,45 +281,28 @@ namespace MotoBikeManage.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
         [HttpPost]
         public ActionResult ApproveImport(int importId)
         {
             try
             {
-                // B1: Tìm import stock
                 var importStock = db.Import_Stock.Find(importId);
                 if (importStock == null)
-                {
                     return Json(new { success = false, message = "Không tìm thấy phiếu nhập." });
-                }
 
-                // B2: Cập nhật approval_status, approved_date
                 importStock.approval_status = "Đã duyệt";
                 importStock.approved_date = DateTime.Now;
 
-                // B3: Lấy tất cả Import_Details của importId
-                var details = db.Import_Details.Where(d => d.import_id == importId).ToList();
-
-                // B4: Với mỗi Import_Details, tìm tất cả Vehicles có model_id tương ứng rồi cập nhật created_at
-                // Chú ý: Tùy logic của bạn, có thể chỉ cập nhật những xe mới thêm
-                // hoặc cập nhật toàn bộ xe đang “exec” – tuỳ nhu cầu.
-                foreach (var detail in details)
+                // Cập nhật ngày nhập cho các xe được nhập từ phiếu này
+                var vehicles = db.Vehicles.Where(v => v.import_id == importId).ToList();
+                foreach (var v in vehicles)
                 {
-                    var vehicles = db.Vehicles
-                                     .Where(v => v.model_id == detail.model_id)
-                                     .ToList();
-
-                    foreach (var vehicle in vehicles)
-                    {
-                        vehicle.created_at = importStock.approved_date;
-                        // Nếu bạn muốn chỉ ghi đè khi created_at còn null, có thể thêm if (...)
-                    }
+                    v.created_at = importStock.approved_date;
                 }
 
-                // B5: Lưu thay đổi
                 db.SaveChanges();
-
-                return Json(new { success = true, message = "Duyệt nhập kho & đồng bộ created_at thành công." });
+                return Json(new { success = true, message = "Duyệt phiếu & cập nhật ngày nhập kho thành công." });
             }
             catch (Exception ex)
             {
