@@ -17,7 +17,6 @@ namespace MotoBikeManage.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public VehicleModel()
         {
-            this.Export_Details = new HashSet<Export_Details>();
             this.Import_Details = new HashSet<Import_Details>();
             this.Vehicles = new HashSet<Vehicle>();
         }
@@ -30,8 +29,6 @@ namespace MotoBikeManage.Models
         public int manufacture_year { get; set; }
         public string image { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Export_Details> Export_Details { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Import_Details> Import_Details { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

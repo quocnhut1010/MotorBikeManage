@@ -18,6 +18,7 @@ namespace MotoBikeManage.Models
         public Vehicle()
         {
             this.Maintenances = new HashSet<Maintenance>();
+            this.Export_Details = new HashSet<Export_Details>();
         }
     
         public int vehicle_id { get; set; }
@@ -32,5 +33,7 @@ namespace MotoBikeManage.Models
         public virtual ICollection<Maintenance> Maintenances { get; set; }
         public virtual VehicleModel VehicleModel { get; set; }
         public virtual Import_Stock Import_Stock { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Export_Details> Export_Details { get; set; }
     }
 }

@@ -25,8 +25,6 @@ namespace MotoBikeManage.Models
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<Export_Details> Export_Details { get; set; }
-        public virtual DbSet<Export_Stock> Export_Stock { get; set; }
         public virtual DbSet<Import_Details> Import_Details { get; set; }
         public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<sysdiagram> sysdiagrams { get; set; }
@@ -37,5 +35,7 @@ namespace MotoBikeManage.Models
         public virtual DbSet<Supplier_Brand> Supplier_Brand { get; set; }
         public virtual DbSet<Vehicle> Vehicles { get; set; }
         public virtual DbSet<Import_Stock> Import_Stock { get; set; }
+        public virtual DbSet<Export_Stock> Export_Stock { get; set; }
+        public virtual DbSet<Export_Details> Export_Details { get; set; }
     }
 }

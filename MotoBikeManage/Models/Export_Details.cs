@@ -16,10 +16,10 @@ namespace MotoBikeManage.Models
     {
         public int export_detail_id { get; set; }
         public int export_id { get; set; }
-        public int model_id { get; set; }
-        public int quantity { get; set; }
+        public int vehicle_id { get; set; }
+        public decimal price { get; set; }
     
         public virtual Export_Stock Export_Stock { get; set; }
-        public virtual VehicleModel VehicleModel { get; set; }
+        public virtual Vehicle Vehicle { get; set; }
     }
 }

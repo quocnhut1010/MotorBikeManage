@@ -17,11 +17,12 @@ namespace MotoBikeManage.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public User()
         {
-            this.Export_Stock = new HashSet<Export_Stock>();
             this.Maintenances = new HashSet<Maintenance>();
             this.Maintenances1 = new HashSet<Maintenance>();
             this.Import_Stock = new HashSet<Import_Stock>();
             this.Import_Stock1 = new HashSet<Import_Stock>();
+            this.Export_Stock = new HashSet<Export_Stock>();
+            this.Export_Stock1 = new HashSet<Export_Stock>();
         }
     
         public int id { get; set; }
@@ -35,8 +36,6 @@ namespace MotoBikeManage.Models
         public string avatar { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Export_Stock> Export_Stock { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Maintenance> Maintenances { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Maintenance> Maintenances1 { get; set; }
@@ -44,5 +43,9 @@ namespace MotoBikeManage.Models
         public virtual ICollection<Import_Stock> Import_Stock { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Import_Stock> Import_Stock1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Export_Stock> Export_Stock { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Export_Stock> Export_Stock1 { get; set; }
     }
 }

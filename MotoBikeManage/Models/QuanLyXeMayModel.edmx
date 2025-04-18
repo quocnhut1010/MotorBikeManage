@@ -11,8 +11,8 @@
           </Key>
           <Property Name="export_detail_id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="export_id" Type="int" Nullable="false" />
-          <Property Name="model_id" Type="int" Nullable="false" />
-          <Property Name="quantity" Type="int" Nullable="false" />
+          <Property Name="vehicle_id" Type="int" Nullable="false" />
+          <Property Name="price" Type="decimal" Precision="18" Scale="2" Nullable="false" />
         </EntityType>
         <EntityType Name="Export_Stock">
           <Key>
@@ -23,6 +23,10 @@
           <Property Name="export_date" Type="datetime" />
           <Property Name="reason" Type="nvarchar" MaxLength="255" />
           <Property Name="receiver" Type="nvarchar" MaxLength="100" />
+          <Property Name="approval_status" Type="nvarchar" MaxLength="20" />
+          <Property Name="approved_date" Type="datetime" />
+          <Property Name="approved_by" Type="int" />
+          <Property Name="reject_reason" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="Import_Details">
           <Key>
@@ -152,7 +156,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="total_exported" Type="int" />
           <Property Name="total_maintenance" Type="int" />
         </EntityType>
-        <Association Name="FK__Export_De__expor__6E01572D">
+        <Association Name="FK__Export_De__expor__2DE6D218">
           <End Role="Export_Stock" Type="Self.Export_Stock" Multiplicity="1" />
           <End Role="Export_Details" Type="Self.Export_Details" Multiplicity="*" />
           <ReferentialConstraint>
@@ -164,15 +168,15 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Export_De__model__6EF57B66">
-          <End Role="VehicleModels" Type="Self.VehicleModels" Multiplicity="1" />
+        <Association Name="FK__Export_De__vehic__2EDAF651">
+          <End Role="Vehicles" Type="Self.Vehicles" Multiplicity="1" />
           <End Role="Export_Details" Type="Self.Export_Details" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="VehicleModels">
-              <PropertyRef Name="model_id" />
+            <Principal Role="Vehicles">
+              <PropertyRef Name="vehicle_id" />
             </Principal>
             <Dependent Role="Export_Details">
-              <PropertyRef Name="model_id" />
+              <PropertyRef Name="vehicle_id" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -298,6 +302,18 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ExportStock_Users_ApprovedBy">
+          <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
+          <End Role="Export_Stock" Type="Self.Export_Stock" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Export_Stock">
+              <PropertyRef Name="approved_by" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_ImportStock_Users_ApprovedBy">
           <End Role="Users" Type="Self.Users" Multiplicity="0..1" />
           <End Role="Import_Stock" Type="Self.Import_Stock" Multiplicity="*" />
@@ -347,12 +363,12 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
     [Inventory].[total_maintenance] AS [total_maintenance]
     FROM [dbo].[Inventory] AS [Inventory]</DefiningQuery>
           </EntitySet>
-          <AssociationSet Name="FK__Export_De__expor__6E01572D" Association="Self.FK__Export_De__expor__6E01572D">
+          <AssociationSet Name="FK__Export_De__expor__2DE6D218" Association="Self.FK__Export_De__expor__2DE6D218">
             <End Role="Export_Stock" EntitySet="Export_Stock" />
             <End Role="Export_Details" EntitySet="Export_Details" />
           </AssociationSet>
-          <AssociationSet Name="FK__Export_De__model__6EF57B66" Association="Self.FK__Export_De__model__6EF57B66">
-            <End Role="VehicleModels" EntitySet="VehicleModels" />
+          <AssociationSet Name="FK__Export_De__vehic__2EDAF651" Association="Self.FK__Export_De__vehic__2EDAF651">
+            <End Role="Vehicles" EntitySet="Vehicles" />
             <End Role="Export_Details" EntitySet="Export_Details" />
           </AssociationSet>
           <AssociationSet Name="FK__Export_St__user___6A30C649" Association="Self.FK__Export_St__user___6A30C649">
@@ -395,6 +411,10 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             <End Role="VehicleModels" EntitySet="VehicleModels" />
             <End Role="Vehicles" EntitySet="Vehicles" />
           </AssociationSet>
+          <AssociationSet Name="FK_ExportStock_Users_ApprovedBy" Association="Self.FK_ExportStock_Users_ApprovedBy">
+            <End Role="Users" EntitySet="Users" />
+            <End Role="Export_Stock" EntitySet="Export_Stock" />
+          </AssociationSet>
           <AssociationSet Name="FK_ImportStock_Users_ApprovedBy" Association="Self.FK_ImportStock_Users_ApprovedBy">
             <End Role="Users" EntitySet="Users" />
             <End Role="Import_Stock" EntitySet="Import_Stock" />
@@ -408,29 +428,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="QLXMModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="Export_Details">
-          <Key>
-            <PropertyRef Name="export_detail_id" />
-          </Key>
-          <Property Name="export_detail_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="export_id" Type="Int32" Nullable="false" />
-          <Property Name="model_id" Type="Int32" Nullable="false" />
-          <Property Name="quantity" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Export_Stock" Relationship="Self.FK__Export_De__expor__6E01572D" FromRole="Export_Details" ToRole="Export_Stock" />
-          <NavigationProperty Name="VehicleModel" Relationship="Self.FK__Export_De__model__6EF57B66" FromRole="Export_Details" ToRole="VehicleModels" />
-        </EntityType>
-        <EntityType Name="Export_Stock">
-          <Key>
-            <PropertyRef Name="export_id" />
-          </Key>
-          <Property Name="export_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="user_id" Type="Int32" Nullable="false" />
-          <Property Name="export_date" Type="DateTime" Precision="3" />
-          <Property Name="reason" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
-          <Property Name="receiver" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Export_Details" Relationship="Self.FK__Export_De__expor__6E01572D" FromRole="Export_Stock" ToRole="Export_Details" />
-          <NavigationProperty Name="User" Relationship="Self.FK__Export_St__user___6A30C649" FromRole="Export_Stock" ToRole="Users" />
-        </EntityType>
         <EntityType Name="Import_Details">
           <Key>
             <PropertyRef Name="import_detail_id" />
@@ -479,11 +476,12 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="phone" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
           <Property Name="created_at" Type="DateTime" Precision="3" />
           <Property Name="avatar" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Export_Stock" Relationship="Self.FK__Export_St__user___6A30C649" FromRole="Users" ToRole="Export_Stock" />
           <NavigationProperty Name="Maintenances" Relationship="QLXMModel.FK__Maintenan__appro__18EBB532" FromRole="User" ToRole="Maintenance" />
           <NavigationProperty Name="Maintenances1" Relationship="QLXMModel.FK__Maintenan__reque__17F790F9" FromRole="User" ToRole="Maintenance" />
           <NavigationProperty Name="Import_Stock" Relationship="QLXMModel.FK__Import_St__user___619B8048" FromRole="User" ToRole="Import_Stock" />
           <NavigationProperty Name="Import_Stock1" Relationship="QLXMModel.FK_ImportStock_Users_ApprovedBy" FromRole="User" ToRole="Import_Stock" />
+          <NavigationProperty Name="Export_Stock" Relationship="QLXMModel.FK__Export_St__user___6A30C649" FromRole="User" ToRole="Export_Stock" />
+          <NavigationProperty Name="Export_Stock1" Relationship="QLXMModel.FK_ExportStock_Users_ApprovedBy" FromRole="User" ToRole="Export_Stock" />
           </EntityType>
         <EntityType Name="VehicleModel">
           <Key>
@@ -496,7 +494,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="color" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
           <Property Name="manufacture_year" Type="Int32" Nullable="false" />
           <Property Name="image" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="Export_Details" Relationship="Self.FK__Export_De__model__6EF57B66" FromRole="VehicleModels" ToRole="Export_Details" />
           <NavigationProperty Name="Import_Details" Relationship="Self.FK__Import_De__model__66603565" FromRole="VehicleModels" ToRole="Import_Details" />
           <NavigationProperty Name="Vehicles" Relationship="QLXMModel.FK__Vehicles__model___534D60F1" FromRole="VehicleModel" ToRole="Vehicle" />
         </EntityType>
@@ -518,42 +515,6 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="total_exported" Type="Int32" />
           <Property Name="total_maintenance" Type="Int32" />
         </EntityType>
-        <Association Name="FK__Export_De__expor__6E01572D">
-          <End Role="Export_Stock" Type="Self.Export_Stock" Multiplicity="1" />
-          <End Role="Export_Details" Type="Self.Export_Details" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Export_Stock">
-              <PropertyRef Name="export_id" />
-            </Principal>
-            <Dependent Role="Export_Details">
-              <PropertyRef Name="export_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Export_De__model__6EF57B66">
-          <End Role="VehicleModels" Type="Self.VehicleModel" Multiplicity="1" />
-          <End Role="Export_Details" Type="Self.Export_Details" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="VehicleModels">
-              <PropertyRef Name="model_id" />
-            </Principal>
-            <Dependent Role="Export_Details">
-              <PropertyRef Name="model_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Export_St__user___6A30C649">
-          <End Role="Users" Type="Self.User" Multiplicity="1" />
-          <End Role="Export_Stock" Type="Self.Export_Stock" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Users">
-              <PropertyRef Name="id" />
-            </Principal>
-            <Dependent Role="Export_Stock">
-              <PropertyRef Name="user_id" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Import_De__model__66603565">
           <End Role="VehicleModels" Type="Self.VehicleModel" Multiplicity="1" />
           <End Role="Import_Details" Type="Self.Import_Details" Multiplicity="*" />
@@ -567,26 +528,12 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="QLXMEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Export_Details" EntityType="Self.Export_Details" />
-          <EntitySet Name="Export_Stock" EntityType="Self.Export_Stock" />
           <EntitySet Name="Import_Details" EntityType="Self.Import_Details" />
           <EntitySet Name="Suppliers" EntityType="Self.Supplier" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagram" />
           <EntitySet Name="Users" EntityType="Self.User" />
           <EntitySet Name="VehicleModels" EntityType="Self.VehicleModel" />
           <EntitySet Name="Inventories" EntityType="Self.Inventory" />
-          <AssociationSet Name="FK__Export_De__expor__6E01572D" Association="Self.FK__Export_De__expor__6E01572D">
-            <End Role="Export_Stock" EntitySet="Export_Stock" />
-            <End Role="Export_Details" EntitySet="Export_Details" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Export_De__model__6EF57B66" Association="Self.FK__Export_De__model__6EF57B66">
-            <End Role="VehicleModels" EntitySet="VehicleModels" />
-            <End Role="Export_Details" EntitySet="Export_Details" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Export_St__user___6A30C649" Association="Self.FK__Export_St__user___6A30C649">
-            <End Role="Users" EntitySet="Users" />
-            <End Role="Export_Stock" EntitySet="Export_Stock" />
-          </AssociationSet>
           <AssociationSet Name="FK__Import_De__model__66603565" Association="Self.FK__Import_De__model__66603565">
             <End Role="VehicleModels" EntitySet="VehicleModels" />
             <End Role="Import_Details" EntitySet="Import_Details" />
@@ -634,6 +581,24 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <AssociationSet Name="FK_Vehicles_Import_Stock" Association="QLXMModel.FK_Vehicles_Import_Stock">
             <End Role="Import_Stock" EntitySet="Import_Stock" />
             <End Role="Vehicle" EntitySet="Vehicles" />
+          </AssociationSet>
+          <EntitySet Name="Export_Stock" EntityType="QLXMModel.Export_Stock" />
+          <AssociationSet Name="FK__Export_St__user___6A30C649" Association="QLXMModel.FK__Export_St__user___6A30C649">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Export_Stock" EntitySet="Export_Stock" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ExportStock_Users_ApprovedBy" Association="QLXMModel.FK_ExportStock_Users_ApprovedBy">
+            <End Role="User" EntitySet="Users" />
+            <End Role="Export_Stock" EntitySet="Export_Stock" />
+          </AssociationSet>
+          <EntitySet Name="Export_Details" EntityType="QLXMModel.Export_Details" />
+          <AssociationSet Name="FK__Export_De__expor__2DE6D218" Association="QLXMModel.FK__Export_De__expor__2DE6D218">
+            <End Role="Export_Stock" EntitySet="Export_Stock" />
+            <End Role="Export_Details" EntitySet="Export_Details" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Export_De__vehic__2EDAF651" Association="QLXMModel.FK__Export_De__vehic__2EDAF651">
+            <End Role="Vehicle" EntitySet="Vehicles" />
+            <End Role="Export_Details" EntitySet="Export_Details" />
           </AssociationSet>
           </EntityContainer>
         <EntityType Name="Maintenance">
@@ -715,6 +680,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <NavigationProperty Name="Maintenances" Relationship="QLXMModel.FK__Maintenan__vehic__17036CC0" FromRole="Vehicle" ToRole="Maintenance" />
           <NavigationProperty Name="VehicleModel" Relationship="QLXMModel.FK__Vehicles__model___534D60F1" FromRole="Vehicle" ToRole="VehicleModel" />
           <NavigationProperty Name="Import_Stock" Relationship="QLXMModel.FK_Vehicles_Import_Stock" FromRole="Vehicle" ToRole="Import_Stock" />
+          <NavigationProperty Name="Export_Details" Relationship="QLXMModel.FK__Export_De__vehic__2EDAF651" FromRole="Vehicle" ToRole="Export_Details" />
         </EntityType>
         <Association Name="FK__Maintenan__vehic__17036CC0">
           <End Type="QLXMModel.Vehicle" Role="Vehicle" Multiplicity="1" />
@@ -821,33 +787,88 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="Export_Stock">
+          <Key>
+            <PropertyRef Name="export_id" />
+          </Key>
+          <Property Name="export_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int32" Nullable="false" />
+          <Property Name="export_date" Type="DateTime" Precision="3" />
+          <Property Name="reason" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="receiver" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="approval_status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="approved_date" Type="DateTime" Precision="3" />
+          <Property Name="approved_by" Type="Int32" />
+          <Property Name="reject_reason" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="User" Relationship="QLXMModel.FK__Export_St__user___6A30C649" FromRole="Export_Stock" ToRole="User" />
+          <NavigationProperty Name="User1" Relationship="QLXMModel.FK_ExportStock_Users_ApprovedBy" FromRole="Export_Stock" ToRole="User" />
+          <NavigationProperty Name="Export_Details" Relationship="QLXMModel.FK__Export_De__expor__2DE6D218" FromRole="Export_Stock" ToRole="Export_Details" />
+        </EntityType>
+        <Association Name="FK__Export_St__user___6A30C649">
+          <End Type="QLXMModel.User" Role="User" Multiplicity="1" />
+          <End Type="QLXMModel.Export_Stock" Role="Export_Stock" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Export_Stock">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ExportStock_Users_ApprovedBy">
+          <End Type="QLXMModel.User" Role="User" Multiplicity="0..1" />
+          <End Type="QLXMModel.Export_Stock" Role="Export_Stock" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="Export_Stock">
+              <PropertyRef Name="approved_by" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Export_Details">
+          <Key>
+            <PropertyRef Name="export_detail_id" />
+          </Key>
+          <Property Name="export_detail_id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="export_id" Type="Int32" Nullable="false" />
+          <Property Name="vehicle_id" Type="Int32" Nullable="false" />
+          <Property Name="price" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <NavigationProperty Name="Export_Stock" Relationship="QLXMModel.FK__Export_De__expor__2DE6D218" FromRole="Export_Details" ToRole="Export_Stock" />
+          <NavigationProperty Name="Vehicle" Relationship="QLXMModel.FK__Export_De__vehic__2EDAF651" FromRole="Export_Details" ToRole="Vehicle" />
+        </EntityType>
+        <Association Name="FK__Export_De__expor__2DE6D218">
+          <End Type="QLXMModel.Export_Stock" Role="Export_Stock" Multiplicity="1" />
+          <End Type="QLXMModel.Export_Details" Role="Export_Details" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Export_Stock">
+              <PropertyRef Name="export_id" />
+            </Principal>
+            <Dependent Role="Export_Details">
+              <PropertyRef Name="export_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Export_De__vehic__2EDAF651">
+          <End Type="QLXMModel.Vehicle" Role="Vehicle" Multiplicity="1" />
+          <End Type="QLXMModel.Export_Details" Role="Export_Details" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicle">
+              <PropertyRef Name="vehicle_id" />
+            </Principal>
+            <Dependent Role="Export_Details">
+              <PropertyRef Name="vehicle_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="QLXMModelStoreContainer" CdmEntityContainer="QLXMEntities">
-          <EntitySetMapping Name="Export_Details">
-            <EntityTypeMapping TypeName="QLXMModel.Export_Details">
-              <MappingFragment StoreEntitySet="Export_Details">
-                <ScalarProperty Name="export_detail_id" ColumnName="export_detail_id" />
-                <ScalarProperty Name="export_id" ColumnName="export_id" />
-                <ScalarProperty Name="model_id" ColumnName="model_id" />
-                <ScalarProperty Name="quantity" ColumnName="quantity" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Export_Stock">
-            <EntityTypeMapping TypeName="QLXMModel.Export_Stock">
-              <MappingFragment StoreEntitySet="Export_Stock">
-                <ScalarProperty Name="export_id" ColumnName="export_id" />
-                <ScalarProperty Name="user_id" ColumnName="user_id" />
-                <ScalarProperty Name="export_date" ColumnName="export_date" />
-                <ScalarProperty Name="reason" ColumnName="reason" />
-                <ScalarProperty Name="receiver" ColumnName="receiver" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Import_Details">
             <EntityTypeMapping TypeName="QLXMModel.Import_Details">
               <MappingFragment StoreEntitySet="Import_Details">
@@ -977,6 +998,31 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
                 <ScalarProperty Name="user_id" ColumnName="user_id" />
                 <ScalarProperty Name="supplier_id" ColumnName="supplier_id" />
                 <ScalarProperty Name="import_id" ColumnName="import_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Export_Stock">
+            <EntityTypeMapping TypeName="QLXMModel.Export_Stock">
+              <MappingFragment StoreEntitySet="Export_Stock">
+                <ScalarProperty Name="reject_reason" ColumnName="reject_reason" />
+                <ScalarProperty Name="approved_by" ColumnName="approved_by" />
+                <ScalarProperty Name="approved_date" ColumnName="approved_date" />
+                <ScalarProperty Name="approval_status" ColumnName="approval_status" />
+                <ScalarProperty Name="receiver" ColumnName="receiver" />
+                <ScalarProperty Name="reason" ColumnName="reason" />
+                <ScalarProperty Name="export_date" ColumnName="export_date" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="export_id" ColumnName="export_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Export_Details">
+            <EntityTypeMapping TypeName="QLXMModel.Export_Details">
+              <MappingFragment StoreEntitySet="Export_Details">
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="vehicle_id" ColumnName="vehicle_id" />
+                <ScalarProperty Name="export_id" ColumnName="export_id" />
+                <ScalarProperty Name="export_detail_id" ColumnName="export_detail_id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

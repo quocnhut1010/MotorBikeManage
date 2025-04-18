@@ -77,11 +77,12 @@ CREATE TABLE Export_Stock (
 CREATE TABLE Export_Details (
     export_detail_id INT IDENTITY(1,1) PRIMARY KEY,
     export_id INT NOT NULL,
-    model_id INT NOT NULL,
-    quantity INT CHECK (quantity > 0) NOT NULL,
+    vehicle_id INT NOT NULL,
+    price DECIMAL(18,2) NOT NULL,                    -- Giá bán (nhập tay)
     FOREIGN KEY (export_id) REFERENCES Export_Stock(export_id),
-    FOREIGN KEY (model_id) REFERENCES VehicleModels(model_id)
+    FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id)
 );
+
 
 -- Bảng bảo trì (giữ nguyên)
 CREATE TABLE Maintenance (
@@ -183,9 +184,8 @@ INSERT INTO Export_Stock (user_id, export_date, reason, receiver) VALUES
 (3, '2023-11-20', N'Bán cho khách hàng', N'Trần Văn C');
 
 -- Thêm dữ liệu vào bảng Export_Details
-INSERT INTO Export_Details (export_id, model_id, quantity) VALUES
-(1, 3, 1),
-(2, 4, 1);
+INSERT INTO Export_Details (export_id, vehicle_id, price) VALUES
+(1, 4, 43000000.00);
 
 -- Thêm dữ liệu vào bảng Maintenance
 -- Thêm dữ liệu cho yêu cầu bảo trì đã được phê duyệt và đang thực hiện
@@ -384,3 +384,20 @@ ADD CONSTRAINT FK_ImportStock_Users_ApprovedBy FOREIGN KEY (approved_by) REFEREN
 
 
 ALTER TABLE Import_Stock ADD reject_reason NVARCHAR(255) NULL;
+
+
+
+--update bản export_stock
+ALTER TABLE Export_Stock
+ADD approval_status NVARCHAR(20) 
+    CHECK (approval_status IN (N'Chờ duyệt', N'Đã duyệt', N'Từ chối')) 
+    DEFAULT N'Chờ duyệt';
+	ALTER TABLE Export_Stock
+ADD 
+    approved_date DATETIME NULL;               -- Thời điểm Admin duyệt
+ALTER TABLE Export_Stock ADD approved_by INT NULL;
+ALTER TABLE Export_Stock 
+ADD CONSTRAINT FK_ExportStock_Users_ApprovedBy FOREIGN KEY (approved_by) REFERENCES Users(id);
+
+
+ALTER TABLE Export_Stock ADD reject_reason NVARCHAR(255) NULL;
