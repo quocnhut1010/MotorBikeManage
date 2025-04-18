@@ -16,31 +16,66 @@ namespace MotoBikeManage.Controllers.Admin
     {
         QLXMEntities db = new QLXMEntities();
         // GET: NhapKho
-        public ActionResult Index()
+        public ActionResult Index(string status, string supplierName, string createdBy, DateTime? fromDate, DateTime? toDate)
         {
-            var importList = db.Import_Stock
-                           .Include(i => i.Supplier) // Tải thông tin Nhà cung cấp
-                           .Include(i => i.User)     // Tải thông tin Người dùng
-                           .OrderByDescending(i => i.import_date) // Sắp xếp theo ngày tạo mới nhất
-                           .Select(i => new ImportStockViewModel // Chuyển đổi sang ViewModel
-                           {
-                               ImportId = i.import_id,
-                               // Giả sử bảng Suppliers có cột supplier_name
-                               SupplierName = i.Supplier.name,
-                               // Giả sử bảng Users có cột full_name hoặc tương tự
-                               UserName = i.User.full_name,
-                               ImportDate = i.import_date,
-                               ApprovalStatus = i.approval_status,
-                               ApprovedDate = i.approved_date,
-                               Note = i.note,
-                               ApprovedByUser = i.User1.full_name
-                               // Nếu muốn tính tổng SL/Giá trị (có thể ảnh hưởng hiệu năng nếu dữ liệu lớn):
-                               // TotalQuantity = i.Import_Details.Sum(d => (int?)d.quantity) ?? 0,
-                               // TotalValue = i.Import_Details.Sum(d => (decimal?)(d.quantity * d.price)) ?? 0m
-                           })
-                           .ToList(); // Lấy danh sách
+            var query = db.Import_Stock
+                        .Include(i => i.Supplier)
+                        .Include(i => i.User)
+                        .Include(i => i.User1)
+                        .OrderByDescending(i => i.import_date)
+                        .AsQueryable();
 
-            return View(importList); // Trả về View với danh sách ViewModel
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(i => i.approval_status == status);
+            }
+
+            if (!string.IsNullOrEmpty(supplierName))
+            {
+                query = query.Where(i => i.Supplier.name.Contains(supplierName));
+            }
+
+            if (!string.IsNullOrEmpty(createdBy))
+            {
+                query = query.Where(i => i.User.full_name.Contains(createdBy));
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(i => i.import_date >= fromDate);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(i => i.import_date <= toDate);
+            }
+
+            var importList = query.Select(i => new ImportStockViewModel
+            {
+                ImportId = i.import_id,
+                SupplierName = i.Supplier.name,
+                UserName = i.User.full_name,
+                ImportDate = i.import_date,
+                ApprovalStatus = i.approval_status,
+                ApprovedDate = i.approved_date,
+                Note = i.note,
+                ApprovedByUser = i.User1.full_name,
+                RejectReason = i.reject_reason
+            }).ToList();
+            // Lấy danh sách duy nhất từ phiếu nhập hiện có
+            ViewBag.Suppliers = db.Import_Stock
+                .Select(i => i.Supplier.name)
+                .Distinct()
+                .OrderBy(n => n)
+                .ToList();
+
+            ViewBag.Creators = db.Import_Stock
+                .Select(i => i.User.full_name)
+                .Distinct()
+                .OrderBy(n => n)
+                .ToList();
+
+            return View(importList);
         }
         [HttpGet]
         public JsonResult Details(int id)
@@ -60,6 +95,7 @@ namespace MotoBikeManage.Controllers.Admin
                      ApprovalStatus = i.approval_status,
                      ApprovedDate = i.approved_date,
                      Note = i.note,
+                     RejectReason = i.reject_reason,
                      ApprovedByUser = i.User1.full_name != null ? i.User1.full_name : null,
                      TotalQuantity = i.Import_Details.Sum(d => (int?)d.quantity) ?? 0,
                      TotalValue = i.Import_Details.Sum(d => (decimal?)(d.quantity * d.price)) ?? 0m,
@@ -91,6 +127,7 @@ namespace MotoBikeManage.Controllers.Admin
                     item.ApprovalStatus,
                     ApprovedDate = item.ApprovedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-",
                     item.Note,
+                    item.RejectReason,
                     ApproverName = item.ApprovedByUser ?? "-",
                     item.TotalQuantity,
                     TotalValue = item.TotalValue,
@@ -153,6 +190,7 @@ namespace MotoBikeManage.Controllers.Admin
                 import_date = DateTime.Now,
                 note = model.Note,
                 approved_by = user.id,
+                reject_reason = model.RejectReason,
                 approval_status = user.role == "Admin" ? "Đã duyệt" : "Chờ duyệt",
                 approved_date = user.role == "Admin" ? DateTime.Now : (DateTime?)null
             };
@@ -353,40 +391,36 @@ namespace MotoBikeManage.Controllers.Admin
             string formD = input.Normalize(NormalizationForm.FormD);
             return regex.Replace(formD, "").Replace('đ', 'd').Replace('Đ', 'D');
         }
-        public ActionResult Print(int id)
+        [HttpPost]
+        public ActionResult Reject(int id, string reason)
         {
-            var item = db.Import_Stock
-                 .Include(i => i.Supplier)
-                 .Include(i => i.User)
-                 .Include(i => i.User1)
-                 .Include(i => i.Import_Details.Select(d => d.VehicleModel))
-                 .FirstOrDefault(i => i.import_id == id);
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                TempData["ErrorReject"] = "Vui lòng nhập lý do từ chối.";
+                return RedirectToAction("Index");
+            }
 
-            if (item == null)
+            var import = db.Import_Stock.FirstOrDefault(i => i.import_id == id);
+            if (import == null)
                 return HttpNotFound();
 
-            var viewModel = new ImportStockViewModel
+            var username = Session["Username"]?.ToString();
+            var user = db.Users.FirstOrDefault(u => u.username == username);
+            if (user == null)
             {
-                ImportId = item.import_id,
-                SupplierName = item.Supplier?.name,
-                UserName = item.User?.full_name,
-                ImportDate = item.import_date,
-                ApprovalStatus = item.approval_status,
-                ApprovedDate = item.approved_date,
-                ApprovedByUser = item.User1?.full_name,
-                Note = item.note,
-                TotalQuantity = item.Import_Details.Sum(d => (int?)d.quantity) ?? 0,
-                TotalValue = item.Import_Details.Sum(d => (decimal?)(d.quantity * d.price)) ?? 0,
-                Details = item.Import_Details.Select(d => new ImportDetailViewModel
-                {
-                    ModelName = d.VehicleModel.name,
-                    Quantity = d.quantity,
-                    Price = d.price,
-                    LineValue = d.quantity * d.price
-                }).ToList()
-            };
+                TempData["Error"] = "Không xác định người dùng.";
+                return RedirectToAction("Index");
+            }
 
-            return View(); // Hoặc bạn tạo View riêng tên là Print.cshtml
+            import.approval_status = "Từ chối";
+            import.reject_reason = reason;
+            import.approved_date = DateTime.Now;
+            import.approved_by = user.id;
+
+            db.SaveChanges();
+
+            TempData["SuccessReject"] = "Phiếu nhập đã được từ chối.";
+            return RedirectToAction("Index");
         }
 
     }

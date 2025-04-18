@@ -31,6 +31,8 @@ namespace MotoBikeManage.ViewModels
         public string UserName { get; set; }
         public string ApprovedByUser { get; set; }
 
+        public string RejectReason { get; set; }
+
         [Display(Name = "Ngày Tạo")]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime? ImportDate { get; set; }

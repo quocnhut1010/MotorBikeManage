@@ -29,6 +29,7 @@ namespace MotoBikeManage.Models
         public string approval_status { get; set; }
         public Nullable<System.DateTime> approved_date { get; set; }
         public Nullable<int> approved_by { get; set; }
+        public string reject_reason { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Import_Details> Import_Details { get; set; }

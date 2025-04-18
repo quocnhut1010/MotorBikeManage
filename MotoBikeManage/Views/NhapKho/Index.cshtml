@@ -15,6 +15,74 @@
         </div>
     </div>
 
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-primary"><i class="fas fa-filter"></i> Bộ lọc nâng cao</h6>
+            <a href="@Url.Action("Index", "NhapKho")" class="btn btn-sm btn-outline-secondary">
+                <i class="fa fa-sync-alt"></i> Đặt lại
+            </a>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("Index", "NhapKho", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái phiếu</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="Chờ duyệt" @(Request["status"] == "Chờ duyệt" ? "selected" : "")>Chờ duyệt</option>
+                        <option value="Đã duyệt" @(Request["status"] == "Đã duyệt" ? "selected" : "")>Đã duyệt</option>
+                        <option value="Từ chối" @(Request["status"] == "Từ chối" ? "selected" : "")>Đã từ chối</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Nhà cung cấp</label>
+                    <select name="supplierName" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var s in (List<string>)ViewBag.Suppliers)
+                        {
+                            <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Người tạo</label>
+                    <select name="createdBy" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var c in (List<string>)ViewBag.Creators)
+                        {
+                            <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
+                        }
+                    </select>
+                </div>
+
+
+                <div class="row" style="margin-top:25px">
+                    <div class="col-md-3">
+                        <label class="form-label">Từ ngày</label>
+                        <input type="date" name="fromDate" class="form-control" value="@Request["fromDate"]" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Đến ngày</label>
+                        <input type="date" name="toDate" class="form-control" value="@Request["toDate"]" />
+                    </div>
+                </div>
+
+
+                <div class="col-md-12 text-end">
+                    <p class="text-muted mt-2">
+                        Đang hiển thị: <strong>@Model.Count()</strong> phiếu nhập.
+                    </p>
+                    <button type="submit" class="btn btn-success" style="margin-right:10px">
+                        <i class="fa fa-search"></i> Lọc
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-md-12 mb-3">
             <div class="d-flex justify-content-between">
@@ -95,6 +163,14 @@
                                                        title="Xem chi tiết phiếu">
                                                         <i class="fa fa-info-circle"></i>
                                                     </a>
+                                                    @*@if (item.ApprovalStatus == "Đã duyệt")
+                                                    {
+                                                        <a onclick="showImportDetail(@item.ImportId)"
+                                                           class="btn btn-sm btn-info"
+                                                           title="In phiếu này">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                    }*@
 
                                                     @if (item.ApprovalStatus == "Chờ duyệt")
                                                     {
@@ -107,10 +183,10 @@
                                                         </a>
 
                                                         <!-- Icon Từ chối -->
-                                                        <a href="@Url.Action("Reject", new { id = item.ImportId })"
+                                                        <a href="javascript:void(0);"
                                                            class="btn btn-danger btn-sm"
                                                            title="Từ chối phiếu này"
-                                                           onclick="return confirm('Bạn chắc chắn muốn từ chối phiếu này?');">
+                                                           onclick="openRejectModal(@item.ImportId)">
                                                             <i class="fas fa-times"></i>
                                                         </a>
                                                     }
@@ -135,7 +211,6 @@
             <div class="modal-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="modal-title">PHIẾU NHẬP KHO</h5>
                 <div class="d-flex gap-2">
-
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             </div>
@@ -152,28 +227,46 @@
     </div>
 </div>
 
+@*modal từ chối*@
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form method="post" action="@Url.Action("Reject", "NhapKho")">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Từ chối phiếu nhập</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="rejectImportId" />
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Lý do từ chối:</label>
+                        <textarea class="form-control" name="reason" id="reason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 
 
 
 <script src='@Url.Content("~/assets/libs/DataTables/jquery.dataTables.min.js")'></script>
 <script src='@Url.Content("~/assets/libs/DataTables/dataTables.bootstrap5.min.js")'></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-    function exportModalToPdf() {
-        const element = document.getElementById("printArea");
-
-        const opt = {
-            margin: 0.5,
-            filename: 'PhieuNhap_' + new Date().getTime() + '.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(opt).from(element).save();
+    function openRejectModal(importId) {
+        document.getElementById('rejectImportId').value = importId;
+        const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        modal.show();
     }
 </script>
-
 <script>
     function formatCurrency(value) {
         return parseFloat(value).toLocaleString('vi-VN') + ' VNĐ';
@@ -189,21 +282,32 @@
                     let data = response.data;
 
                     let html = `
+                        <div class="text-center mb-4">
+                            <h4 class="fw-bold">PHIẾU NHẬP KHO</h4>
+                        </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <p><strong>Mã phiếu:</strong> ${data.ImportId}</p>
                                 <p><strong>Nhà cung cấp:</strong> ${data.SupplierName}</p>
                                 <p><strong>Người tạo:</strong> ${data.UserName}</p>
-                                <p><strong>Người duyệt:</strong> ${data.ApproverName}</p>
                             </div>
                             <div class="col-md-6 text-end">
                                 <p><strong>Ngày tạo:</strong> ${data.ImportDate}</p>
-                                <p><strong>Ngày duyệt:</strong> ${data.ApprovedDate}</p>
-                                <p><strong>Trạng thái:</strong> <span class="badge bg-info text-dark">${data.ApprovalStatus}</span></p>
+
+                                ${data.ApprovalStatus === "Từ chối"
+                        ? `<p><strong>Ngày từ chối</strong> ${data.ApprovedDate}</p>`
+                        : `<p><strong>Ngày duyệt:</strong> ${data.ApprovedDate}</p>`}
+                               <p><strong>Trạng thái:</strong> <span class="badge ${data.ApprovalStatus === 'Đã duyệt' ? 'bg-info text-white' : (data.ApprovalStatus === 'Từ chối' ? 'bg-danger text-white' : 'bg-info text-dark')}">${data.ApprovalStatus}</span></p>
+                                ${data.ApprovalStatus === "Từ chối"
+                                    ? `<p><strong>Bị từ chối bởi:</strong> ${data.ApproverName}</p>`
+                                    : `<p><strong>Người duyệt:</strong> ${data.ApproverName}</p>`}
                             </div>
                         </div>
                         <div class="mb-3">
                             <p><strong>Ghi chú:</strong> ${data.Note}</p>
+                            ${data.ApprovalStatus === "Từ chối"
+                                ? `<p class="text-danger"><strong>Lý do từ chối:</strong> ${data.RejectReason}</p>`
+                                : ""}
                         </div>
                         <hr>
                         <h5 class="mb-3">Danh sách sản phẩm nhập</h5>
@@ -242,25 +346,26 @@
                         </table>
 
                         <div class="text-end mb-4">
-                            <p><em>..., ngày ... tháng ... năm ...</em></p>
-                          </div>
+                            <p><em>..., ngày ..., tháng ..., năm ...</em></p>
+                        </div>
 
-                          <div class="row text-center mb-5">
-                            <div class="col">
-                              <strong>Người lập phiếu</strong><br>
-                              <br>
-                              <span class="text-muted" style="margin-top: 25px; display: inline-block;">${data.UserName}</span>
+                      <div class="row text-center mb-5" style="page-break-inside: avoid;">
+                            <div class="col-md-3">
+                                <strong>Người lập phiếu</strong><br>
+                                <span class="text-muted">(Ghi rõ họ tên)<br>
+                                </span>
+                                <strong style="margin-top: 50px; display: block; text-align: center;">${data.UserName}</strong>
                             </div>
-                            <div class="col">
-                              <strong>Người duyệt</strong><br>
-
-                              <br>
-                              <span class="text-muted" style="margin-top: 25px; display: inline-block;">${data.ApproverName}</span>
+                            <div class="col-md-4">
+                                <strong>Người duyệt</strong><br>
+                                <span class="text-muted">(Ghi rõ họ tên)</span><br>
+                                <strong style="margin-top: 50px; display: block; text-align: center;">${data.ApproverName}</strong>
                             </div>
-                            <div class="col">
-                              <strong>Kế toán</strong><br>
-                              <span class="text-muted">(Ghi rõ họ tên)</span>
+                            <div class="col-md-5">
+                                <strong display: block; >Kế toán</strong><br>
+                                <span class="text-muted">(Ghi rõ họ tên)</span>
                             </div>
+                        </div>
                         </div>`;
 
                     $('#importDetailContent').html(html);
@@ -278,16 +383,36 @@
         });
     }
 
-    function printImportDetail() {
-        const printContent = document.getElementById("printArea").innerHTML;
-        const originalContent = document.body.innerHTML;
+    function exportModalToPdf() {
 
-        document.body.innerHTML = printContent;
-        window.print();
-        document.body.innerHTML = originalContent;
-        location.reload(); // Tải lại trang để khôi phục sự kiện
+        const element = document.getElementById("printArea");
+
+
+
+        const opt = {
+
+            margin: 0.3,
+
+            filename: 'PhieuNhap_' + new Date().getTime() + '.pdf',
+
+            image: { type: 'jpeg', quality: 0.98 },
+
+            html2canvas: {
+
+                scale: 2,
+
+                scrollY: 0,
+
+            },
+
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+
+        };
+        html2pdf().set(opt).from(element).save();
+
     }
 </script>
+
 @* Script khởi tạo DataTables với ngôn ngữ tiếng Việt *@
 <script>
     $(document).ready(function () {
@@ -316,14 +441,28 @@
     }
 }
 @{
-    if (TempData["SuccessImport1"] != null)
+    if (TempData["SuccessReject"] != null)
     {
-        var message = TempData["SuccessImport1"].ToString();
+        var message = TempData["SuccessReject"].ToString();
         <script>
          swal({
              title: "Thành công",
-             text: "@Html.Raw(TempData["SuccessImport1"])",
+             text: "@Html.Raw(TempData["SuccessReject"])",
              icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}
+@{
+    if (TempData["ErrorReject"] != null)
+    {
+        var message = TempData["ErrorReject"].ToString();
+        <script>
+         swal({
+             title: "Thất bại",
+             text: "@Html.Raw(TempData["ErrorReject"])",
+             icon: "error",
              button: "Đóng"
          });
         </script>

@@ -381,3 +381,6 @@ FOREIGN KEY (import_id) REFERENCES Import_Stock(import_id);
 ALTER TABLE Import_Stock ADD approved_by INT NULL;
 ALTER TABLE Import_Stock 
 ADD CONSTRAINT FK_ImportStock_Users_ApprovedBy FOREIGN KEY (approved_by) REFERENCES Users(id);
+
+
+ALTER TABLE Import_Stock ADD reject_reason NVARCHAR(255) NULL;

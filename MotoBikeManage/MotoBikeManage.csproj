@@ -1012,7 +1012,6 @@
     <Content Include="Views\Error\NotFound.cshtml" />
     <Content Include="Views\NhapKho\Index.cshtml" />
     <Content Include="Views\NhapKho\Create.cshtml" />
-    <Content Include="Views\NhapKho\Print.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

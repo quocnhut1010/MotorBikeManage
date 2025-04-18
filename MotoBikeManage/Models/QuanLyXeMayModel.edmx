@@ -46,6 +46,7 @@
           <Property Name="approval_status" Type="nvarchar" MaxLength="20" />
           <Property Name="approved_date" Type="datetime" />
           <Property Name="approved_by" Type="int" />
+          <Property Name="reject_reason" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="Maintenance">
           <Key>
@@ -753,6 +754,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <Property Name="approval_status" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="approved_date" Type="DateTime" Precision="3" />
           <Property Name="approved_by" Type="Int32" />
+          <Property Name="reject_reason" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Import_Details" Relationship="QLXMModel.FK__Import_De__impor__656C112C" FromRole="Import_Stock" ToRole="Import_Details" />
           <NavigationProperty Name="Supplier" Relationship="QLXMModel.FK__Import_St__suppl__60A75C0F" FromRole="Import_Stock" ToRole="Supplier" />
           <NavigationProperty Name="User" Relationship="QLXMModel.FK__Import_St__user___619B8048" FromRole="Import_Stock" ToRole="User" />
@@ -966,6 +968,7 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySetMapping Name="Import_Stock">
             <EntityTypeMapping TypeName="QLXMModel.Import_Stock">
               <MappingFragment StoreEntitySet="Import_Stock">
+                <ScalarProperty Name="reject_reason" ColumnName="reject_reason" />
                 <ScalarProperty Name="approved_by" ColumnName="approved_by" />
                 <ScalarProperty Name="approved_date" ColumnName="approved_date" />
                 <ScalarProperty Name="approval_status" ColumnName="approval_status" />
