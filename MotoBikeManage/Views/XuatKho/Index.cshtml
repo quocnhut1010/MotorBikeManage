@@ -66,17 +66,24 @@
                                             <td>@(item.ApprovedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                                             <td>
                                                 <div class="d-flex justify-content-start">
-                                                    <button class="btn btn-sm btn-primary me-2" onclick="showExportDetail(@item.ExportId)">
+                                                    <button class="btn btn-sm btn-primary me-2"
+                                                            title="Thông tin phiếu này"
+                                                            onclick="showExportDetail(@item.ExportId)">
                                                         <i class="fa fa-info-circle"></i>
                                                     </button>
                                                     @if (item.ApprovalStatus == "Chờ duyệt")
                                                     {
-                                                        <a href="@Url.Action("Approve", new { id = item.ExportId })"
-                                                           class="btn btn-success btn-sm me-2"
-                                                           title="Duyệt phiếu này"
-                                                           onclick="return confirm('Bạn chắc chắn muốn duyệt phiếu này?');">
-                                                            <i class="fas fa-check"></i>
-                                                        </a>
+                                                        using (Html.BeginForm("Approve", "XuatKho", FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Bạn chắc chắn muốn duyệt phiếu này?');" }))
+                                                        {
+                                                            @Html.AntiForgeryToken()
+                                                            @Html.Hidden("id", item.ExportId)
+
+                                                            <button type="submit"
+                                                                    class="btn btn-success btn-sm me-2"
+                                                                    title="Duyệt phiếu này">
+                                                                <i class="fa fa-check"></i>
+                                                            </button>
+                                                        }
 
                                                         <a href="javascript:void(0);"
                                                            class="btn btn-danger btn-sm"
@@ -134,12 +141,13 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4" id="printArea">
                     <div id="exportDetailContent" class="font-monospace">
 
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="exportModalToPdf()" >Xuất PDF</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 </div>
             </div>
@@ -294,6 +302,34 @@
                 }
             });
         }
+    function exportModalToPdf() {
+
+     const element = document.getElementById("printArea");
+
+
+
+     const opt = {
+
+         margin: 0.3,
+
+         filename: 'PhieuXuat_' + new Date().getTime() + '.pdf',
+
+         image: { type: 'jpeg', quality: 0.98 },
+
+         html2canvas: {
+
+             scale: 2,
+
+             scrollY: 0,
+
+         },
+
+         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+
+     };
+     html2pdf().set(opt).from(element).save();
+
+ }
     </script>
 
     <script>

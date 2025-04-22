@@ -1,0 +1,287 @@
+﻿@model MotoBikeManage.ViewModels.ExportStockViewModel
+@{
+    ViewBag.Title = "Tạo phiếu xuất kho";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml"; // Đảm bảo layout này đã có jQuery
+}
+
+<div class="container mt-4 p-4 border rounded bg-white shadow">
+    <h2 class="mb-4" style="text-align:center">TẠO PHIẾU XUẤT KHO</h2>
+
+    @using (Html.BeginForm("Create", "XuatKho", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate", id = "xuatKhoForm" }))
+    {
+        @Html.AntiForgeryToken()
+
+        @* --- Phần thông tin chung không đổi --- *@
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="font-weight-bold">Bên nhận:</label>
+                @Html.TextBoxFor(m => m.Receiver, new { @class = "form-control", placeholder = "Tên bên nhận" })
+                @Html.ValidationMessageFor(m => m.Receiver, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-6">
+                <label class="font-weight-bold">Lý do:</label>
+                @Html.TextBoxFor(m => m.Reason, new { @class = "form-control", placeholder = "Lý do xuất kho" })
+                @Html.ValidationMessageFor(m => m.Reason, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <hr />
+        <h5 class="mt-4">Danh sách xe xuất</h5>
+        <table class="table table-bordered table-sm text-center" id="exportTable">
+            <thead class="thead-light">
+                <tr>
+                    @* Điều chỉnh lại width các cột *@
+                    <th style="width: 25%">Chọn xe (số khung)</th>
+                    <th style="width: 15%">Số máy</th>
+                    <th style="width: 10%">Màu</th>
+                    <th style="width: 10%">Năm</th>
+                    <th style="width: 15%">Giá bán</th>
+                    <th style="width: 15%">Thành tiền</th> @* <-- Cột mới *@
+                    <th style="width: 10%">Xóa</th>
+                </tr>
+            </thead>
+            <tbody id="detailRows">
+                @* Các dòng chi tiết sẽ được thêm vào đây bằng Javascript *@
+            </tbody>
+        </table>
+
+        <div class="mb-3">
+            <button type="button" class="btn btn-outline-primary btn-sm" id="addRow">+ Thêm dòng</button>
+        </div>
+
+        @* Phần hiển thị Tổng cộng - Đã bỏ comment và thêm ID *@
+        <div class="text-right mb-4">
+            <h5 class="font-weight-bold">Tổng cộng: <span id="grandTotalExport">0 VNĐ</span></h5>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-5">Lưu phiếu</button>
+            <a href="@Url.Action("Index", "XuatKho")" class="btn btn-secondary">Hủy</a> @* Sửa lại Url.Action *@
+        </div>
+    }
+</div>
+
+@* Đặt script vào section hoặc cuối trang *@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+        $(document).ready(function () { // Bọc code trong document ready
+
+            let rowIndex = 0;
+            let cachedVehicleList = null; // Lưu trữ danh sách xe để không gọi AJAX mỗi lần thêm dòng
+
+            // --- Các hàm tính toán và định dạng tiền tệ ---
+            function formatCurrency(number) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(number || 0);
+            }
+
+            function parseCurrency(currencyString) {
+                 if (!currencyString) return 0;
+                 const cleanedString = String(currencyString).replace(/[.₫\s]/g, '').replace(',', '.');
+                 const number = parseFloat(cleanedString);
+                 return isNaN(number) ? 0 : number;
+            }
+
+            // !! Sử dụng class '.price' từ code của bạn
+            function calculateLineTotal(row) {
+                const priceInput = $(row).find('.price');
+                const lineTotalCell = $(row).find('.line-total'); // Ô thành tiền mới
+                const price = parseCurrency(priceInput.val());
+                const lineTotal = price * 1;
+
+                lineTotalCell.text(formatCurrency(lineTotal));
+                lineTotalCell.data('value', lineTotal);
+            }
+
+            function calculateGrandTotal() {
+                let grandTotal = 0;
+                $('#detailRows .line-total').each(function() {
+                    grandTotal += $(this).data('value') || 0;
+                });
+                $('#grandTotalExport').text(formatCurrency(grandTotal));
+            }
+
+
+            // --- Hàm load và thêm dòng (dựa trên code mới của bạn) ---
+            function loadVehicleOptions(callback) {
+                 // Nếu đã có danh sách xe, dùng lại, không gọi AJAX nữa
+                 if(cachedVehicleList) {
+                     console.log("Using cached vehicle list");
+                     callback(cachedVehicleList);
+                     return;
+                 }
+                 // Nếu chưa có, gọi AJAX
+                 console.log("Fetching vehicle list via AJAX");
+                 $.getJSON("/Vehicles/GetAvailableVehicles", function (data) {
+                     cachedVehicleList = data; // Lưu lại danh sách
+                     callback(data);
+                 }).fail(function() {
+                    alert("Lỗi khi tải danh sách xe ban đầu.");
+                    cachedVehicleList = []; // Đặt là rỗng nếu lỗi để tránh gọi lại
+                    callback([]); // Gọi callback với mảng rỗng
+                 });
+            }
+
+            function addRowInternal(vehicleList) { // Đổi tên để tránh trùng global
+                let options = '<option value="">-- Chọn xe --</option>';
+                vehicleList.forEach(v => {
+                     let modelNameDisplay = v.model_name ? `(${v.model_name})` : '';
+                     options += `<option value="${v.vehicle_id}" data-engine="${v.engine_number || ''}" data-color="${v.color || ''}" data-year="${v.manufacture_year || ''}" data-modelid="${v.model_id || ''}" data-modelname="${v.model_name || ''}">${v.frame_number} ${modelNameDisplay}</option>`;
+                });
+
+                // Cập nhật HTML dòng mới:
+                // - Thêm cột Thành tiền (td.line-total)
+                // - Sử dụng class '.price' và '.remove-row' từ code của bạn
+                // - Thêm text-right cho giá và thành tiền
+                let rowHtml = `
+                    <tr>
+                        <td> <select name="Details[${rowIndex}].VehicleId" class="form-control form-control-sm vehicle-select" required> ${options} </select> </td>
+                        <td> <input type="text" name="Details[${rowIndex}].EngineNumber" class="form-control form-control-sm engine" readonly /> </td>
+                        <td> <input type="text" name="Details[${rowIndex}].Color" class="form-control form-control-sm color" readonly /> </td>
+                        <td> <input type="text" name="Details[${rowIndex}].ManufactureYear" class="form-control form-control-sm year" readonly /> </td>
+                        <td>
+                            @* Sử dụng class="price" từ code của bạn, thêm text-right *@
+                            <input type="text" inputmode="numeric" name="Details[${rowIndex}].Price" class="form-control form-control-sm price text-right" placeholder="Nhập giá bán..." required value="0"/>
+                        </td>
+                        @* Ô thành tiền mới *@
+                        <td class="line-total text-right" data-value="0">0 VNĐ</td>
+                        <td>
+                            @* Sử dụng class="remove-row" từ code của bạn *@
+                            <button type="button" class="btn btn-danger btn-sm remove-row">Xóa</button>
+                        </td>
+                    </tr>`;
+
+                $('#detailRows').append(rowHtml);
+                const newRow = $('#detailRows tr:last');
+
+                // Tính toán và cập nhật tổng
+                calculateLineTotal(newRow); // Tính dòng mới
+                calculateGrandTotal();    // Cập nhật tổng
+
+                rowIndex++; // Tăng index
+
+                updateVehicleOptions(); // Cập nhật lại các dropdown theo logic của bạn
+            }
+
+            // --- Hàm cập nhật dropdown (giữ nguyên logic của bạn) ---
+             function updateVehicleOptions() {
+                 const selectedIds = [];
+
+                 $('.vehicle-select').each(function () {
+                     const val = $(this).val();
+                     if (val) selectedIds.push(val);
+                 });
+
+                 $('.vehicle-select').each(function () {
+                     const currentVal = $(this).val();
+                     let hasVisibleOptions = false; // Biến kiểm tra xem còn option nào không
+                     $(this).find('option').each(function () {
+                         const optionVal = $(this).val();
+                         if (optionVal && optionVal !== currentVal && selectedIds.includes(optionVal)) {
+                             $(this).prop('disabled', true).hide(); // Disable và ẩn
+                         } else {
+                             $(this).prop('disabled', false).show(); // Enable và hiện
+                             if (optionVal) { // Đếm các option có giá trị hợp lệ và đang hiển thị
+                                 hasVisibleOptions = true;
+                             }
+                         }
+                     });
+                      // Tùy chọn: Disable cả dropdown nếu không còn lựa chọn nào khác ngoài cái đang chọn
+                     // $(this).prop('disabled', !hasVisibleOptions && currentVal !== '');
+                 });
+             }
+
+
+            // --- Các Event Handlers ---
+
+            // Khi chọn xe từ dropdown
+            $(document).on('change', '.vehicle-select', function () {
+                let selected = $(this).find('option:selected');
+                let row = $(this).closest('tr');
+                let priceInput = row.find('.price'); // Sử dụng class '.price'
+
+                row.find('.engine').val(selected.data('engine'));
+                row.find('.color').val(selected.data('color'));
+                row.find('.year').val(selected.data('year'));
+
+                let vehicleId = selected.val();
+                if (vehicleId) {
+                    $.getJSON('/Vehicles/GetLastImportPrice', { vehicleId: vehicleId }, function (result) {
+                        if (result && result.price > 0) {
+                            priceInput.val(result.price);
+                        } else {
+                            priceInput.val(0);
+                        }
+                        // Trigger tính toán sau khi cập nhật giá
+                        calculateLineTotal(row);
+                        calculateGrandTotal();
+                    }).fail(function() {
+                         priceInput.val(0);
+                         calculateLineTotal(row);
+                         calculateGrandTotal();
+                    });
+                } else {
+                    priceInput.val(0);
+                    calculateLineTotal(row);
+                    calculateGrandTotal();
+                }
+
+                updateVehicleOptions(); // Cập nhật dropdowns
+            });
+
+             // Khi nhập/thay đổi giá bán (sử dụng class '.price')
+             $(document).on('input change', '.price', function() {
+                  const row = $(this).closest('tr');
+                  calculateLineTotal(row);
+                  calculateGrandTotal();
+              });
+
+            // Khi bấm nút "+ Thêm dòng"
+            $('#addRow').on('click', function () {
+                // Kiểm tra số lượng dòng hiện tại so với số xe có sẵn (nếu đã cache)
+                if (cachedVehicleList && $('#detailRows tr').length >= cachedVehicleList.length) {
+                    alert("Đã hết xe có sẵn trong kho để thêm.");
+                    return; // Không thêm dòng nếu hết xe
+                }
+                loadVehicleOptions(addRowInternal);
+            });
+
+            // Khi bấm nút "Xóa" dòng (sử dụng class '.remove-row')
+            $(document).on('click', '.remove-row', function () {
+                $(this).closest('tr').remove();
+                calculateGrandTotal(); // Tính lại tổng trước
+                updateVehicleOptions(); // Rồi mới cập nhật dropdowns
+            });
+
+            // Tính tổng cộng lần đầu khi trang tải xong
+            calculateGrandTotal();
+
+            // Gọi updateVehicleOptions lần đầu nếu có dữ liệu sẵn (ví dụ: form Edit)
+            // Tuy nhiên, form Create thường bắt đầu trống nên có thể không cần thiết
+            // updateVehicleOptions();
+
+             // Client-side validation (tương tự như trước)
+             $('#xuatKhoForm').on('submit', function(e) {
+                 let isValid = true;
+                 if ($('#detailRows tr').length === 0) {
+                     alert('Vui lòng thêm ít nhất một xe vào phiếu xuất!');
+                     isValid = false;
+                 }
+                 $('#detailRows tr').each(function() {
+                     const vehicleSelect = $(this).find('.vehicle-select');
+                     const priceInput = $(this).find('.price'); // Sử dụng class '.price'
+                     if (!vehicleSelect.val()) {
+                         alert('Vui lòng chọn xe cho tất cả các dòng.');
+                         vehicleSelect.focus();
+                         isValid = false; return false;
+                     }
+                     if (parseCurrency(priceInput.val()) <= 0) {
+                          alert('Vui lòng nhập giá bán hợp lệ (lớn hơn 0) cho tất cả các dòng.');
+                          priceInput.focus();
+                          isValid = false; return false;
+                     }
+                 });
+                 if (!isValid) { e.preventDefault(); }
+             });
+
+        }); // Kết thúc document ready
+</script>

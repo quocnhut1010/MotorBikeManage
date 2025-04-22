@@ -526,7 +526,44 @@ namespace MotoBikeManage.Controllers
 
             return Json(models, JsonRequestBehavior.AllowGet);
         }
+        [HttpGet]
+        public JsonResult GetAvailableVehicles()
+        {
+            var list = db.Vehicles
+                .Where(v => v.status == "Trong kho")
+                .Select(v => new
+                {
+                    v.vehicle_id,
+                    v.frame_number,
+                    v.engine_number,
+                    color = v.VehicleModel.color,
+                    manufacture_year = v.VehicleModel.manufacture_year,
+                    v.model_id,
+                    model_name = v.VehicleModel.name
+                })
+                .ToList();
 
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        [HttpGet]
+        public JsonResult GetLastImportPrice(int vehicleId)
+        {
+            var modelId = db.Vehicles
+                .Where(v => v.vehicle_id == vehicleId)
+                .Select(v => v.model_id)
+                .FirstOrDefault();
+
+            if (modelId == 0)
+                return Json(new { price = 0 }, JsonRequestBehavior.AllowGet);
+
+            var price = db.Import_Details
+                .Where(d => d.model_id == modelId)
+                .OrderByDescending(d => d.import_detail_id)
+                .Select(d => d.price)
+                .FirstOrDefault();
+
+            return Json(new { price = price }, JsonRequestBehavior.AllowGet);
+        }
     }
 }
 

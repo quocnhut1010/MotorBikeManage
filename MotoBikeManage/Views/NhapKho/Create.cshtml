@@ -7,7 +7,7 @@
 <div class="container mt-4 p-4 border rounded bg-white shadow">
     <h2 class="mb-4" style="text-align:center">PHIẾU NHẬP KHO</h2>
 
-    @using (Html.BeginForm())
+    @using (Html.BeginForm("Create", "NhapKho", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate", id = "nhapKhoForm" }))
     {
         @Html.AntiForgeryToken()
 
@@ -107,6 +107,16 @@
             addRow(models);
         });
     });
+    $('#nhapKhoForm').on('submit', function (e) {
+        let isValid = true;
+        if ($('#detailRows tr').length === 0) {
+            alert('Vui lòng thêm ít nhất một xe vào phiếu nhập!');
+            isValid = false;
+        }
+
+        if (!isValid) e.preventDefault();
+    });
+
 
     $(document).on("click", ".remove-row", function () {
         $(this).closest("tr").remove();

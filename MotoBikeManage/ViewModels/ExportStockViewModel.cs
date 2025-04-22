@@ -9,6 +9,8 @@ namespace MotoBikeManage.ViewModels
 {
     public class ExportDetailViewModel
     {
+        public string VehicleId { get; set; }
+        public string ModelId { get; set; }
         public string ModelName { get; set; }
         public string FrameNumber { get; set; }
         public string EngineNumber { get; set; }

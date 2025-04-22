@@ -163,6 +163,8 @@ namespace MotoBikeManage.Controllers.Admin
 
             if (string.IsNullOrWhiteSpace(model.Note))
                 ModelState.AddModelError("Note", "Ghi chú không được để trống.");
+            if (model.Details == null || !model.Details.Any())
+                ModelState.AddModelError("", "Phải chọn ít nhất một xe để nhập kho.");
 
             foreach (var item in model.Details)
             {
@@ -170,6 +172,7 @@ namespace MotoBikeManage.Controllers.Admin
                     ModelState.AddModelError("", "Số lượng phải lớn hơn 0.");
                 if (item.Price <= 0)
                     ModelState.AddModelError("", "Đơn giá phải lớn hơn 0.");
+              
             }
 
             if (!ModelState.IsValid)
