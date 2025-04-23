@@ -3,9 +3,12 @@ using MotoBikeManage.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using static System.Data.Entity.Infrastructure.Design.Executor;
 
 namespace MotoBikeManage.Controllers.Admin
 {
@@ -13,13 +16,33 @@ namespace MotoBikeManage.Controllers.Admin
     {
         private QLXMEntities db = new QLXMEntities();
         // GET: XuatKho
-        public ActionResult Index()
+        public ActionResult Index(string status, string supplierName, string createdBy, DateTime? fromDate, DateTime? toDate)
         {
-            var exportList = db.Export_Stock
+            var query = db.Export_Stock
             .Include("User")    // Người tạo
             .Include("User1")   // Người duyệt
             .OrderByDescending(e => e.export_date)
-            .Select(e => new ExportStockViewModel
+            .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(i => i.approval_status == status);
+            }
+            if (!string.IsNullOrEmpty(createdBy))
+            {
+                query = query.Where(i => i.User.full_name.Contains(createdBy));
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(i => i.export_date >= fromDate);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(i => i.export_date <= toDate);
+            }
+            var exportList = query.Select(e => new ExportStockViewModel
             {
                 ExportId = e.export_id,
                 UserName = e.User.full_name,
@@ -32,6 +55,11 @@ namespace MotoBikeManage.Controllers.Admin
                 RejectReason = e.reject_reason
             })
             .ToList();
+            ViewBag.Creators = db.Import_Stock
+                .Select(i => i.User.full_name)
+                .Distinct()
+                .OrderBy(n => n)
+                .ToList();
             return View(exportList);
         }
         [HttpGet]
@@ -246,8 +274,104 @@ namespace MotoBikeManage.Controllers.Admin
 
             db.SaveChanges();
 
-            TempData["Success"] = "Duyệt phiếu xuất thành công.";
+            TempData["SuccessExport"] = "Duyệt phiếu xuất thành công.";
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public ActionResult Reject(int id, string reason)
+        {
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                TempData["ErrorReject"] = "Vui lòng nhập lý do từ chối.";
+                return RedirectToAction("Index");
+            }
+
+            var export = db.Export_Stock.FirstOrDefault(i => i.export_id == id);
+            if (export == null)
+                return HttpNotFound();
+
+            var username = Session["Username"]?.ToString();
+            var user = db.Users.FirstOrDefault(u => u.username == username);
+            if (user == null)
+            {
+                TempData["Error"] = "Không xác định người dùng.";
+                return RedirectToAction("Index");
+            }
+
+            export.approval_status = "Từ chối";
+            export.reject_reason = reason;
+            export.approved_date = DateTime.Now;
+            export.approved_by = user.id;
+
+            db.SaveChanges();
+
+            TempData["SuccessRejectExport"] = "Phiếu nhập đã được từ chối.";
+            return RedirectToAction("Index");
+        }
+        // Hàm trợ giúp để escape dữ liệu cho CSV
+        public ActionResult ExportCsv()
+        {
+            string fullName = Session["FullName"]?.ToString() ?? "Unknown";
+            string currentTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+            var exportList = db.Export_Stock
+                .Include("User")
+                .Include("Export_Details")
+                .Where(e => e.approval_status == "Đã duyệt" && e.approved_date != null)
+                .OrderBy(e => e.export_id)
+                .ToList();
+
+            var sb = new StringBuilder();
+
+            // 1. Header thông tin
+            sb.AppendLine("Báo cáo phiếu xuất kho");
+            sb.AppendLine($"Người xuất: {fullName}");
+            sb.AppendLine($"Thời gian xuất file: {currentTime}");
+            sb.AppendLine();
+
+            // 2. Tiêu đề bảng
+            sb.AppendLine("Mã Phiếu,Ngày Duyệt,Người Tạo,Tổng SL,Tổng Giá trị (VNĐ),Trạng Thái");
+
+            int totalQty = 0;
+            decimal totalVal = 0;
+
+            // 3. Ghi từng dòng phiếu xuất
+            foreach (var e in exportList)
+            {
+                int qty = e.Export_Details.Count;
+                decimal val = e.Export_Details.Sum(d => d.price);
+
+                totalQty += qty;
+                totalVal += val;
+
+                sb.AppendLine(string.Join(",",
+                 $"PX0{e.export_id}",
+                 "\u200B" + e.approved_date.Value.ToString("dd/MM/yyyy HH:mm"),  // ✅ tránh bị ###
+                 e.User?.full_name ?? "-",
+                 qty,
+                 $"\"{val.ToString("#,##0")} VNĐ\"",
+                 e.approval_status
+             ));
+
+            }
+
+            // 4. Dòng tổng kết
+            sb.AppendLine($",,,Tổng,\"{totalVal.ToString("#,##0")} VNĐ\",");
+
+            // 5. Chuyển thành byte[] có BOM UTF-8 để Excel hiển thị tốt
+            var preamble = Encoding.UTF8.GetPreamble();
+            var csvBytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var finalBytes = preamble.Concat(csvBytes).ToArray();
+
+            // 6. Xuất file
+            string fileName = $"PhieuXuat_{DateTime.Now:dd_MM_yyyy}.csv";
+            Response.Clear();
+            Response.ContentType = "text/csv; charset=utf-8";
+            Response.AddHeader("Content-Disposition", $"attachment;filename={fileName}");
+            Response.BinaryWrite(finalBytes);
+            Response.End();
+
+            return null;
         }
 
     }

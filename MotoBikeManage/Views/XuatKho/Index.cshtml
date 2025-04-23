@@ -12,6 +12,73 @@
             <h2>@ViewBag.Title</h2>
         </div>
     </div>
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 text-primary"><i class="fas fa-filter"></i> Bộ lọc nâng cao</h6>
+            <a href="@Url.Action("Index", "XuatKho")" class="btn btn-sm btn-outline-secondary">
+                <i class="fa fa-sync-alt"></i> Đặt lại
+            </a>
+        </div>
+        <div class="card-body">
+            @using (Html.BeginForm("Index", "XuatKho", FormMethod.Get, new { @class = "row g-3 align-items-end" }))
+            {
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái phiếu</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="Chờ duyệt" @(Request["status"] == "Chờ duyệt" ? "selected" : "")>Chờ duyệt</option>
+                        <option value="Đã duyệt" @(Request["status"] == "Đã duyệt" ? "selected" : "")>Đã duyệt</option>
+                        <option value="Từ chối" @(Request["status"] == "Từ chối" ? "selected" : "")>Đã từ chối</option>
+                    </select>
+                </div>
+
+                @*<div class="col-md-3">
+                    <label class="form-label">Nhà cung cấp</label>
+                    <select name="supplierName" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var s in (List<string>)ViewBag.Suppliers)
+                        {
+                            <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
+                        }
+                    </select>
+                </div>*@
+
+                <div class="col-md-3">
+                    <label class="form-label">Người tạo</label>
+                    <select name="createdBy" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var c in (List<string>)ViewBag.Creators)
+                        {
+                            <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
+                        }
+                    </select>
+                </div>
+
+
+                <div class="row" style="margin-top:25px">
+                    <div class="col-md-3">
+                        <label class="form-label">Từ ngày</label>
+                        <input type="date" name="fromDate" class="form-control" value="@Request["fromDate"]" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Đến ngày</label>
+                        <input type="date" name="toDate" class="form-control" value="@Request["toDate"]" />
+                    </div>
+                </div>
+
+
+                <div class="col-md-3">
+                    <p class="text-muted mt-2">
+                        Đang hiển thị: <strong>@Model.Count()</strong> phiếu nhập.
+                    </p>
+                    <button type="submit" class="btn btn-success" style="margin-right:10px">
+                        <i class="fa fa-search"></i> Lọc
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-md-12 mb-3">
@@ -19,6 +86,11 @@
                 <div class="mr-auto">
                     <a href="@Url.Action("Create", "XuatKho")" class="btn btn-primary mr-3">
                         <i class="fa fa-truck"></i> Tạo Phiếu Xuất Mới
+                    </a>
+                </div>
+                <div class="mr-auto ">
+                    <a href="@Url.Action("ExportCsv", "XuatKho")" class="btn btn-outline-success mb-3">
+                        <i class="fa fa-file-excel"></i> Xuất CSV
                     </a>
                 </div>
             </div>
@@ -59,8 +131,8 @@
                                             <td>@item.Reason</td>
                                             <td>
                                                 @{ string statusClass = item.ApprovalStatus == "Chờ duyệt" ? "badge bg-warning" :
-                                                                        item.ApprovalStatus == "Đã duyệt" ? "badge bg-success" :
-                                                                        item.ApprovalStatus == "Từ chối" ? "badge bg-danger" : "badge bg-secondary"; }
+                                                                            item.ApprovalStatus == "Đã duyệt" ? "badge bg-success" :
+                                                                            item.ApprovalStatus == "Từ chối" ? "badge bg-danger" : "badge bg-secondary"; }
                                                 <span class="@statusClass">@item.ApprovalStatus</span>
                                             </td>
                                             <td>@(item.ApprovedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
@@ -92,6 +164,7 @@
                                                             <i class="fas fa-times"></i>
                                                         </a>
                                                     }
+
                                                 </div>
                                             </td>
                                         </tr>
@@ -110,6 +183,7 @@
 <div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <form method="post" action="@Url.Action("Reject", "XuatKho")">
+            @Html.AntiForgeryToken()
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Từ chối phiếu xuất</h5>
@@ -132,45 +206,45 @@
 </div>
 
 <!-- Modal chi tiết xuất kho -->
-    <div class="modal fade" id="exportDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content border rounded shadow">
-                <div class="modal-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="modal-title">Chi tiết phiếu xuất</h5>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                </div>
-                <div class="modal-body p-4" id="printArea">
-                    <div id="exportDetailContent" class="font-monospace">
-
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="exportModalToPdf()" >Xuất PDF</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+<div class="modal fade" id="exportDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content border rounded shadow">
+            <div class="modal-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="modal-title">Chi tiết phiếu xuất</h5>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
             </div>
+            <div class="modal-body p-4" id="printArea">
+                <div id="exportDetailContent" class="font-monospace">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="exportModalToPdf()">Xuất PDF</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
         </div>
-        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    function openRejectModal(exportId) {
+        document.getElementById('rejectExportId').value = exportId;
+        const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+        modal.show();
+    }
 
-    <script>
-        function openRejectModal(exportId) {
-            document.getElementById('rejectExportId').value = exportId;
-            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
-            modal.show();
-        }
+    function showExportDetail(exportId) {
+        $.ajax({
+            url: '/XuatKho/Details', // Keeping the original URL structure
+            type: 'GET',
+            data: { id: exportId },
+            success: function (response) {
+                if (response.success) {
+                    let data = response.data;
 
-        function showExportDetail(exportId) {
-            $.ajax({
-                url: '/XuatKho/Details', // Keeping the original URL structure
-                type: 'GET',
-                data: { id: exportId },
-                success: function (response) {
-                    if (response.success) {
-                        let data = response.data;
-
-                        let html = `
+                    let html = `
                     <div class="text-center mb-4">
                         <h4 class="fw-bold">PHIẾU XUẤT KHO</h4>
                     </div>
@@ -184,16 +258,16 @@
                         <div class="col-md-6 text-end">
                             <p><strong>Trạng Thái:</strong> <span class="badge ${data.ApprovalStatus === 'Đã duyệt' ? 'bg-success' : (data.ApprovalStatus === 'Từ chối' ? 'bg-danger' : 'bg-secondary')}">${data.ApprovalStatus}</span></p>
                             ${data.ApprovalStatus === "Từ chối"
-                                ? `<p><strong>Ngày từ chối:</strong> ${data.ApprovedDate}</p>`
-                                : `<p><strong>Ngày duyệt:</strong> ${data.ApprovedDate}</p>`}
+                            ? `<p><strong>Ngày từ chối:</strong> ${data.ApprovedDate}</p>`
+                            : `<p><strong>Ngày duyệt:</strong> ${data.ApprovedDate}</p>`}
                             <p><strong>Người Duyệt:</strong> ${data.ApprovedByUser ?? '-'}</p>
                         </div>
                     </div>
                     <div class="mb-3">
                         <p><strong>Lý Do:</strong> ${data.Reason ?? '-'}</p>
                         ${data.ApprovalStatus === "Từ chối" && data.RejectReason
-                                ? `<p class="text-danger"><strong>Lý Do Từ Chối:</strong> ${data.RejectReason}</p>`
-                                : ""}
+                            ? `<p class="text-danger"><strong>Lý Do Từ Chối:</strong> ${data.RejectReason}</p>`
+                            : ""}
                     </div>
                     <hr>
                     <h5 class="mb-3">Danh sách xe xuất:</h5>
@@ -211,16 +285,16 @@
                         <tbody>
                 `;
 
-                        let total = 0;
-                        let group = {}; // Keep the group calculation for the summary below
+                    let total = 0;
+                    let group = {}; // Keep the group calculation for the summary below
 
-                        if (data.Details && data.Details.length > 0) {
-                            data.Details.forEach(item => {
-                                const key = item.ModelName;
-                                group[key] = (group[key] || 0) + item.Price;
-                                total += item.Price;
+                    if (data.Details && data.Details.length > 0) {
+                        data.Details.forEach(item => {
+                            const key = item.ModelName;
+                            group[key] = (group[key] || 0) + item.Price;
+                            total += item.Price;
 
-                                html += `
+                            html += `
                             <tr class="text-center">
                                 <td class="text-start">${item.ModelName}</td>
                                 <td>${item.Color}</td>
@@ -230,13 +304,13 @@
                                 <td>${item.Price.toLocaleString('vi-VN')} VNĐ</td>
                             </tr>
                         `;
-                            });
-                        } else {
-                            html += `<tr><td colspan="4" class="text-center">Không có chi tiết xuất kho</td></tr>`;
-                        }
+                        });
+                    } else {
+                        html += `<tr><td colspan="4" class="text-center">Không có chi tiết xuất kho</td></tr>`;
+                    }
 
 
-                        html += `</tbody>
+                    html += `</tbody>
                         <tfoot>
                              <tr>
                                 <td colspan="5" class="text-end"><strong>Tổng số lượng:</strong></td>
@@ -249,39 +323,39 @@
                         </tfoot>
                     </table>`;
 
-                        // Add grouped total similar to the original structure
-                        html += `<div class="mt-3"><h6>Tổng giá trị theo dòng xe:</h6><ul>`;
-                        for (let key in group) {
-                            if (group.hasOwnProperty(key)) {
-                                html += `<li>${key}: ${group[key].toLocaleString('vi-VN')} VNĐ</li>`;
-                            }
+                    // Add grouped total similar to the original structure
+                    html += `<div class="mt-3"><h6>Tổng giá trị theo dòng xe:</h6><ul>`;
+                    for (let key in group) {
+                        if (group.hasOwnProperty(key)) {
+                            html += `<li>${key}: ${group[key].toLocaleString('vi-VN')} VNĐ</li>`;
                         }
-                        html += `</ul></div>`;
+                    }
+                    html += `</ul></div>`;
 
 
-                        // Add signature section
-                        html += `<div class="text-end mt-4 mb-4">
+                    // Add signature section
+                    html += `<div class="text-end mt-4 mb-4">
                             <p><em>..., ngày ..., tháng ..., năm ...</em></p>
                           </div>`;
 
-                        html += `<div class="row text-center mb-5" style="page-break-inside: avoid;">
+                    html += `<div class="row text-center mb-5" style="page-break-inside: avoid;">
                             <div class="row text-center mb-5" style="page-break-inside: avoid;">
-                                <div class="col-md-3 col-6"> 
+                                <div class="col-md-3 col-6">
                                     <strong>Người lập phiếu</strong><br>
                                     <span class="text-muted">(Ký, ghi rõ họ tên)</span>
                                     <strong style="margin-top: 50px; display: block; text-align: center;">${data.UserName ?? '-'}</strong>
                                 </div>
-                                <div class="col-md-3 col-6"> 
+                                <div class="col-md-3 col-6">
                                     <strong>Người duyệt</strong><br>
                                     <span class="text-muted">(Ký, ghi rõ họ tên)</span>
                                     <strong style="margin-top: 50px; display: block; text-align: center;">${data.ApprovedByUser ?? '-'}</strong>
                                 </div>
-                                <div class="col-md-3 col-6"> 
+                                <div class="col-md-3 col-6">
                                     <strong>Bên nhận</strong><br>
                                     <span class="text-muted">(Ký, ghi rõ họ tên)</span>
                                     <strong style="margin-top: 50px; display: block; text-align: center;">${data.Receiver ?? '-'}</strong>
                                 </div>
-                                <div class="col-md-3 col-6"> 
+                                <div class="col-md-3 col-6">
                                     <strong>Kế toán</strong><br>
                                     <span class="text-muted">(Ký, ghi rõ họ tên)</span>
                                     <strong style="margin-top: 50px; display: block; text-align: center;">.....................</strong>
@@ -289,56 +363,86 @@
                             </div>
                          </div>`;
 
-                        $('#exportDetailContent').html(html);
-                        const modalElem = document.getElementById('exportDetailModal');
-                        const modalObj = new bootstrap.Modal(modalElem);
-                        modalObj.show();
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function () {
-                    alert("Đã xảy ra lỗi khi tải chi tiết phiếu xuất.");
+                    $('#exportDetailContent').html(html);
+                    const modalElem = document.getElementById('exportDetailModal');
+                    const modalObj = new bootstrap.Modal(modalElem);
+                    modalObj.show();
+                } else {
+                    alert(response.message);
                 }
-            });
-        }
+            },
+            error: function () {
+                alert("Đã xảy ra lỗi khi tải chi tiết phiếu xuất.");
+            }
+        });
+    }
     function exportModalToPdf() {
 
-     const element = document.getElementById("printArea");
+        const element = document.getElementById("printArea");
 
 
 
-     const opt = {
+        const opt = {
 
-         margin: 0.3,
+            margin: 0.3,
 
-         filename: 'PhieuXuat_' + new Date().getTime() + '.pdf',
+            filename: 'PhieuXuat_' + new Date().getTime() + '.pdf',
 
-         image: { type: 'jpeg', quality: 0.98 },
+            image: { type: 'jpeg', quality: 0.98 },
 
-         html2canvas: {
+            html2canvas: {
 
-             scale: 2,
+                scale: 2,
 
-             scrollY: 0,
+                scrollY: 0,
 
-         },
+            },
 
-         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
 
-     };
-     html2pdf().set(opt).from(element).save();
+        };
+        html2pdf().set(opt).from(element).save();
 
- }
-    </script>
+    }
+</script>
 
-    <script>
-        $(document).ready(function () {
-            $('#exportTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
-                },
-                "order": [[2, "desc"]]
-            });
+<script>
+    $(document).ready(function () {
+        $('#exportTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json"
+            },
+            "order": [[2, "desc"]]
         });
-    </script>
+    });
+</script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+@{
+    if (TempData["SuccessRejectExport"] != null)
+    {
+        var message = TempData["SuccessRejectExport"].ToString();
+        <script>
+         swal({
+             title: "Thành công",
+             text: "@Html.Raw(TempData["SuccessRejectExport"])",
+             icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}
+@{
+    if (TempData["SuccessExport"] != null)
+    {
+        var message = TempData["SuccessExport"].ToString();
+        <script>
+         swal({
+             title: "Thành công",
+             text: "@Html.Raw(TempData["SuccessExport"])",
+             icon: "success",
+             button: "Đóng"
+         });
+        </script>
+    }
+}
