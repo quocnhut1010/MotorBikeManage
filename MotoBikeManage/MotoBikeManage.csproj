@@ -193,7 +193,9 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Common\VehicleStatus.cs" />
     <Compile Include="Controllers\Admin\AdminController.cs" />
+    <Compile Include="Controllers\Admin\BaoCaoController.cs" />
     <Compile Include="Controllers\Admin\BaoTriController.cs" />
     <Compile Include="Controllers\Admin\ErrorController.cs" />
     <Compile Include="Controllers\Admin\NhapKhoController.cs" />
@@ -1050,6 +1052,7 @@
     <Content Include="Views\VehicleModels\Details.cshtml" />
     <Content Include="Views\VehicleModels\Index.cshtml" />
     <Content Include="Views\XuatKho\Create.cshtml" />
+    <Content Include="Views\BaoCao\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

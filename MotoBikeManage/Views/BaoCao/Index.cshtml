@@ -1,0 +1,400 @@
+﻿@{
+    ViewBag.Title = "Báo cáo thống kê";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">BÁO CÁO THỐNG KÊ</h2>
+
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title" id="tongXeTrongKho">0</h4>
+                    <p class="card-text text-muted">Xe trong kho</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title" id="tongXeDaXuat">0</h4>
+                    <p class="card-text text-muted">Xe đã xuất</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title" id="tongXeDangBaoTri">0</h4>
+                    <p class="card-text text-muted">Xe đang bảo trì</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card text-center h-100 shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title" id="tongGiaTriXuat">0 đ</h4>
+                    <p class="card-text text-muted">Doanh thu bán xe</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Thống kê tồn kho theo mẫu xe</h4>
+        </div>
+        <div class="card-body" style="max-height: 450px; overflow-y: auto;">
+            <table class="table table-bordered table-hover table-sm" id="bangThongKeModel">
+                <thead class="thead-light" style="position: sticky; top: 0; z-index: 1; background-color: white;">
+                    <tr>
+                        <th>Tên xe</th>
+                        <th>Hãng</th>
+                        <th>Model</th>
+                        <th>Trong kho</th>
+                        <th>Đã xuất</th>
+                        <th>Bảo trì</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mb-4 align-items-end">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <label for="filterYear">Lọc biểu đồ theo Năm:</label>
+            <select id="filterYear" class="form-control form-control-sm">
+            </select>
+        </div>
+        <div class="col-md-2 mb-3 mb-md-0">
+            <button class="btn btn-primary btn-block btn-sm" onclick="reloadThongKe()">Áp dụng</button>
+        </div> <small class="form-text text-muted">Lọc này sẽ áp dụng cho các biểu đồ bên dưới.</small>
+       
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-7 mb-3 mb-lg-0">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Số lượng nhập & bán xe theo tháng</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="bieudoNhapBanXe"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Top 5 mẫu xe bán chạy</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="bieudoTop5"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h4>Chi phí nhập & Doanh thu bán theo tháng</h4>
+                </div>
+                <div class="card-body">
+                    <canvas id="bieudoChiPhiLoiNhuan"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div> 
+
+<style>
+    #bangThongKeModel thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background-color: #f8f9fa;
+    }
+</style>
+<style>
+    /* Giúp header bảng dính lại khi cuộn */
+    #bangThongKeModel thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1; /* Đảm bảo header nổi lên trên */
+        background-color: #f8f9fa; /* Màu nền giống thead-light */
+    }
+
+    /* Đảm bảo card-body không bị header che khuất khi cuộn */
+    .card-body[style*="overflow-y: auto"] {
+        /* Có thể cần thêm padding-top nếu header quá cao */
+    }
+</style>
+<!-- Gọi JQuery và Chart.js -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    var yearSelected = new Date().getFullYear(); // mặc định năm hiện tại
+    var chartChiPhiLoiNhuan;
+
+    $(document).ready(function () {
+        loadYears();
+        loadAllThongKe();
+    });
+    var chartNhapBanXe;
+
+    function loadThongKeNhapBanXe() {
+        $.ajax({
+            url: '/BaoCao/ThongKeNhapBanXeTheoThang?year=' + yearSelected,
+            method: 'GET',
+            success: function (res) {
+                var labels = [];
+                var dataNhap = [];
+                var dataBan = [];
+
+                for (var i = 1; i <= 12; i++) {
+                    labels.push('Tháng ' + i);
+                    var monthData = res.find(x => x.Thang == i);
+                    dataNhap.push(monthData ? monthData.TongNhap : 0);
+                    dataBan.push(monthData ? monthData.TongBan : 0);
+                }
+
+                if (chartNhapBanXe) chartNhapBanXe.destroy();
+
+                var ctx = document.getElementById('bieudoNhapBanXe').getContext('2d');
+                chartNhapBanXe = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Số lượng nhập',
+                                data: dataNhap,
+                                backgroundColor: 'rgba(255, 206, 86, 0.7)'
+                            },
+                            {
+                                label: 'Số lượng bán',
+                                data: dataBan,
+                                backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function loadThongKeChiPhiLoiNhuan() {
+        $.ajax({
+            url: '/BaoCao/ThongKeChiPhiLoiNhuanTheoThang?year=' + yearSelected,
+            method: 'GET',
+            success: function (res) {
+                var labels = [];
+                var dataChiPhi = [];
+                var dataDoanhThu = [];
+
+                for (var i = 1; i <= 12; i++) {
+                    labels.push('Tháng ' + i);
+                    var monthData = res.find(x => x.Thang == i);
+                    dataChiPhi.push(monthData ? monthData.TongChiPhi : 0);
+                    dataDoanhThu.push(monthData ? monthData.TongDoanhThu : 0);
+                }
+
+                if (chartChiPhiLoiNhuan) chartChiPhiLoiNhuan.destroy();
+
+                var ctx = document.getElementById('bieudoChiPhiLoiNhuan').getContext('2d');
+                chartChiPhiLoiNhuan = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Chi phí nhập xe',
+                                data: dataChiPhi,
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                            },
+                            {
+                                label: 'Doanh thu bán xe',
+                                data: dataDoanhThu,
+                                backgroundColor: 'rgba(75, 192, 192, 0.7)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+    function loadYears() {
+        var now = new Date().getFullYear();
+        var html = '';
+        for (var y = now; y >= now - 5; y--) {
+            html += `<option value="${y}">${y}</option>`;
+        }
+        $('#filterYear').html(html);
+        $('#filterYear').val(yearSelected);
+    }
+
+    function reloadThongKe() {
+        yearSelected = $('#filterYear').val();
+        loadAllThongKe();
+    }
+
+    function loadAllThongKe() {
+        loadThongKeTongQuat();
+        loadThongKeTheoModel();
+        loadThongKeXuatKhoTheoThang();
+        loadTop5BanChay();
+        loadThongKeChiPhiLoiNhuan();
+        loadThongKeNhapBanXe();
+    }
+
+    function loadThongKeTongQuat() {
+        $.ajax({
+            url: '/BaoCao/ThongKeTongQuat',
+            method: 'GET',
+            success: function (res) {
+                $('#tongXeTrongKho').text(res.TongXeTrongKho);
+                $('#tongXeDaXuat').text(res.TongXeDaXuat);
+                $('#tongXeDangBaoTri').text(res.TongXeDangBaoTri);
+                $('#tongGiaTriXuat').text(formatCurrency(res.TongGiaTriXuat));
+            }
+        });
+    }
+
+    function loadThongKeTheoModel() {
+        $.ajax({
+            url: '/BaoCao/ThongKeTheoModel',
+            method: 'GET',
+            success: function (res) {
+                var tbody = $('#bangThongKeModel tbody');
+                tbody.empty();
+
+                if (res.length == 0) {
+                    tbody.append('<tr><td colspan="6" class="text-center text-muted">Không có dữ liệu</td></tr>');
+                } else {
+                    res.forEach(function (item) {
+                        tbody.append(`
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.brand}</td>
+                            <td>${item.model}</td>
+                            <td>${item.soLuongTrongKho}</td>
+                            <td>${item.soLuongDaXuat}</td>
+                            <td>${item.soLuongDangBaoTri}</td>
+                        </tr>
+                    `);
+                    });
+                }
+            }
+        });
+    }
+
+    var chartXuatKho, chartTop5;
+
+    function loadThongKeXuatKhoTheoThang() {
+        $.ajax({
+            url: '/BaoCao/ThongKeXuatKhoTheoThang?year=' + yearSelected,
+            method: 'GET',
+            success: function (res) {
+                var labels = [];
+                var data = [];
+
+                for (var i = 1; i <= 12; i++) {
+                    labels.push('Tháng ' + i);
+                    var monthData = res.find(x => x.Thang == i);
+                    data.push(monthData ? monthData.SoLuongXuat : 0);
+                }
+
+                if (chartXuatKho) chartXuatKho.destroy();
+
+                var ctx = document.getElementById('bieudoXuatKho').getContext('2d');
+                chartXuatKho = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Số lượng xe bán',
+                            data: data,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function loadTop5BanChay() {
+        $.ajax({
+            url: '/BaoCao/Top5BanChay',
+            method: 'GET',
+            success: function (res) {
+                var labels = [];
+                var data = [];
+
+                res.forEach(function (item) {
+                    labels.push(item.TenXe);
+                    data.push(item.SoLuongBan);
+                });
+
+                if (chartTop5) chartTop5.destroy();
+
+                var ctx = document.getElementById('bieudoTop5').getContext('2d');
+                chartTop5 = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Top 5 xe bán chạy',
+                            data: data,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true
+                    }
+                });
+            }
+        });
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    }
+</script>
