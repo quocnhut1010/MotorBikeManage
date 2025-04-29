@@ -2,7 +2,23 @@
 @{
     ViewBag.Title = "Danh sách Phiếu Nhập Kho";
     // Đảm bảo bạn sử dụng Layout phù hợp (ví dụ: _AdminLayout.cshtml)
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    // Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var userRole = ViewBag.UserRole as string;
+    if (userRole == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    else if (userRole == "NhanVien")
+    {
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+    }
+    else
+    {
+        // Layout mặc định hoặc xử lý trường hợp vai trò không xác định (tùy chọn)
+        // Ví dụ: quay về trang đăng nhập hoặc dùng một layout chung
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Ví dụ layout chung
+       
+    }
 
 }
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -34,28 +50,60 @@
                         <option value="Từ chối" @(Request["status"] == "Từ chối" ? "selected" : "")>Đã từ chối</option>
                     </select>
                 </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Nhà cung cấp</label>
-                    <select name="supplierName" class="form-select">
-                        <option value="">-- Tất cả --</option>
-                        @foreach (var s in (List<string>)ViewBag.Suppliers)
-                        {
-                            <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label">Người tạo</label>
-                    <select name="createdBy" class="form-select">
-                        <option value="">-- Tất cả --</option>
-                        @foreach (var c in (List<string>)ViewBag.Creators)
-                        {
-                            <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
-                        }
-                    </select>
-                </div>
+                if (userRole == "Admin")
+                {
+                    <div class="col-md-3">
+                        <label class="form-label">Nhà cung cấp</label>
+                        <select name="supplierName" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            @if (ViewBag.Suppliers != null) // Kiểm tra null
+                            {
+                                foreach (var s in (List<string>)ViewBag.Suppliers)
+                                {
+                                    <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
+                @*<div class="col-md-3">
+                <label class="form-label">Nhà cung cấp</label>
+                <select name="supplierName" class="form-select">
+                    <option value="">-- Tất cả --</option>
+                    @foreach (var s in (List<string>)ViewBag.Suppliers)
+                    {
+                        <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>*@
+                @* --- HIỂN THỊ BỘ LỌC NGƯỜI TẠO CHỈ CHO ADMIN --- *@
+                if (userRole == "Admin")
+                {
+                    <div class="col-md-3">
+                        <label class="form-label">Người tạo</label>
+                        <select name="createdBy" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            @if (ViewBag.Creators != null)
+                            {
+                                foreach (var c in (List<string>)ViewBag.Creators)
+                                {
+                                    <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
+                @* --- KẾT THÚC BỘ LỌC NGƯỜI TẠO --- *@
+                @*<div class="col-md-3">
+                <label class="form-label">Người tạo</label>
+                <select name="createdBy" class="form-select">
+                    <option value="">-- Tất cả --</option>
+                    @foreach (var c in (List<string>)ViewBag.Creators)
+                    {
+                        <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
+                    }
+                </select>
+            </div>*@
 
 
                 <div class="row" style="margin-top:25px">
@@ -87,13 +135,22 @@
         <div class="col-md-12 mb-3">
             <div class="d-flex justify-content-between">
                 <div class="mr-auto">
-                    <a href="@Url.Action("Create", "NhapKho")" class="btn btn-primary mr-3">
-                        <i class="fa fa-info-circle"></i> Tạo Phiếu Nhập Mới
-                    </a>
+                    @if (userRole == "Admin" || userRole == "NhanVien") // Cho phép cả Admin và NV tạo
+                    {
+                        <a href="@Url.Action("Create", "NhapKho")" class="btn btn-primary mr-3">
+                            <i class="fa fa-plus-circle"></i> Tạo Phiếu Nhập Mới @*Đổi icon nếu muốn*@
+                        </a>
+                    }
+                  
                 </div>
-                <a href="@Url.Action("ExportCsv", "TonKho")" class="btn btn-success">
-                    <i class="fa fa-file-excel"></i> Xuất Excel
-                </a>
+                @if (userRole == "Admin") // Chỉ admin thấy nút xuất excel
+                {
+                    <a href="@Url.Action("ExportCsv", "TonKho")" class="btn btn-success">
+                        @*Kiểm tra lại action này nếu cần*@
+                        <i class="fa fa-file-excel"></i> Xuất Excel
+                    </a>
+                }
+               
             </div>
         </div>
 
@@ -164,37 +221,36 @@
                                                         <i class="fa fa-info-circle"></i>
                                                     </a>
                                                     @*@if (item.ApprovalStatus == "Đã duyệt")
-                                                    {
-                                                        <a onclick="showImportDetail(@item.ImportId)"
-                                                           class="btn btn-sm btn-info"
-                                                           title="In phiếu này">
-                                                            <i class="fas fa-print"></i>
-                                                        </a>
-                                                    }*@
+        {
+            <a onclick="showImportDetail(@item.ImportId)"
+               class="btn btn-sm btn-info"
+               title="In phiếu này">
+                <i class="fas fa-print"></i>
+            </a>
+        }*@
 
-                                                    @if (item.ApprovalStatus == "Chờ duyệt")
-                                                    {
-                                                        <!-- Icon Duyệt -->
-                                                        <a href="@Url.Action("Approve", new { id = item.ImportId })"
-                                                           class="btn btn-success btn-sm me-2"
-                                                           title="Duyệt phiếu này"
-                                                           onclick="return confirm('Bạn chắc chắn muốn duyệt phiếu này?');">
-                                                            <i class="fas fa-check"></i>
-                                                        </a>
+                                                    @* --- HIỂN THỊ NÚT DUYỆT/TỪ CHỐI CHỈ CHO ADMIN --- *@
+                                                                                            @if (userRole == "Admin" && item.ApprovalStatus == "Chờ duyệt") {
+                                                                                            <a href = "@Url.Action("Approve", new { id = item.ImportId })"
+                                                                                                   class="btn btn-success btn-sm me-2"
+                                                                                               title="Duyệt phiếu này"
+                                                                                               onclick="return confirm('Bạn chắc chắn muốn duyệt phiếu này?');">
+                                                                                                <i class="fas fa-check"></i>
+                                                                                            </a>
 
-                                                        <!-- Icon Từ chối -->
-                                                        <a href="javascript:void(0);"
-                                                           class="btn btn-danger btn-sm"
-                                                           title="Từ chối phiếu này"
-                                                           onclick="openRejectModal(@item.ImportId)">
-                                                            <i class="fas fa-times"></i>
-                                                        </a>
+                                                                                            <a href = "javascript:void(0);"
+                                                                                                   class="btn btn-danger btn-sm"
+                                                                                               title="Từ chối phiếu này"
+                                                                                               onclick="openRejectModal(@item.ImportId)">
+                                                                                                <i class="fas fa-times"></i>
+                                                                                            </a>
+                                                                                        }
+                                                @* --- KẾT THÚC NÚT DUYỆT/TỪ CHỐI --- *@
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </tr>
                                                     }
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
+                                    </tbody>
                             </table>
 
                         </div>

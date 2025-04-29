@@ -18,6 +18,15 @@ namespace MotoBikeManage.Controllers.Admin
         // GET: NhapKho
         public ActionResult Index(string status, string supplierName, string createdBy, DateTime? fromDate, DateTime? toDate)
         {
+            // Lấy thông tin người dùng từ Session
+            var userRole = Session["Role"]?.ToString();
+            var userId = (int?)Session["Id"]; // Ép kiểu nullable int phòng trường hợp Session null
+
+            if (string.IsNullOrEmpty(userRole) || !userId.HasValue)
+            {
+                // Nếu chưa đăng nhập hoặc thiếu thông tin Session, chuyển hướng về trang Login
+                return RedirectToAction("Login", "Admin"); // Hoặc trang đăng nhập phù hợp
+            }
             var query = db.Import_Stock
                         .Include(i => i.Supplier)
                         .Include(i => i.User)
@@ -25,6 +34,15 @@ namespace MotoBikeManage.Controllers.Admin
                         .OrderByDescending(i => i.import_date)
                         .AsQueryable();
 
+            // --- LỌC DỮ LIỆU THEO VAI TRÒ ---
+            if (userRole == "NhanVien")
+            {
+                // Nếu là Nhân viên, chỉ hiển thị phiếu do chính họ tạo
+                query = query.Where(i => i.user_id == userId.Value); // Sử dụng userId.Value vì đã kiểm tra HasValue ở trên
+                                                                     // Không cho nhân viên lọc theo người tạo khác
+                createdBy = null; // Hoặc bỏ qua input filter `createdBy` trong view cho nhân viên
+            }
+            // --- KẾT THÚC LỌC THEO VAI TRÒ ---
             if (!string.IsNullOrEmpty(status))
             {
                 query = query.Where(i => i.approval_status == status);
@@ -35,7 +53,7 @@ namespace MotoBikeManage.Controllers.Admin
                 query = query.Where(i => i.Supplier.name.Contains(supplierName));
             }
 
-            if (!string.IsNullOrEmpty(createdBy))
+            if (!string.IsNullOrEmpty(createdBy) && userRole == "Admin")
             {
                 query = query.Where(i => i.User.full_name.Contains(createdBy));
             }
@@ -62,6 +80,20 @@ namespace MotoBikeManage.Controllers.Admin
                 ApprovedByUser = i.User1.full_name,
                 RejectReason = i.reject_reason
             }).ToList();
+            // Lấy danh sách duy nhất từ phiếu nhập hiện có (giữ nguyên hoặc điều chỉnh nếu cần)
+            // Nếu là nhân viên, có thể không cần hiển thị bộ lọc theo người tạo khác
+            if (userRole == "Admin")
+            {
+                ViewBag.Creators = db.Import_Stock
+                    .Select(i => i.User.full_name)
+                    .Distinct()
+                    .OrderBy(n => n)
+                    .ToList();
+             }
+            else
+            {
+                ViewBag.Creators = new List<string>(); // Hoặc chỉ chứa tên của nhân viên đó
+            }
             // Lấy danh sách duy nhất từ phiếu nhập hiện có
             ViewBag.Suppliers = db.Import_Stock
                 .Select(i => i.Supplier.name)
@@ -69,17 +101,27 @@ namespace MotoBikeManage.Controllers.Admin
                 .OrderBy(n => n)
                 .ToList();
 
-            ViewBag.Creators = db.Import_Stock
-                .Select(i => i.User.full_name)
-                .Distinct()
-                .OrderBy(n => n)
-                .ToList();
-
+            //ViewBag.Creators = db.Import_Stock
+            //    .Select(i => i.User.full_name)
+            //    .Distinct()
+            //    .OrderBy(n => n)
+            //    .ToList();
+            ViewBag.UserRole = userRole;
             return View(importList);
         }
         [HttpGet]
         public JsonResult Details(int id)
         {
+            // Thêm kiểm tra quyền ở đây nếu cần
+            // Ví dụ: Nếu là nhân viên, chỉ cho xem chi tiết phiếu của mình
+            var userRole = Session["Role"]?.ToString();
+            var userId = (int?)Session["Id"];
+            var importQuery = db.Import_Stock.AsQueryable();
+
+            if (userRole == "NhanVien")
+            {
+                importQuery = importQuery.Where(i => i.user_id == userId.Value);
+            }
             var item = db.Import_Stock
                  .Include(i => i.Supplier)
                  .Include(i => i.User)
@@ -143,6 +185,13 @@ namespace MotoBikeManage.Controllers.Admin
         // GET: NhapKho/Create
         public ActionResult Create()
         {
+            // Kiểm tra quyền nếu cần, ví dụ chỉ Admin và NhanVien được tạo
+            var userRole = Session["Role"]?.ToString();
+            if (userRole != "Admin" && userRole != "NhanVien")
+            {
+                // Hoặc thông báo lỗi, hoặc chuyển hướng
+                return RedirectToAction("Login", "Admin");
+            }
             ViewBag.Suppliers = new SelectList(db.Suppliers.ToList(), "supplier_id", "name");
 
             var viewModel = new ImportStockViewModel
@@ -185,6 +234,7 @@ namespace MotoBikeManage.Controllers.Admin
                 TempData["Error"] = "Không xác định người dùng.";
                 return RedirectToAction("Index");
             }
+            var userRole = user.role?.Trim(); // Lấy vai trò từ đối tượng user đã lấy được
 
             var import = new Import_Stock
             {
@@ -192,57 +242,93 @@ namespace MotoBikeManage.Controllers.Admin
                 user_id = user.id,
                 import_date = DateTime.Now,
                 note = model.Note,
-                approved_by = user.id,
-                reject_reason = model.RejectReason,
-                approval_status = user.role == "Admin" ? "Đã duyệt" : "Chờ duyệt",
-                approved_date = user.role == "Admin" ? DateTime.Now : (DateTime?)null
+                approval_status = (userRole == "Admin") ? "Đã duyệt" : "Chờ duyệt",
+                approved_date = (userRole == "Admin") ? (DateTime?)DateTime.Now : null,
+                approved_by = (userRole == "Admin") ? (int?)user.id : null, // CHỈ Admin tự duyệt mới gán approved_by
+                reject_reason = null // Lý do từ chối ban đầu là null
             };
 
             db.Import_Stock.Add(import);
-            db.SaveChanges();
-
-            foreach (var detail in model.Details)
+            try
             {
-                var modelId = db.VehicleModels
-                                .Where(m => m.name == detail.ModelName)
-                                .Select(m => m.model_id)
-                                .FirstOrDefault();
-
-                if (modelId > 0)
-                {
-                    db.Import_Details.Add(new Import_Details
-                    {
-                        import_id = import.import_id,
-                        model_id = modelId,
-                        quantity = detail.Quantity,
-                        price = detail.Price
-                    });
-                }
-            }
-
-            db.SaveChanges();
-
-            // Tự động duyệt nếu là Admin
-            var importWithDetails = db.Import_Stock
-                                      .Include(i => i.Import_Details)
-                                      .FirstOrDefault(i => i.import_id == import.import_id);
-
-            if (user.role == "Admin" && importWithDetails != null)
-            {
-                ApproveImportStock(importWithDetails);
                 db.SaveChanges();
-                TempData["SuccessImport1"] = "Phiếu nhập đã được tạo thành công.";
-            }
-            else
-            {
-                TempData["Success"] = "Tạo phiếu nhập kho thành công (chờ duyệt).";
-            }
 
-            return RedirectToAction("Index");
+                // Thêm chi tiết phiếu nhập (giữ nguyên logic)
+                foreach (var detail in model.Details)
+                {
+                    var modelId = db.VehicleModels
+                                    .Where(m => m.name == detail.ModelName)
+                                    .Select(m => m.model_id)
+                                    .FirstOrDefault();
+                    if (modelId > 0)
+                    {
+                        db.Import_Details.Add(new Import_Details
+                        {
+                            import_id = import.import_id, // Lấy id vừa tạo
+                            model_id = modelId,
+                            quantity = detail.Quantity,
+                            price = detail.Price
+                        });
+                    }
+                }
+                db.SaveChanges(); // Lưu chi tiết
+
+                // Tự động duyệt và sinh xe nếu là Admin (giữ nguyên logic)
+                if (userRole == "Admin") // Chỉ gọi ApproveImportStock nếu là Admin
+                {
+                    // Cần lấy lại import với details vì ApproveImportStock cần details
+                    var importToApprove = db.Import_Stock
+                                          .Include(i => i.Import_Details)
+                                          .FirstOrDefault(i => i.import_id == import.import_id);
+
+                    if (importToApprove != null)
+                    {
+                        ApproveImportStock(importToApprove); // Gọi hàm sinh xe
+                        db.SaveChanges(); // Lưu thay đổi sau khi sinh xe
+                        TempData["SuccessImport1"] = "Phiếu nhập đã được tạo và duyệt thành công.";
+                    }
+                    else
+                    {
+                        // Xử lý lỗi nếu không tìm thấy phiếu vừa tạo để duyệt
+                        TempData["Error"] = "Lỗi khi tự động duyệt phiếu nhập.";
+                    }
+
+                }
+                else // Nếu là Nhân viên
+                {
+                    TempData["Success"] = "Tạo phiếu nhập kho thành công (chờ duyệt).";
+                }
+
+
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex) // Bắt lỗi nếu có vấn đề khi lưu DB
+            {
+                // Log lỗi (quan trọng)
+                // Logger.LogError(ex, "Lỗi khi tạo phiếu nhập kho");
+                TempData["Error"] = "Đã xảy ra lỗi trong quá trình tạo phiếu nhập. Vui lòng thử lại.";
+                // Cần xóa import đã add nếu save bị lỗi ở bước thêm details
+                var entry = db.Entry(import);
+                if (entry.State == EntityState.Added)
+                {
+                    // Cố gắng gỡ bỏ khỏi context nếu nó chưa được lưu
+                    // Hoặc nếu đã lưu thì phải xử lý xóa nó đi
+                }
+
+                return View(model); // Trả về view với lỗi
+            }
         }
         // GET: NhapKho/Approve/5
         public ActionResult Approve(int id)
         {
+            var userRole = Session["Role"]?.ToString();
+            var userId = (int?)Session["Id"]; // Lấy ID người dùng từ Session
+            // 1. Kiểm tra quyền Admin và ID người dùng
+            if (userRole != "Admin" || !userId.HasValue)
+            {
+                TempData["Error"] = "Bạn không có quyền hoặc phiên đăng nhập đã hết hạn.";
+                return RedirectToAction("Index");
+            }
             var import = db.Import_Stock
                            .Include(i => i.Import_Details)
                            .FirstOrDefault(i => i.import_id == id);
@@ -256,17 +342,38 @@ namespace MotoBikeManage.Controllers.Admin
                 return RedirectToAction("Index");
             }
 
-            ApproveImportStock(import);
+            // 4. Gọi hàm sinh xe (nếu logic sinh xe phức tạp)
+            // Nếu hàm ApproveImportStock có thể gây lỗi, nên đặt trong try-catch
+            try
+            {
+                ApproveImportStock(import); // Gọi hàm sinh xe
 
-            db.SaveChanges();
+                // 5. *** CẬP NHẬT TRẠNG THÁI PHIẾU NHẬP ***
+                import.approval_status = "Đã duyệt";
+                import.approved_date = DateTime.Now;
+                import.approved_by = userId.Value; // Gán ID của Admin đang duyệt
+                import.reject_reason = null; // Xóa lý do từ chối nếu có (trường hợp duyệt lại phiếu bị từ chối - nếu có logic này)
 
-            TempData["SuccessImport"] = "Duyệt nhập kho thành công!";
-            return RedirectToAction("Index");
+
+                // 6. Lưu tất cả thay đổi (cả xe mới và trạng thái phiếu nhập)
+                db.SaveChanges();
+
+                TempData["SuccessImport"] = "Duyệt nhập kho thành công!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi quan trọng ở đây (ex.ToString())
+                TempData["Error"] = "Đã xảy ra lỗi trong quá trình duyệt và sinh xe. Vui lòng thử lại.";
+                // Cân nhắc: Có nên rollback việc thêm xe nếu cập nhật phiếu lỗi? (Cần transaction)
+                return RedirectToAction("Index");
+            }
         }
 
         // Logic dùng chung để duyệt phiếu nhập và sinh xe mới
         private void ApproveImportStock(Import_Stock import)
         {
+
             foreach (var detail in import.Import_Details)
             {
                 var modelId = detail.model_id;
@@ -313,8 +420,8 @@ namespace MotoBikeManage.Controllers.Admin
                     });
                 }
             }
-            import.approval_status = "Đã duyệt";
-            import.approved_date = DateTime.Now;
+           // import.approval_status = "Đã duyệt";
+           // import.approved_date = DateTime.Now;
         }
         private static readonly char[] ValidLetters = "ABCDEFGHJKLMNPRSTUVWXYZ".ToCharArray(); // Loại I, O, Q
 
@@ -397,6 +504,12 @@ namespace MotoBikeManage.Controllers.Admin
         [HttpPost]
         public ActionResult Reject(int id, string reason)
         {
+            var userRole = Session["Role"]?.ToString();
+            if (userRole != "Admin")
+            {
+                TempData["Error"] = "Bạn không có quyền thực hiện hành động này.";
+                return RedirectToAction("Index");
+            }
             if (string.IsNullOrWhiteSpace(reason))
             {
                 TempData["ErrorReject"] = "Vui lòng nhập lý do từ chối.";
@@ -409,12 +522,18 @@ namespace MotoBikeManage.Controllers.Admin
 
             var username = Session["Username"]?.ToString();
             var user = db.Users.FirstOrDefault(u => u.username == username);
-            if (user == null)
+            if (user == null || user.role?.Trim() != "Admin") // Kiểm tra lại user và role
             {
-                TempData["Error"] = "Không xác định người dùng.";
+                TempData["Error"] = "Không xác định người dùng Admin hợp lệ.";
                 return RedirectToAction("Index");
             }
 
+            // Kiểm tra lại user có phải admin không (double check)
+            if (user.role?.Trim() != "Admin")
+            {
+                TempData["Error"] = "Chỉ Admin mới có quyền từ chối.";
+                return RedirectToAction("Index");
+            }
             import.approval_status = "Từ chối";
             import.reject_reason = reason;
             import.approved_date = DateTime.Now;
