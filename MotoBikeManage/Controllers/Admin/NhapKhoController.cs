@@ -193,6 +193,8 @@ namespace MotoBikeManage.Controllers.Admin
                 return RedirectToAction("Login", "Admin");
             }
             ViewBag.Suppliers = new SelectList(db.Suppliers.ToList(), "supplier_id", "name");
+            
+            ViewBag.UserRole = userRole;
 
             var viewModel = new ImportStockViewModel
             {

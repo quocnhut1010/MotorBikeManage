@@ -1,7 +1,24 @@
 ﻿@model MotoBikeManage.ViewModels.ExportStockViewModel
 @{
     ViewBag.Title = "Tạo phiếu xuất kho";
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml"; // Đảm bảo layout này đã có jQuery
+    // Đảm bảo bạn sử dụng Layout phù hợp (ví dụ: _AdminLayout.cshtml)
+    // Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var userRole = ViewBag.UserRole as string;
+    if (userRole == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    else if (userRole == "NhanVien")
+    {
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+    }
+    else
+    {
+        // Layout mặc định hoặc xử lý trường hợp vai trò không xác định (tùy chọn)
+        // Ví dụ: quay về trang đăng nhập hoặc dùng một layout chung
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Ví dụ layout chung
+
+    }
 }
 
 <div class="container mt-4 p-4 border rounded bg-white shadow">

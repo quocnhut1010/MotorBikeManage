@@ -221,15 +221,15 @@
                                                         <i class="fa fa-info-circle"></i>
                                                     </a>
                                                     @*@if (item.ApprovalStatus == "Đã duyệt")
-        {
-            <a onclick="showImportDetail(@item.ImportId)"
-               class="btn btn-sm btn-info"
-               title="In phiếu này">
-                <i class="fas fa-print"></i>
-            </a>
-        }*@
+                                                    {
+                                                        <a onclick="showImportDetail(@item.ImportId)"
+                                                           class="btn btn-sm btn-info"
+                                                           title="In phiếu này">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                    }*@
 
-                                                    @* --- HIỂN THỊ NÚT DUYỆT/TỪ CHỐI CHỈ CHO ADMIN --- *@
+                                                                            @* --- HIỂN THỊ NÚT DUYỆT/TỪ CHỐI CHỈ CHO ADMIN --- *@
                                                                                             @if (userRole == "Admin" && item.ApprovalStatus == "Chờ duyệt") {
                                                                                             <a href = "@Url.Action("Approve", new { id = item.ImportId })"
                                                                                                    class="btn btn-success btn-sm me-2"
@@ -244,8 +244,8 @@
                                                                                                onclick="openRejectModal(@item.ImportId)">
                                                                                                 <i class="fas fa-times"></i>
                                                                                             </a>
-                                                                                        }
-                                                @* --- KẾT THÚC NÚT DUYỆT/TỪ CHỐI --- *@
+                                                                                            }
+                                                                             @* --- KẾT THÚC NÚT DUYỆT/TỪ CHỐI --- *@
                                                                                                 </div>
                                                                                             </td>
                                                                                         </tr>

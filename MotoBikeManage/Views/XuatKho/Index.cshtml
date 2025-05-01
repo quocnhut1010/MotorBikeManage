@@ -1,7 +1,25 @@
 ﻿@model List<MotoBikeManage.ViewModels.ExportStockViewModel>
 @{
     ViewBag.Title = "Danh sách Phiếu Xuất Kho";
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    // Lấy Role từ ViewBag để sử dụng trong View
+    var userRole = ViewBag.UserRole as string;
+
+    // Đặt Layout dựa trên vai trò người dùng
+    if (userRole == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    else if (userRole == "NhanVien")
+    {
+        // !!! KIỂM TRA LẠI TÊN FILE LAYOUT NHÂN VIÊN !!!
+        // Có thể là _LayoutStaff.cshtml hoặc _Layout_Staff.cshtml tùy theo bạn đặt tên
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml"; // Giả sử tên là _LayoutStaff.cshtml
+    }
+    else
+    {
+        // Layout mặc định hoặc xử lý khác
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
 }
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
@@ -33,26 +51,35 @@
                 </div>
 
                 @*<div class="col-md-3">
-                    <label class="form-label">Nhà cung cấp</label>
-                    <select name="supplierName" class="form-select">
-                        <option value="">-- Tất cả --</option>
-                        @foreach (var s in (List<string>)ViewBag.Suppliers)
-                        {
-                            <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
-                        }
-                    </select>
-                </div>*@
+                <label class="form-label">Nhà cung cấp</label>
+                <select name="supplierName" class="form-select">
+                    <option value="">-- Tất cả --</option>
+                    @foreach (var s in (List<string>)ViewBag.Suppliers)
+                    {
+                        <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
+                    }
+                </select>
+            </div>*@
 
-                <div class="col-md-3">
-                    <label class="form-label">Người tạo</label>
-                    <select name="createdBy" class="form-select">
-                        <option value="">-- Tất cả --</option>
-                        @foreach (var c in (List<string>)ViewBag.Creators)
-                        {
-                            <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
-                        }
-                    </select>
-                </div>
+                @* --- HIỂN THỊ BỘ LỌC NGƯỜI TẠO CHỈ CHO ADMIN --- *@
+                if (userRole == "Admin")
+                {
+                    <div class="col-md-3">
+                        <label class="form-label">Người tạo</label>
+                        <select name="createdBy" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            @if (ViewBag.Creators != null)
+                            {
+                                foreach (var c in (List<string>)ViewBag.Creators)
+                                {
+                                    <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
+                @* --- KẾT THÚC BỘ LỌC NGƯỜI TẠO --- *@
+
 
 
                 <div class="row" style="margin-top:25px">
@@ -84,14 +111,22 @@
         <div class="col-md-12 mb-3">
             <div class="d-flex justify-content-between">
                 <div class="mr-auto">
-                    <a href="@Url.Action("Create", "XuatKho")" class="btn btn-primary mr-3">
-                        <i class="fa fa-truck"></i> Tạo Phiếu Xuất Mới
-                    </a>
+                    @* --- NÚT TẠO MỚI CHO ADMIN & NHANVIEN --- *@
+                    @if (userRole == "Admin" || userRole == "NhanVien")
+                    {
+                        <a href="@Url.Action("Create", "XuatKho")" class="btn btn-primary mr-3">
+                            <i class="fa fa-plus-circle"></i> Tạo Phiếu Xuất Mới @* Đổi icon nếu muốn *@
+                        </a>
+                    }
                 </div>
                 <div class="mr-auto ">
-                    <a href="@Url.Action("ExportCsv", "XuatKho")" class="btn btn-outline-success mb-3">
-                        <i class="fa fa-file-excel"></i> Xuất CSV
-                    </a>
+                    @* --- NÚT XUẤT CSV CHỈ CHO ADMIN --- *@
+                    @if (userRole == "Admin")
+                    {
+                        <a href="@Url.Action("ExportCsv", "XuatKho")" class="btn btn-outline-success mb-3">
+                            <i class="fa fa-file-excel"></i> Xuất CSV
+                        </a>
+                    }
                 </div>
             </div>
         </div>
@@ -124,15 +159,15 @@
                                     @foreach (var item in Model)
                                     {
                                         <tr>
-                                            <td>@item.ExportId</td>
+                                            <td>PXK@(item.ExportId.ToString("D5"))</td> @* Định dạng mã phiếu *@
                                             <td>@item.UserName</td>
                                             <td>@(item.ExportDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                                             <td>@item.Receiver</td>
                                             <td>@item.Reason</td>
                                             <td>
                                                 @{ string statusClass = item.ApprovalStatus == "Chờ duyệt" ? "badge bg-warning" :
-                                                                            item.ApprovalStatus == "Đã duyệt" ? "badge bg-success" :
-                                                                            item.ApprovalStatus == "Từ chối" ? "badge bg-danger" : "badge bg-secondary"; }
+                                                                             item.ApprovalStatus == "Đã duyệt" ? "badge bg-success" :
+                                                                             item.ApprovalStatus == "Từ chối" ? "badge bg-danger" : "badge bg-secondary"; }
                                                 <span class="@statusClass">@item.ApprovalStatus</span>
                                             </td>
                                             <td>@(item.ApprovedDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
@@ -143,13 +178,14 @@
                                                             onclick="showExportDetail(@item.ExportId)">
                                                         <i class="fa fa-info-circle"></i>
                                                     </button>
-                                                    @if (item.ApprovalStatus == "Chờ duyệt")
+                                                    @* --- NÚT DUYỆT & TỪ CHỐI CHỈ CHO ADMIN --- *@
+                                                    @if (userRole == "Admin" && item.ApprovalStatus == "Chờ duyệt")
                                                     {
+                                                        // Nút Duyệt (dùng form POST)
                                                         using (Html.BeginForm("Approve", "XuatKho", FormMethod.Post, new { @class = "d-inline", onsubmit = "return confirm('Bạn chắc chắn muốn duyệt phiếu này?');" }))
                                                         {
                                                             @Html.AntiForgeryToken()
                                                             @Html.Hidden("id", item.ExportId)
-
                                                             <button type="submit"
                                                                     class="btn btn-success btn-sm me-2"
                                                                     title="Duyệt phiếu này">
@@ -157,6 +193,7 @@
                                                             </button>
                                                         }
 
+                                                        // Nút Từ chối (mở modal)
                                                         <a href="javascript:void(0);"
                                                            class="btn btn-danger btn-sm"
                                                            title="Từ chối phiếu này"
@@ -164,6 +201,7 @@
                                                             <i class="fas fa-times"></i>
                                                         </a>
                                                     }
+                                                    @* --- KẾT THÚC NÚT DUYỆT & TỪ CHỐI --- *@
 
                                                 </div>
                                             </td>
@@ -237,7 +275,7 @@
 
     function showExportDetail(exportId) {
         $.ajax({
-            url: '/XuatKho/Details', // Keeping the original URL structure
+            url: '@Url.Action("Details", "XuatKho")', // Keeping the original URL structure
             type: 'GET',
             data: { id: exportId },
             success: function (response) {
