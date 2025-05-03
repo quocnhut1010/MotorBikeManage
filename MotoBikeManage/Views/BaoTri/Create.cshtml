@@ -1,0 +1,91 @@
+﻿@model MotoBikeManage.Models.Maintenance
+@{
+    ViewBag.Title = "Tạo Yêu Cầu Bảo Trì";
+    // Logic đặt Layout dựa trên vai trò người dùng
+    var userRole = ViewBag.UserRole as string;
+    if (userRole == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    else if (userRole == "NhanVien")
+    {
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml"; // Đảm bảo đường dẫn này chính xác
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Layout mặc định
+    }
+}
+
+<div class="container mt-4 p-4 border rounded bg-white shadow">
+    <h2 class="mb-4" style="text-align:center">TẠO YÊU CẦU BẢO TRÌ MỚI</h2>
+
+    @using (Html.BeginForm("Create", "BaoTri", FormMethod.Post, new { @class = "needs-validation", novalidate = "novalidate", id = "baoTriForm" }))
+    {
+        @Html.AntiForgeryToken()
+        @* Hiển thị lỗi cấp độ Model (ví dụ: lỗi kiểm tra trạng thái xe từ controller) *@
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row mb-3">
+            <div class="col-md-6 form-group">
+                @* Thêm form-group để căn chỉnh validation message *@
+                <label class="font-weight-bold" for="vehicle_id">Chọn xe cần bảo trì:</label>
+                @Html.DropDownListFor(m => m.vehicle_id, (SelectList)ViewBag.Vehicles, "-- Chọn xe --", new { @class = "form-control form-select", required = "required" })
+                @Html.ValidationMessageFor(m => m.vehicle_id, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="font-weight-bold" for="start_date">Ngày bắt đầu (dự kiến):</label>
+                @Html.EditorFor(m => m.start_date, new { htmlAttributes = new { @class = "form-control", type = "datetime-local", required = "required" } })
+                @Html.ValidationMessageFor(m => m.start_date, "", new { @class = "text-danger" })
+                @* Bỏ ghi chú nếu không set mặc định trong controller *@
+                @* <small class="form-text text-muted">Mặc định là ngày giờ hiện tại nếu bỏ trống.</small> *@
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6 form-group">
+                <label class="font-weight-bold" for="maintenance_type">Loại bảo trì:</label>
+                @Html.DropDownListFor(m => m.maintenance_type, (SelectList)ViewBag.MaintenanceTypes, "-- Chọn loại --", new { @class = "form-control form-select", required = "required" })
+                @Html.ValidationMessageFor(m => m.maintenance_type, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="font-weight-bold" for="priority">Mức ưu tiên:</label>
+                @Html.DropDownListFor(m => m.priority, (SelectList)ViewBag.Priorities, new { @class = "form-control form-select", required = "required" })
+                @Html.ValidationMessageFor(m => m.priority, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-12 form-group">
+                <label class="font-weight-bold" for="reason">Lý do bảo trì:</label>
+                @Html.TextAreaFor(m => m.reason, new { @class = "form-control", rows = 4, placeholder = "Mô tả chi tiết lý do cần bảo trì, tình trạng xe...", required = "required" })
+                @Html.ValidationMessageFor(m => m.reason, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success px-5">
+                <i class="fa fa-paper-plane"></i> Gửi Yêu Cầu
+            </button>
+            <a href="@Url.Action("Index", "BaoTri")" class="btn btn-secondary">
+                <i class="fa fa-times"></i> Hủy
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval") @* Đảm bảo include jQuery Validate *@
+    <script>
+        // Script có thể để trống nếu chỉ dùng validation mặc định của MVC và HTML5 'required'
+        $(document).ready(function () {
+            // Ví dụ: Nếu muốn dùng một thư viện datepicker khác
+            // if ($('input[type="datetime-local"]').prop('type') !== 'datetime-local') {
+            //     $('input[type="datetime-local"]').datepicker({ /* options */ });
+            // }
+        });
+    </script>
+}

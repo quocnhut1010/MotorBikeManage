@@ -1053,6 +1053,7 @@
     <Content Include="Views\VehicleModels\Index.cshtml" />
     <Content Include="Views\XuatKho\Create.cshtml" />
     <Content Include="Views\BaoCao\Index.cshtml" />
+    <Content Include="Views\BaoTri\Create.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

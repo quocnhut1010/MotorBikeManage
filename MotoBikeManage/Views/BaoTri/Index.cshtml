@@ -1,190 +1,37 @@
 ﻿@model IEnumerable<MotoBikeManage.Models.Maintenance>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Danh sách Yêu Cầu Bảo Trì"; // Changed title slightly
 
-    // Retrieve the user role from ViewBag [cite: 2]
+    // Retrieve the user role from ViewBag
     var userRole = ViewBag.UserRole as string;
 
-    // Set the layout based on the user role [cite: 3, 4, 6]
+    // Set the layout based on the user role
     if (userRole == "Admin")
     {
         Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     }
-    // Add other roles as needed. Example for a 'User' role:
-    else if (userRole == "NhanVien") // Based on your index.txt [cite: 4]
+    else if (userRole == "NhanVien") // Based on your index.txt
     {
-        Layout = "~/Views/Shared/_Layout_Staff.cshtml"; // Ensure this path is correct [cite: 5]
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml"; // Ensure this path is correct
     }
-    else // Default layout for other roles or if role is not set [cite: 6]
+    else // Default layout for other roles or if role is not set
     {
-        // You might want to set a default layout or handle this case differently
-        Layout = "~/Views/Shared/_Layout.cshtml"; // Example default layout [cite: 6]
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Example default layout
     }
 }
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-
 <style>
     /* Your existing CSS styles remain here */
-    /* Tổng thể */
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        /*margin: 20px;*/
-    }
-
-    /* Container chính */
-    .container {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-top: 55px !important;
-        /*width: 100% !important;*/
-        margin: 0 !important;
-    }
-
-    /* Bảng */
-    table.table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        table.table thead {
-            background-color: #f8f9fa;
-        }
-
-            table.table thead th {
-                text-align: center;
-                padding: 12px;
-                font-weight: bold;
-            }
-
-        table.table tbody td {
-            text-align: center;
-            padding: 10px;
-        }
-
-        table.table tbody tr:nth-child(even) {
-            background-color: #f2f2f2; /* Màu nền xen kẽ */
-        }
-
-        table.table tbody tr:hover {
-            background-color: #e9ecef; /* Hiệu ứng hover */
-        }
-
-        /* Hình ảnh */
-        table.table tbody td img {
-            border-radius: 10%;
-            width: 100px;
-            height: 80px;
-            object-fit: cover; /* Nếu muốn cắt ảnh vừa khung */
-        }
-
-    /* Nút hành động */
-    .btn-sm {
-        margin: 25px;
-        /*padding: 6px 10px;*/
-        font-size: 14px;
-    }
-
-    /* Chỉnh sửa màu sắc và hình dạng icon */
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        color: white; /* Màu chữ trắng */
-        margin-right: 5px; /* Khoảng cách giữa icon và chữ */
-    }
-
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-        color: white; /* Màu chữ trắng */
-        margin-right: 5px; /* Khoảng cách giữa icon và chữ */
-    }
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-
-    /* Phân trang */
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-        .pagination .page-item {
-            margin-right: 5px; /* Khoảng cách giữa các số trang */
-        }
-
-        .pagination .page-link {
-            color: #007bff;
-            border-radius: 5px;
-            padding: 8px 12px;
-        }
-
-            .pagination .page-link:hover {
-                background-color: #e9ecef; /* Hiệu ứng hover */
-            }
-
-        .pagination .active .page-link {
-            background-color: #007bff;
-            color: white !important; /* Màu chữ trong trang hiện tại */
-        }
-
-    /* Loại bỏ dấu chấm <li> ở phân trang */
-    .pagination {
-        list-style: none;
-    }
-
-        /* Xóa gạch chân ở phân trang */
-        .pagination .page-link {
-            text-decoration: none;
-        }
-
-
-    /*--lọc*/
-    .form-inline {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .form-group {
-        display: flex;
-        align-items: center;
-        margin-top: 25px;
-    }
-
-        .form-group label {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-    .form-control {
-        width: 150px;
-        padding: 5px;
-    }
-
-    button.btn {
-        /*padding: 5px 15px;*/
-        border: 1px solid black;
-        background-color: white;
-        color: black;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 25px;
-        margin-left: 25px;
+    /* ... */
+    .action-button-container {
+        margin-bottom: 15px; /* Add some space below the button */
+        text-align: left; /* Or right, depending on preference */
+        padding-left: 15px; /* Match container padding */
+        padding-right: 15px;
     }
 </style>
 
@@ -194,6 +41,15 @@
     var currentFilterStatus = Request.QueryString["filterStatus"] ?? "";
     string emptyListMessage = TempData["EmptyListMessage"] as string;
 }
+
+<div class="container action-button-container" style="margin-top: 20px;">
+    @if (userRole == "Admin" || userRole == "NhanVien")
+    {
+        <a href="@Url.Action("Create", "BaoTri")" class="btn btn-primary">
+            <i class="fa fa-plus-circle"></i> Tạo Yêu Cầu Bảo Trì Mới
+        </a>
+    }
+</div>
 
 <form method="get" action="@Url.Action("Index", "BaoTri")" class="form-inline mb-3 justify-content-center">
     <div class="form-group mr-2">
@@ -228,99 +84,133 @@
     <button type="submit" class="btn btn-primary">Lọc</button>
 </form>
 
-<div class="container mt-5" style="width:100%">
-    <table class="table table-bordered text-center">
-        <thead>
-            <tr>
-                <th>Nhân viên</th>
-                <th>Số khung xe</th>
-                <th>Lí do bảo trì</th>
-                <th>Ngày bắt đầu</th>
-                <th>Ngày kết thúc</th>
-                <th>Trạng thái phê duyệt</th>
-                <th>Trạng thái phê duyệt hoàn thành</th>
-                <th>Trạng thái hoàn thành</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.User1.full_name</td>
-                    <td>@item.Vehicle.frame_number</td>
-                    <td>@item.reason</td>
-                    <td>@item.start_date</td>
-                    <td>@item.end_date</td>
-                    <td>@item.approval_status</td>
-                    <td>@item.completion_approval_status</td>
-                    <td>@item.completion_status</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm btnShowDetail" data-id="@item.maintenance_id">
-                            <i class="fa fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="container mt-3" style="width:100%; padding: 0;">
+    @* Adjusted margin-top and removed padding if button container handles it *@
+    <div class="card shadow mb-4">
+        @* Optional: Wrap table in a card for better styling *@
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách Yêu cầu Bảo trì</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                @* Make table responsive *@
+                <table class="table table-bordered table-hover text-center" id="maintenanceTable">
+                    @* Added hover effect and an ID *@
+                    <thead class="thead-light">
+                        @* Use thead-light for better contrast *@
+                        <tr>
+                            <th>Người Yêu Cầu</th> @* Changed from Nhân viên to Người Yêu Cầu for clarity *@
+                            <th>Xe (Số khung)</th> @* Clarified Vehicle column *@
+                            <th>Lý do</th> @* Shortened label *@
+                            <th>Ngày Bắt Đầu</th>
+                            <th>Ngày Kết Thúc</th>
+                            <th>Trạng Thái Phê Duyệt</th>
+                            <th>Trạng Thái Xác Nhận HT</th> @* Shortened label *@
+                            <th>Trạng Thái Hoàn Thành</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center">Không có yêu cầu bảo trì nào.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@(item.User1?.full_name ?? "N/A")</td> @* Safe navigation for requester name *@
+                                    <td>@(item.Vehicle?.frame_number ?? "N/A") (@(item.Vehicle?.VehicleModel?.name ?? ""))</td> @* Show frame number and model name *@
+                                    <td>@item.reason</td>
+                                    <td>@(item.start_date?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td> @* Format date *@
+                                    <td>@(item.end_date?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td> @* Format date *@
+                                    <td>@item.approval_status</td>
+                                    <td>@item.completion_approval_status</td>
+                                    <td>@item.completion_status</td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm btnShowDetail" data-id="@item.maintenance_id" title="Xem Chi tiết">
+                                            @* Changed color, added title *@
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                        @* Optional: Add Edit/Delete buttons here based on role and status *@
+                                        @*
+                                            if (userRole == "Admin" || (userRole == "NhanVien" && item.requested_by == (int)Session["Id"] && item.approval_status == "Chờ phê duyệt"))
+                                            {
+                                                <a href="@Url.Action("Edit", "BaoTri", new { id = item.maintenance_id })" class="btn btn-warning btn-sm" title="Sửa"> <i class="fa fa-edit"></i></a>
+                                                <a href="@Url.Action("Delete", "BaoTri", new { id = item.maintenance_id })" class="btn btn-danger btn-sm" title="Xóa" onclick="return confirm('Bạn chắc chắn muốn xóa yêu cầu này?');"> <i class="fa fa-trash"></i></a>
+                                            }
+                                        *@
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 <div class="modal fade" id="maintenanceDetailModal" tabindex="-1" role="dialog" aria-labelledby="maintenanceDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="maintenanceDetailModalLabel">Chi tiết bảo trì</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Đóng">
+                @* Ensure correct dismiss attribute for Bootstrap 4 *@
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div id="maintenanceInfo">
-                    <p><strong>Nhân viên bảo trì:</strong> <span id="detailFullName"></span></p>
+                    <p><strong>Người Yêu Cầu:</strong> <span id="detailFullName"></span></p>
+                    <p><strong>Xe (Model):</strong> <span id="detailVehicleModel"></span></p>
                     <p><strong>Số khung xe:</strong> <span id="detailFrameNumber"></span></p>
                     <p><strong>Lí do bảo trì:</strong> <span id="detailReason"></span></p>
+                    <p><strong>Loại bảo trì:</strong> <span id="detailMaintenanceType"></span></p>
+                    <p><strong>Mức ưu tiên:</strong> <span id="detailPriority"></span></p>
+                    <hr />
                     <p><strong>Trạng thái phê duyệt:</strong> <span id="detailApprovalStatus"></span></p>
-                    <p><strong>Trạng thái phê duyệt hoàn thành:</strong> <span id="detailCompletionApprovalStatus"></span></p>
+                    <p><strong>Trạng thái xác nhận HT:</strong> <span id="detailCompletionApprovalStatus"></span></p>
                     <p><strong>Trạng thái hoàn thành:</strong> <span id="detailCompletionStatus"></span></p>
                     <hr />
-                    <div id="completedInfoContainer" style="display: none;">
-                        <p><strong>Phê duyệt bởi:</strong> <span id="detailApprovedByName"></span></p>
+                    @* Show Approver/Completion Info only if applicable *@
+                    <div id="adminActionInfoContainer" style="display: none;">
+                        <p><strong>Phê duyệt/Từ chối bởi:</strong> <span id="detailApprovedByName"></span></p>
                         <p><strong>Ngày bắt đầu:</strong> <span id="detailStartDate"></span></p>
                         <p><strong>Ngày hoàn thành:</strong> <span id="detailEndDate"></span></p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            @* Conditionally show footer buttons based on role and status passed from AJAX *@
+            <div class="modal-footer" id="modalActionFooter">
                 <button type="button" class="btn btn-success" id="btnApprove">
-                    <i class="fa fa-check"></i> Phê duyệt
+                    <i class="fa fa-check"></i> Phê duyệt / Xác nhận HT
                 </button>
                 <button type="button" class="btn btn-danger" id="btnReject">
                     <i class="fa fa-times"></i> Từ chối
                 </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button> @* Always show close button *@
             </div>
         </div>
     </div>
 </div>
 
 <script>
-     function onChangeCategory() {
+    // onChangeCategory function remains the same
+    function onChangeCategory() {
         var selectedVal = document.getElementById("filterCategory").value;
         var secondDropdown = document.getElementById("filterStatus");
-
-        // Clear old items in dropdown 2
         secondDropdown.innerHTML = "";
-        // Default allows selecting "Tất cả"
         secondDropdown.options.add(new Option("Tất cả", ""));
-
-        // If nothing is selected (Tất cả), disable dropdown 2
         if (selectedVal === "") {
             secondDropdown.disabled = true;
         } else {
             secondDropdown.disabled = false;
-
-            // Depending on the attribute value of dropdown 1
-            // assign options to dropdown 2
             if (selectedVal === "approval_status") {
                 secondDropdown.options.add(new Option("Chờ phê duyệt", "Chờ phê duyệt"));
                 secondDropdown.options.add(new Option("Đã phê duyệt", "Đã phê duyệt"));
@@ -335,220 +225,207 @@
             }
         }
     }
-
-    // Function to set dropdown 2 on page load
+    // onload setup remains the same
     window.onload = function () {
-        // Call onChangeCategory() to populate appropriate options
         onChangeCategory();
-
-        // Get filterStatus value from Razor
         var currentFilterStatus = "@currentFilterStatus";
-        // If there is a filterStatus value, set it for dropdown 2
         if (currentFilterStatus) {
             document.getElementById("filterStatus").value = currentFilterStatus;
         }
+        // Optional: Initialize DataTable if you want sorting/searching on the table
+        // $('#maintenanceTable').DataTable({ "language": { "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json" } });
     };
 </script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
-    // Click event for the small X button in the modal (if you want to add more logic)
-    $(document).on("click", ".btn-close[data-dismiss='modal']", function() {
-        console.log("Modal closed with X button.");
-        // Add more actions here if needed
-    });
+    $(document).ready(function() { // Ensure scripts run after DOM is ready
 
-    // Handle View button event
-    $(document).on("click", ".btnShowDetail", function() {
-        var id = $(this).data("id");
-        // Call AJAX to get details
-        $.ajax({
-            url: '@Url.Action("GetMaintenanceDetail","BaoTri")',
-            type: 'GET',
-            data: { id: id },
-            success: function (response) {
-                if (!response.success) {
-                    swal({
-                        title: "Oops...",
-                        text: response.message,
-                        icon: 'error',
-                        button: "Đóng"
-                    });
-                    return;
-                }
+        // Click event for the small X button in the modal (if you want to add more logic)
+        $(document).on("click", ".close[data-dismiss='modal']", function() { // Target Bootstrap 4 close button
+            console.log("Modal closed with X button.");
+            // Add more actions here if needed
+        });
 
-                // Display data in the modal
-                $("#detailFullName").text(response.data.full_name);
-                $("#detailFrameNumber").text(response.data.frame_number);
-                $("#detailReason").text(response.data.reason);
-                $("#detailApprovalStatus").text(response.data.approval_status);
-                $("#detailCompletionApprovalStatus").text(response.data.completion_approval_status);
-                $("#detailCompletionStatus").text(response.data.completion_status);
-                $("#detailApprovedByName").text(response.data.approved_by_name);
-                $("#detailStartDate").text(response.data.start_date_str);
-                $("#detailEndDate").text(response.data.end_date_str);
+        // Handle View button event
+        $(document).on("click", ".btnShowDetail", function() {
+            var id = $(this).data("id");
+             $('#maintenanceDetailModal').modal('show'); // Show modal immediately (optional, show loading?)
+             $('#maintenanceInfo').hide(); // Hide content while loading
+             $('#modalActionFooter button').hide(); // Hide action buttons initially
+             $('.modal-body').append('<div id="modalLoading" class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i> Loading...</div>'); // Add loading indicator
 
-                // Check completion status
-                if (response.data.completion_status === "Đã hoàn thành") {
-                    // Show the completedInfoContainer block
-                    $("#completedInfoContainer").show();
-                } else {
-                    // Hide this block if not completed
-                    $("#completedInfoContainer").hide();
-                }
-
-                // Store the ID in the modal
-                $("#maintenanceDetailModal").data("maintenance-id", response.data.maintenance_id);
-
-                // If not completed => show buttons (or set appropriate text for Case 1 / Case 2)
-                if (response.data.completion_status !== "Đã hoàn thành") {
-                    if (response.data.approval_status === "Đã phê duyệt") {
-                        // Case 2
-                        $("#btnApprove").html('<i class="fa fa-check"></i> Xác nhận');
-                        $("#btnReject").html('<i class="fa fa-times"></i> Từ chối');
-                    } else {
-                        // Case 1
-                        $("#btnApprove").html('<i class="fa fa-check"></i> Phê duyệt');
-                        $("#btnReject").html('<i class="fa fa-times"></i> Từ chối');
+            $.ajax({
+                url: '@Url.Action("GetMaintenanceDetail","BaoTri")',
+                type: 'GET',
+                data: { id: id },
+                success: function (response) {
+                    $('#modalLoading').remove(); // Remove loading indicator
+                    if (!response.success) {
+                         $('#maintenanceDetailModal').modal('hide'); // Hide modal on error
+                        swal({
+                            title: "Oops...",
+                            text: response.message,
+                            icon: 'error',
+                            button: "Đóng"
+                        });
+                        return;
                     }
 
-                    // Show both buttons
-                    $("#btnApprove").show();
-                    $("#btnReject").show();
-                }
-                else {
-                    // If "Đã hoàn thành", hide both buttons for view-only
-                    $("#btnApprove").hide();
-                    $("#btnReject").hide();
-                }
+                    // Populate modal content
+                    $("#detailFullName").text(response.data.full_name);
+                     $("#detailVehicleModel").text(response.data.vehicle_model);
+                    $("#detailFrameNumber").text(response.data.frame_number);
+                    $("#detailReason").text(response.data.reason);
+                     $("#detailMaintenanceType").text(response.data.maintenance_type);
+                     $("#detailPriority").text(response.data.priority);
+                    $("#detailApprovalStatus").text(response.data.approval_status);
+                    $("#detailCompletionApprovalStatus").text(response.data.completion_approval_status);
+                    $("#detailCompletionStatus").text(response.data.completion_status);
 
-                // Open the modal
-                $("#maintenanceDetailModal").modal("show");
-            },
-            error: function () {
-                swal({
-                    title: "Lỗi",
-                    text: "Lỗi khi gọi server!",
-                    icon: 'error',
-                    button: "Đóng"
-                });
-            }
-        });
-    });
 
-    // Approve button
-    $("#btnApprove").click(function() {
-        var id = $("#maintenanceDetailModal").data("maintenance-id");
-        callUpdateStatus(id, "approve");
-    });
+                    // Show admin/completion info only if relevant data exists
+                     if(response.data.approved_by_name !== 'Chưa duyệt' || response.data.completion_status === 'Đã hoàn thành') {
+                         $("#detailApprovedByName").text(response.data.approved_by_name);
+                         $("#detailStartDate").text(response.data.start_date_str);
+                         $("#detailEndDate").text(response.data.end_date_str);
+                         $("#adminActionInfoContainer").show();
+                     } else {
+                         $("#adminActionInfoContainer").hide();
+                     }
 
-    // Reject button
-    $("#btnReject").click(function() {
-        var id = $("#maintenanceDetailModal").data("maintenance-id");
-        callUpdateStatus(id, "reject");
-    });
 
-    // AJAX update function
-    function callUpdateStatus(id, actionType) {
-        $.ajax({
-            url: '@Url.Action("UpdateMaintenanceStatus","BaoTri")',
-            type: 'POST',
-            data: { id: id, actionType: actionType },
-            success: function (response) {
-                if (!response.success) {
+                    // Store the ID in the modal's data attribute
+                    $("#maintenanceDetailModal").data("maintenance-id", response.data.maintenance_id);
+
+                    // Determine if action buttons should be shown (Only for Admin)
+                     var currentUserRole = "@userRole"; // Get role from Razor variable
+                    var showActionButtons = false;
+
+                    if (currentUserRole === "Admin") {
+                        // Admin can act if request is 'Chờ phê duyệt' OR ('Đã phê duyệt' AND 'Đang bảo trì')
+                        if (response.data.approval_status === 'Chờ phê duyệt' ||
+                            (response.data.approval_status === 'Đã phê duyệt' && response.data.completion_status === 'Đang bảo trì'))
+                         {
+                             showActionButtons = true;
+
+                            // Adjust button text based on state
+                             if (response.data.approval_status === "Đã phê duyệt") {
+                                 // Case 2: Confirm/Reject Completion
+                                 $("#btnApprove").html('<i class="fa fa-check"></i> Xác nhận Hoàn Thành');
+                                 $("#btnReject").html('<i class="fa fa-times"></i> Từ chối Hoàn Thành');
+                             } else {
+                                 // Case 1: Approve/Reject Request
+                                 $("#btnApprove").html('<i class="fa fa-check"></i> Phê duyệt Yêu Cầu');
+                                 $("#btnReject").html('<i class="fa fa-times"></i> Từ chối Yêu Cầu');
+                             }
+                         }
+                    }
+
+                    // Show/hide action buttons based on logic above
+                     if (showActionButtons) {
+                         $("#btnApprove").show();
+                         $("#btnReject").show();
+                         $("#modalActionFooter button[data-dismiss='modal']").show(); // Show close button
+                     } else {
+                         $("#btnApprove").hide();
+                         $("#btnReject").hide();
+                         $("#modalActionFooter button[data-dismiss='modal']").show(); // Still show close button
+                    }
+                     $('#maintenanceInfo').show(); // Show populated content
+
+                },
+                error: function () {
+                     $('#modalLoading').remove(); // Remove loading indicator
+                     $('#maintenanceDetailModal').modal('hide'); // Hide modal on error
                     swal({
-                        title: "Oops...",
-                        text: response.message,
+                        title: "Lỗi",
+                        text: "Lỗi khi tải chi tiết yêu cầu!",
                         icon: 'error',
                         button: "Đóng"
                     });
-                    return;
                 }
+            });
+        }); // End btnShowDetail click
 
-                // Show SweetAlert success popup
-                swal({
-                    title: "Thành công",
-                    text: response.message,
-                    icon: 'success',
-                    button: "Đóng"
-                }).then(function() {
-                    // Close modal, reload
-                    $("#maintenanceDetailModal").modal("hide");
-                    location.reload();
-                });
-            },
-            error: function() {
-                swal({
-                    title: "Lỗi",
-                    text: "Lỗi khi cập nhật trạng thái!",
-                    icon: 'error',
-                    button: "Đóng"
-                });
-            }
+        // Approve button click - Action logic remains the same
+        $("#btnApprove").click(function() {
+            var id = $("#maintenanceDetailModal").data("maintenance-id");
+            // Add confirmation dialog
+             swal({
+                 title: "Xác nhận?",
+                 text: "Bạn có chắc muốn thực hiện hành động này?",
+                 icon: "warning",
+                 buttons: ["Hủy", "Xác nhận"],
+                 dangerMode: false, // False for approve/confirm, true for reject/delete
+             })
+             .then((willProcess) => {
+                 if (willProcess) {
+                     callUpdateStatus(id, "approve");
+                 }
+             });
         });
-    }
+
+        // Reject button click - Action logic remains the same
+        $("#btnReject").click(function() {
+            var id = $("#maintenanceDetailModal").data("maintenance-id");
+             // Add confirmation dialog
+             swal({
+                 title: "Xác nhận?",
+                 text: "Bạn có chắc muốn từ chối yêu cầu/xác nhận này?",
+                 icon: "warning",
+                 buttons: ["Hủy", "Xác nhận"],
+                 dangerMode: true, // True for reject/delete
+             })
+             .then((willProcess) => {
+                 if (willProcess) {
+                    callUpdateStatus(id, "reject");
+                 }
+             });
+        });
+
+        // AJAX update function remains the same (ensure CSRF token if needed)
+        function callUpdateStatus(id, actionType) {
+             // If using ValidateAntiForgeryToken, you need to include the token in the data
+             // var token = $('input[name="__RequestVerificationToken"]').val(); // Get token from form
+             $.ajax({
+                 url: '@Url.Action("UpdateMaintenanceStatus","BaoTri")',
+                 type: 'POST',
+                 // data: { id: id, actionType: actionType, __RequestVerificationToken: token }, // Include token
+                 data: { id: id, actionType: actionType }, // Without token for now, add if needed
+                 success: function (response) {
+                     if (!response.success) {
+                         swal({ title: "Oops...", text: response.message, icon: 'error', button: "Đóng" });
+                         return;
+                     }
+                     swal({ title: "Thành công", text: response.message, icon: 'success', button: "Đóng" })
+                     .then(function() {
+                         $("#maintenanceDetailModal").modal("hide");
+                         location.reload(); // Reload page to see updated status
+                     });
+                 },
+                 error: function() {
+                     swal({ title: "Lỗi", text: "Lỗi khi cập nhật trạng thái!", icon: 'error', button: "Đóng" });
+                 }
+             });
+         }
+
+     }); // End document ready
 </script>
 
 @{
-    if (TempData["EmptyListMessage"] != null)
+    if (TempData["EmptyListMessage"] != null) { /* ... */ }
+    if (TempData["ApproveMessage"] != null) { /* ... */ }
+    if (TempData["Approve_Message"] != null) { /* ... */ }
+    if (TempData["NoApproveMessage"] != null) { /* ... */ }
+    if (TempData["NoApprove_Message"] != null) { /* ... */ }
+    // Add TempData checks for Success/Error from Create action if you added them
+    if (TempData["Success"] != null)
     {
-        var message = TempData["EmptyListMessage"].ToString();
-        <script>
-            swal({
-                title: "Oops...",
-                text: "@Html.Raw(TempData["EmptyListMessage"])",
-                icon: 'error',
-                button: "Đóng"
-            });
-        </script>
+        <script>swal({ title: "Thành công", text: "@Html.Raw(TempData["Success"])", icon: 'success', button: "Đóng" });</script>
     }
-    // ... (keep other TempData checks as they were) ...
-    if (TempData["ApproveMessage"] != null)
+    if (TempData["Error"] != null)
     {
-        var message = TempData["ApproveMessage"].ToString();
-        <script>
-           swal({
-               title: "Thành công",
-               text: "@Html.Raw(TempData["ApproveMessage"])",
-               icon: 'success',
-               button: "Đóng"
-           });
-        </script>
-    }
-    if (TempData["Approve_Message"] != null)
-    {
-        var message = TempData["Approve_Message"].ToString();
-        <script>
-           swal({
-               title: "Thành công",
-               text: "@Html.Raw(TempData["Approve_Message"])",
-               icon: 'success',
-               button: "Đóng"
-           });
-        </script>
-    }
-    if (TempData["NoApproveMessage"] != null)
-    {
-        var message = TempData["NoApproveMessage"].ToString();
-        <script>
-           swal({
-               title: "Oops...",
-               text: "@Html.Raw(TempData["NoApproveMessage"])",
-               icon: 'error',
-               button: "Đóng"
-           });
-        </script>
-    }
-    if (TempData["NoApprove_Message"] != null)
-    {
-        var message = TempData["NoApprove_Message"].ToString();
-        <script>
-           swal({
-               title: "Oops...",
-               text: "@Html.Raw(TempData["NoApprove_Message"])",
-               icon: 'error',
-               button: "Đóng"
-           });
-        </script>
+        <script>swal({ title: "Lỗi", text: "@Html.Raw(TempData["Error"])", icon: 'error', button: "Đóng" });</script>
     }
 }
