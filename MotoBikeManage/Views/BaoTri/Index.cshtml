@@ -21,9 +21,12 @@
     }
 }
 
+
+@*<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">*@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
     /* Your existing CSS styles remain here */
     /* ... */
@@ -43,7 +46,7 @@
 }
 
 <div class="container action-button-container" style="margin-top: 20px;">
-    @if (userRole == "Admin" || userRole == "NhanVien")
+    @if (userRole == "NhanVien")
     {
         <a href="@Url.Action("Create", "BaoTri")" class="btn btn-primary">
             <i class="fa fa-plus-circle"></i> Tạo Yêu Cầu Bảo Trì Mới
@@ -51,38 +54,29 @@
     }
 </div>
 
-<form method="get" action="@Url.Action("Index", "BaoTri")" class="form-inline mb-3 justify-content-center">
-    <div class="form-group mr-2">
-        <label for="filterCategory" class="mr-2">Tất cả:</label>
-        <select id="filterCategory"
-                name="filterCategory"
-                class="form-control"
-                onchange="onChangeCategory()">
-            <option value="" @(currentFilterCategory == "" ? "selected" : "")>Tất cả</option>
-            <option value="approval_status" @(currentFilterCategory == "approval_status" ? "selected" : "")>
-                Trạng thái phê duyệt
-            </option>
-            <option value="completion_status" @(currentFilterCategory == "completion_status" ? "selected" : "")>
-                Trạng thái hoàn thành
-            </option>
-            <option value="completion_approval_status" @(currentFilterCategory == "completion_approval_status" ? "selected" : "")>
-                Trạng thái phê duyệt hoàn thành
-            </option>
-        </select>
-    </div>
+<div class="container mb-3">
+    <form method="get" action="@Url.Action("Index", "BaoTri")" class="row align-items-center">
+        <div class="col-md-4">
+            <label for="filterCategory">Tất cả:</label>
+            <select id="filterCategory" name="filterCategory" class="form-control" onchange="onChangeCategory()">
+                <option value="" @(currentFilterCategory == "" ? "selected" : "")>Tất cả</option>
+                <option value="approval_status" @(currentFilterCategory == "approval_status" ? "selected" : "")>Trạng thái phê duyệt</option>
+                <option value="completion_status" @(currentFilterCategory == "completion_status" ? "selected" : "")>Trạng thái hoàn thành</option>
+                <option value="completion_approval_status" @(currentFilterCategory == "completion_approval_status" ? "selected" : "")>Trạng thái xác nhận HT</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="filterStatus">Trạng thái:</label>
+            <select id="filterStatus" name="filterStatus" class="form-control" disabled>
+                <option value="">Tất cả</option>
+            </select>
+        </div>
+        <div class="col-md-4 mt-4">
+            <button type="submit" class="btn btn-primary">Lọc</button>
+        </div>
+    </form>
+</div>
 
-    <div class="form-group mr-2">
-        <label for="filterStatus" class="mr-2">Thuộc tính tương ứng:</label>
-        <select id="filterStatus"
-                name="filterStatus"
-                class="form-control"
-                disabled>
-            <option value="">Tất cả</option>
-        </select>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Lọc</button>
-</form>
 
 <div class="container mt-3" style="width:100%; padding: 0;">
     @* Adjusted margin-top and removed padding if button container handles it *@
@@ -131,19 +125,66 @@
                                     <td>@item.completion_approval_status</td>
                                     <td>@item.completion_status</td>
                                     <td>
+                                        <!-- Mặc định luôn có nút xem thông tin -->
                                         <button class="btn btn-info btn-sm btnShowDetail" data-id="@item.maintenance_id" title="Xem Chi tiết">
-                                            @* Changed color, added title *@
                                             <i class="fa fa-eye"></i>
                                         </button>
-                                        @* Optional: Add Edit/Delete buttons here based on role and status *@
-                                        @*
-                                            if (userRole == "Admin" || (userRole == "NhanVien" && item.requested_by == (int)Session["Id"] && item.approval_status == "Chờ phê duyệt"))
+
+                                        @if (userRole == "Admin")
+                                        {
+                                            if (item.approval_status == "Chờ phê duyệt")
                                             {
-                                                <a href="@Url.Action("Edit", "BaoTri", new { id = item.maintenance_id })" class="btn btn-warning btn-sm" title="Sửa"> <i class="fa fa-edit"></i></a>
-                                                <a href="@Url.Action("Delete", "BaoTri", new { id = item.maintenance_id })" class="btn btn-danger btn-sm" title="Xóa" onclick="return confirm('Bạn chắc chắn muốn xóa yêu cầu này?');"> <i class="fa fa-trash"></i></a>
+                                                <button class="btn btn-success btn-sm btnApprove" data-id="@item.maintenance_id" data-action="approve"><i class="fa fa-check"></i></button>
+                                                <button class="btn btn-danger btn-sm btnReject" data-id="@item.maintenance_id" data-action="reject"><i class="fa fa-times"></i></button>
                                             }
-                                        *@
+                                            else if (item.approval_status == "Đã phê duyệt"
+                                                     && item.completion_status == "Đang bảo trì"
+                                                     && item.completion_approval_status == "Chờ xác nhận"
+                                                     && item.is_complete_request_sent == true)
+                                            {
+                                                <button class="btn btn-success btn-sm btnApprove" data-id="@item.maintenance_id" data-action="approve-complete" title="Xác nhận hoàn tất"><i class="fa fa-check-double"></i></button>
+                                                <button class="btn btn-danger btn-sm btnReject" data-id="@item.maintenance_id" data-action="reject-complete" title="Từ chối hoàn tất"><i class="fa fa-times-circle"></i></button>
+                                            }
+                                            else if (item.approval_status == "Từ chối" || item.completion_approval_status == "Từ chối")
+                                            {
+                                                <!-- Admin chỉ xem thông tin -->
+                                            }
+                                        }
+                                        else if (userRole == "NhanVien")
+                                        {
+                                            // Gửi lại yêu cầu bảo trì nếu bị từ chối phê duyệt ban đầu
+                                            if (item.approval_status == "Từ chối" && item.completion_status == null)
+                                            {
+                                                <button class="btn btn-warning btn-sm btnApprove" data-id="@item.maintenance_id" data-action="resend-maintenance-request" title="Gửi lại yêu cầu bảo trì">
+                                                    <i class="fa fa-redo"></i>
+                                                </button>
+                                            }
+
+
+
+                                            // Gửi yêu cầu xác nhận hoàn tất lần đầu
+                                            else if (item.approval_status == "Đã phê duyệt"
+                                                     && item.completion_status == "Đang bảo trì"
+                                                     && item.completion_approval_status == "Chờ xác nhận"
+                                                     && item.is_complete_request_sent == false)
+                                            {
+                                                <button class="btn btn-warning btn-sm btnApprove" data-id="@item.maintenance_id" data-action="send-complete-request" title="Gửi xác nhận hoàn tất">
+                                                    <i class="fa fa-paper-plane"></i>
+                                                </button>
+                                            }
+                                            // Gửi lại yêu cầu xác nhận hoàn tất nếu bị từ chối
+                                            else if (item.approval_status == "Đã phê duyệt"
+                                                    && item.completion_status == "Đang bảo trì"
+                                                    && item.completion_approval_status == "Từ chối")
+                                            {
+                                                <button class="btn btn-warning btn-sm btnApprove" data-id="@item.maintenance_id" data-action="resend-complete-request" title="Gửi lại xác nhận hoàn tất">
+                                                    <i class="fa fa-redo"></i>
+                                                </button>
+                                            }
+                                        }
                                     </td>
+
+
                                 </tr>
                             }
                         }
@@ -159,47 +200,102 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="maintenanceDetailModalLabel">Chi tiết bảo trì</h5>
-                @* Ensure correct dismiss attribute for Bootstrap 4 *@
+                <h5 class="modal-title" id="maintenanceDetailModalLabel">Chi tiết yêu cầu bảo trì</h5> @* Slightly more specific title *@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <div id="maintenanceInfo">
-                    <p><strong>Người Yêu Cầu:</strong> <span id="detailFullName"></span></p>
-                    <p><strong>Xe (Model):</strong> <span id="detailVehicleModel"></span></p>
-                    <p><strong>Số khung xe:</strong> <span id="detailFrameNumber"></span></p>
-                    <p><strong>Lí do bảo trì:</strong> <span id="detailReason"></span></p>
-                    <p><strong>Loại bảo trì:</strong> <span id="detailMaintenanceType"></span></p>
-                    <p><strong>Mức ưu tiên:</strong> <span id="detailPriority"></span></p>
-                    <hr />
-                    <p><strong>Trạng thái phê duyệt:</strong> <span id="detailApprovalStatus"></span></p>
-                    <p><strong>Trạng thái xác nhận HT:</strong> <span id="detailCompletionApprovalStatus"></span></p>
-                    <p><strong>Trạng thái hoàn thành:</strong> <span id="detailCompletionStatus"></span></p>
-                    <hr />
-                    @* Show Approver/Completion Info only if applicable *@
-                    <div id="adminActionInfoContainer" style="display: none;">
-                        <p><strong>Phê duyệt/Từ chối bởi:</strong> <span id="detailApprovedByName"></span></p>
-                        <p><strong>Ngày bắt đầu:</strong> <span id="detailStartDate"></span></p>
-                        <p><strong>Ngày hoàn thành:</strong> <span id="detailEndDate"></span></p>
-                    </div>
-                </div>
-            </div>
-            @* Conditionally show footer buttons based on role and status passed from AJAX *@
-            <div class="modal-footer" id="modalActionFooter">
-                <button type="button" class="btn btn-success" id="btnApprove">
-                    <i class="fa fa-check"></i> Phê duyệt / Xác nhận HT
-                </button>
-                <button type="button" class="btn btn-danger" id="btnReject">
-                    <i class="fa fa-times"></i> Từ chối
-                </button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button> @* Always show close button *@
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="container-fluid">
+                    @* Use container-fluid for padding/structure *@
 
+                    @* Section 1: Request Details *@
+                    <h5>Thông tin yêu cầu</h5>
+                    <div class="row mb-2">
+                        @* Use Bootstrap grid for layout *@
+                        <div class="col-md-6"><strong>Người Yêu Cầu:</strong></div>
+                        <div class="col-md-6"><span id="detailFullName"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Xe (Model):</strong></div>
+                        <div class="col-md-6"><span id="detailVehicleModel"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Số khung xe:</strong></div>
+                        <div class="col-md-6"><span id="detailFrameNumber"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Lí do bảo trì:</strong></div>
+                        <div class="col-md-6"><span id="detailReason"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Loại bảo trì:</strong></div>
+                        <div class="col-md-6"><span id="detailMaintenanceType"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Mức ưu tiên:</strong></div>
+                        <div class="col-md-6"><span id="detailPriority"></span></div>
+                    </div>
+
+                    <hr />
+
+                    @* Section 2: Statuses *@
+                    <h5>Trạng thái</h5>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Trạng thái phê duyệt:</strong></div>
+                        <div class="col-md-6"><span id="detailApprovalStatus"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Trạng thái xác nhận HT:</strong></div>
+                        <div class="col-md-6"><span id="detailCompletionApprovalStatus"></span></div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Trạng thái hoàn thành:</strong></div>
+                        <div class="col-md-6"><span id="detailCompletionStatus"></span></div>
+                    </div>
+
+                    @* Section 3: Admin/Processing Info (Conditionally Shown) *@
+                    <div id="adminActionInfoContainer">
+                        @* This container will be shown/hidden by JS *@
+                        <hr />
+                        <h5>Thông tin xử lý</h5>
+                        <div class="row mb-2" id="approvedByRow">
+                            @* Row for Approved By *@
+                            <div class="col-md-6"><strong>Phê duyệt/Từ chối bởi:</strong></div>
+                            <div class="col-md-6"><span id="detailApprovedByName"></span></div>
+                        </div>
+                        <div class="row mb-2" id="startDateRow">
+                            @* Row for Start Date *@
+                            <div class="col-md-6"><strong>Ngày bắt đầu:</strong></div>
+                            <div class="col-md-6"><span id="detailStartDate"></span></div>
+                        </div>
+                        <div class="row mb-2" id="endDateRow">
+                            @* Row for End Date *@
+                            <div class="col-md-6"><strong>Ngày hoàn thành:</strong></div>
+                            <div class="col-md-6"><span id="detailEndDate"></span></div>
+                        </div>
+                        <div class="row mb-2" id="rejectReasonRow">
+                            @* Row for Reject Reason *@
+                            <div class="col-md-6" ><strong>Lí do từ chối:</strong></div>
+                            <div class="col-md-6" style="color:red" ><span id="detailReject"></span></div>
+                        </div>
+                    </div>
+
+                </div> @* End container-fluid *@
+            </div> @* End modal-body *@
+
+            <div class="modal-footer" id="modalActionFooter">
+                @* Buttons will be added dynamically by JavaScript *@
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div> @* End modal-footer *@
+        </div> @* End modal-content *@
+    </div> @* End modal-dialog *@
+</div> @* End modal *@
+
+
+@*<script src='@Url.Content("~/assets/libs/DataTables/jquery.dataTables.min.js")'></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>*@
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
     // onChangeCategory function remains the same
     function onChangeCategory() {
@@ -233,185 +329,125 @@
             document.getElementById("filterStatus").value = currentFilterStatus;
         }
         // Optional: Initialize DataTable if you want sorting/searching on the table
-        // $('#maintenanceTable').DataTable({ "language": { "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json" } });
+         $('#maintenanceTable').DataTable({ "language": { "url": "//cdn.datatables.net/plug-ins/1.10.21/i18n/Vietnamese.json" } });
     };
 </script>
-
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script>
-    $(document).ready(function() { // Ensure scripts run after DOM is ready
+    $(document).ready(function () {
+        // Xử lý các nút duyệt gửi xác nhận
+        $(document).on("click", ".btnApprove", function () {
+            const id = $(this).data("id");
+            const action = $(this).data("action");
 
-        // Click event for the small X button in the modal (if you want to add more logic)
-        $(document).on("click", ".close[data-dismiss='modal']", function() { // Target Bootstrap 4 close button
-            console.log("Modal closed with X button.");
-            // Add more actions here if needed
-        });
+            let message = "Bạn có chắc chắn?";
+            if (action === "approve") message = "Phê duyệt yêu cầu bảo trì?";
+            else if (action === "approve-complete") message = "Xác nhận hoàn tất bảo trì?";
+            else if (action === "send-complete-request") message = "Gửi yêu cầu xác nhận hoàn tất đến Admin?";
+            else if (action === "resend-maintenance-request") message = "Gửi lại yêu cầu bảo trì?";
+            else if (action === "resend-complete-request") message = "Gửi lại xác nhận hoàn tất?";
 
-        // Handle View button event
-        $(document).on("click", ".btnShowDetail", function() {
-            var id = $(this).data("id");
-             $('#maintenanceDetailModal').modal('show'); // Show modal immediately (optional, show loading?)
-             $('#maintenanceInfo').hide(); // Hide content while loading
-             $('#modalActionFooter button').hide(); // Hide action buttons initially
-             $('.modal-body').append('<div id="modalLoading" class="text-center"><i class="fa fa-spinner fa-spin fa-2x"></i> Loading...</div>'); // Add loading indicator
-
-            $.ajax({
-                url: '@Url.Action("GetMaintenanceDetail","BaoTri")',
-                type: 'GET',
-                data: { id: id },
-                success: function (response) {
-                    $('#modalLoading').remove(); // Remove loading indicator
-                    if (!response.success) {
-                         $('#maintenanceDetailModal').modal('hide'); // Hide modal on error
-                        swal({
-                            title: "Oops...",
-                            text: response.message,
-                            icon: 'error',
-                            button: "Đóng"
-                        });
-                        return;
-                    }
-
-                    // Populate modal content
-                    $("#detailFullName").text(response.data.full_name);
-                     $("#detailVehicleModel").text(response.data.vehicle_model);
-                    $("#detailFrameNumber").text(response.data.frame_number);
-                    $("#detailReason").text(response.data.reason);
-                     $("#detailMaintenanceType").text(response.data.maintenance_type);
-                     $("#detailPriority").text(response.data.priority);
-                    $("#detailApprovalStatus").text(response.data.approval_status);
-                    $("#detailCompletionApprovalStatus").text(response.data.completion_approval_status);
-                    $("#detailCompletionStatus").text(response.data.completion_status);
-
-
-                    // Show admin/completion info only if relevant data exists
-                     if(response.data.approved_by_name !== 'Chưa duyệt' || response.data.completion_status === 'Đã hoàn thành') {
-                         $("#detailApprovedByName").text(response.data.approved_by_name);
-                         $("#detailStartDate").text(response.data.start_date_str);
-                         $("#detailEndDate").text(response.data.end_date_str);
-                         $("#adminActionInfoContainer").show();
-                     } else {
-                         $("#adminActionInfoContainer").hide();
-                     }
-
-
-                    // Store the ID in the modal's data attribute
-                    $("#maintenanceDetailModal").data("maintenance-id", response.data.maintenance_id);
-
-                    // Determine if action buttons should be shown (Only for Admin)
-                     var currentUserRole = "@userRole"; // Get role from Razor variable
-                    var showActionButtons = false;
-
-                    if (currentUserRole === "Admin") {
-                        // Admin can act if request is 'Chờ phê duyệt' OR ('Đã phê duyệt' AND 'Đang bảo trì')
-                        if (response.data.approval_status === 'Chờ phê duyệt' ||
-                            (response.data.approval_status === 'Đã phê duyệt' && response.data.completion_status === 'Đang bảo trì'))
-                         {
-                             showActionButtons = true;
-
-                            // Adjust button text based on state
-                             if (response.data.approval_status === "Đã phê duyệt") {
-                                 // Case 2: Confirm/Reject Completion
-                                 $("#btnApprove").html('<i class="fa fa-check"></i> Xác nhận Hoàn Thành');
-                                 $("#btnReject").html('<i class="fa fa-times"></i> Từ chối Hoàn Thành');
-                             } else {
-                                 // Case 1: Approve/Reject Request
-                                 $("#btnApprove").html('<i class="fa fa-check"></i> Phê duyệt Yêu Cầu');
-                                 $("#btnReject").html('<i class="fa fa-times"></i> Từ chối Yêu Cầu');
-                             }
-                         }
-                    }
-
-                    // Show/hide action buttons based on logic above
-                     if (showActionButtons) {
-                         $("#btnApprove").show();
-                         $("#btnReject").show();
-                         $("#modalActionFooter button[data-dismiss='modal']").show(); // Show close button
-                     } else {
-                         $("#btnApprove").hide();
-                         $("#btnReject").hide();
-                         $("#modalActionFooter button[data-dismiss='modal']").show(); // Still show close button
-                    }
-                     $('#maintenanceInfo').show(); // Show populated content
-
-                },
-                error: function () {
-                     $('#modalLoading').remove(); // Remove loading indicator
-                     $('#maintenanceDetailModal').modal('hide'); // Hide modal on error
-                    swal({
-                        title: "Lỗi",
-                        text: "Lỗi khi tải chi tiết yêu cầu!",
-                        icon: 'error',
-                        button: "Đóng"
-                    });
+            swal({
+                title: "Xác nhận",
+                text: message,
+                icon: "info",
+                buttons: ["Hủy", "Xác nhận"]
+            }).then((ok) => {
+                if (ok) {
+                    sendUpdateRequest(id, action);
                 }
             });
-        }); // End btnShowDetail click
-
-        // Approve button click - Action logic remains the same
-        $("#btnApprove").click(function() {
-            var id = $("#maintenanceDetailModal").data("maintenance-id");
-            // Add confirmation dialog
-             swal({
-                 title: "Xác nhận?",
-                 text: "Bạn có chắc muốn thực hiện hành động này?",
-                 icon: "warning",
-                 buttons: ["Hủy", "Xác nhận"],
-                 dangerMode: false, // False for approve/confirm, true for reject/delete
-             })
-             .then((willProcess) => {
-                 if (willProcess) {
-                     callUpdateStatus(id, "approve");
-                 }
-             });
         });
 
-        // Reject button click - Action logic remains the same
-        $("#btnReject").click(function() {
-            var id = $("#maintenanceDetailModal").data("maintenance-id");
-             // Add confirmation dialog
-             swal({
-                 title: "Xác nhận?",
-                 text: "Bạn có chắc muốn từ chối yêu cầu/xác nhận này?",
-                 icon: "warning",
-                 buttons: ["Hủy", "Xác nhận"],
-                 dangerMode: true, // True for reject/delete
-             })
-             .then((willProcess) => {
-                 if (willProcess) {
-                    callUpdateStatus(id, "reject");
-                 }
-             });
+        // Xử lý từ chối và nhập lý do
+        $(document).on("click", ".btnReject", function () {
+            const id = $(this).data("id");
+            const action = $(this).data("action");
+
+            const promptText = (action === "reject-complete")
+                ? "Lý do từ chối hoàn tất:"
+                : "Lý do từ chối yêu cầu:";
+
+            swal({
+                title: "Nhập lý do từ chối",
+                content: {
+                    element: "input",
+                    attributes: {
+                        placeholder: "Nhập lý do...",
+                        type: "text"
+                    }
+                },
+                buttons: ["Hủy", "Gửi"]
+            }).then((reason) => {
+                if (reason) {
+                    sendUpdateRequest(id, action, reason);
+                }
+            });
         });
 
-        // AJAX update function remains the same (ensure CSRF token if needed)
-        function callUpdateStatus(id, actionType) {
-             // If using ValidateAntiForgeryToken, you need to include the token in the data
-             // var token = $('input[name="__RequestVerificationToken"]').val(); // Get token from form
-             $.ajax({
-                 url: '@Url.Action("UpdateMaintenanceStatus","BaoTri")',
-                 type: 'POST',
-                 // data: { id: id, actionType: actionType, __RequestVerificationToken: token }, // Include token
-                 data: { id: id, actionType: actionType }, // Without token for now, add if needed
-                 success: function (response) {
-                     if (!response.success) {
-                         swal({ title: "Oops...", text: response.message, icon: 'error', button: "Đóng" });
-                         return;
-                     }
-                     swal({ title: "Thành công", text: response.message, icon: 'success', button: "Đóng" })
-                     .then(function() {
-                         $("#maintenanceDetailModal").modal("hide");
-                         location.reload(); // Reload page to see updated status
-                     });
-                 },
-                 error: function() {
-                     swal({ title: "Lỗi", text: "Lỗi khi cập nhật trạng thái!", icon: 'error', button: "Đóng" });
-                 }
-             });
-         }
-
-     }); // End document ready
+        // Hàm chung gửi ajax cập nhật trạng thái
+        function sendUpdateRequest(id, actionType, rejectReason = "") {
+            $.ajax({
+                url: '@Url.Action("UpdateMaintenanceStatus", "BaoTri")',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+                    id: id,
+                    actionType: actionType,
+                    rejectReason: rejectReason
+                },
+                success: function (response) {
+                    if (!response.success) {
+                        swal("Lỗi", response.message, "error");
+                    } else {
+                        swal("Thành công", response.message, "success")
+                            .then(() => location.reload());
+                    }
+                },
+                error: function () {
+                    swal("Lỗi", "Không thể cập nhật trạng thái", "error");
+                }
+            });
+        }
+    });
 </script>
+<script>
+$(document).on("click", ".btnShowDetail", function () {
+    const id = $(this).data("id");
+
+    $.ajax({
+        url: '@Url.Action("GetMaintenanceDetail", "BaoTri")',
+        type: 'GET',
+        data: { id: id },
+        success: function (response) {
+            if (!response.success) {
+                swal("Lỗi", response.message, "error");
+                return;
+            }
+
+            // Đổ dữ liệu vào modal
+            $("#detailFullName").text(response.data.full_name);
+            $("#detailVehicleModel").text(response.data.vehicle_model);
+            $("#detailFrameNumber").text(response.data.frame_number);
+            $("#detailReason").text(response.data.reason);
+            $("#detailMaintenanceType").text(response.data.maintenance_type);
+            $("#detailPriority").text(response.data.priority);
+            $("#detailApprovalStatus").text(response.data.approval_status);
+            $("#detailCompletionApprovalStatus").text(response.data.completion_approval_status);
+            $("#detailCompletionStatus").text(response.data.completion_status);
+            $("#detailApprovedByName").text(response.data.approved_by_name);
+            $("#detailStartDate").text(response.data.start_date_str);
+            $("#detailEndDate").text(response.data.end_date_str);
+            $("#detailReject").text(response.data.rejectReason);
+
+            $('#maintenanceDetailModal').modal('show');
+        },
+        error: function () {
+            swal("Lỗi", "Không thể tải chi tiết yêu cầu", "error");
+        }
+    });
+});
+</script>
+
 
 @{
     if (TempData["EmptyListMessage"] != null) { /* ... */ }

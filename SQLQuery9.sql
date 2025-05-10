@@ -401,3 +401,6 @@ ADD CONSTRAINT FK_ExportStock_Users_ApprovedBy FOREIGN KEY (approved_by) REFEREN
 
 
 ALTER TABLE Export_Stock ADD reject_reason NVARCHAR(255) NULL;
+
+ALTER TABLE Maintenance ADD reject_reason NVARCHAR(255) NULL;
+ALTER TABLE Maintenance ADD is_complete_request_sent BIT DEFAULT 0;

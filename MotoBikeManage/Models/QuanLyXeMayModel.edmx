@@ -68,6 +68,8 @@
           <Property Name="end_date" Type="datetime" />
           <Property Name="completion_status" Type="nvarchar" MaxLength="20" />
           <Property Name="completion_approval_status" Type="nvarchar" MaxLength="30" />
+          <Property Name="reject_reason" Type="nvarchar" MaxLength="255" />
+          <Property Name="is_complete_request_sent" Type="bit" />
         </EntityType>
         <EntityType Name="Supplier_Brand">
           <Key>
@@ -620,6 +622,8 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <NavigationProperty Name="User" Relationship="QLXMModel.FK__Maintenan__appro__18EBB532" FromRole="Maintenance" ToRole="User" />
           <NavigationProperty Name="User1" Relationship="QLXMModel.FK__Maintenan__reque__17F790F9" FromRole="Maintenance" ToRole="User" />
           <NavigationProperty Name="Vehicle" Relationship="QLXMModel.FK__Maintenan__vehic__17036CC0" FromRole="Maintenance" ToRole="Vehicle" />
+          <Property Name="reject_reason" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="is_complete_request_sent" Type="Boolean" />
         </EntityType>
         <Association Name="FK__Maintenan__appro__18EBB532">
           <End Type="QLXMModel.User" Role="User" Multiplicity="0..1" />
@@ -949,6 +953,8 @@ warning 6002: The table/view 'QLXM.dbo.Inventory' does not have a primary key de
           <EntitySetMapping Name="Maintenances">
             <EntityTypeMapping TypeName="QLXMModel.Maintenance">
               <MappingFragment StoreEntitySet="Maintenance">
+                <ScalarProperty Name="is_complete_request_sent" ColumnName="is_complete_request_sent" />
+                <ScalarProperty Name="reject_reason" ColumnName="reject_reason" />
                 <ScalarProperty Name="completion_approval_status" ColumnName="completion_approval_status" />
                 <ScalarProperty Name="completion_status" ColumnName="completion_status" />
                 <ScalarProperty Name="end_date" ColumnName="end_date" />

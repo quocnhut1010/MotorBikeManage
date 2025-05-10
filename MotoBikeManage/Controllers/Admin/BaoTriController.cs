@@ -43,10 +43,11 @@ namespace MotoBikeManage.Controllers.Admin
             // Load Vehicles - Show only vehicles NOT currently 'Đang bảo trì' for NEW requests
             ViewBag.Vehicles = new SelectList(db.Vehicles
                 .Include(v => v.VehicleModel)
-                .Where(v => v.status != "Đang bảo trì") // Filter out vehicles already under maintenance
+                .Where(v => v.status == "Trong kho") // Filter out vehicles already under maintenance
                 .OrderBy(v => v.VehicleModel.name)
                 .ThenBy(v => v.frame_number)
-                .Select(v => new {
+                .Select(v => new
+                {
                     Value = v.vehicle_id,
                     Text = v.VehicleModel.name + " - Khung: " + v.frame_number + " (" + v.status + ")" // Show status
                 }), "Value", "Text", selectedVehicleId);
@@ -143,7 +144,7 @@ namespace MotoBikeManage.Controllers.Admin
                     return RedirectToAction("Index"); // Or an Access Denied view
                 }
             }
-
+            //ViewBag.vehicle_id = new SelectList(db.Vehicles.Where(v => v.status == "Trong kho"), "vehicle_id", "frame_number");
             LoadMaintenanceDropdowns(); // Load dropdowns for the form
             ViewBag.UserRole = Session["Role"].ToString(); // Pass role for potential view logic
 
@@ -337,6 +338,7 @@ namespace MotoBikeManage.Controllers.Admin
                     full_name = item.User1?.full_name ?? "N/A", // Creator Name
                     frame_number = item.Vehicle?.frame_number ?? "N/A",
                     reason = item.reason,
+                    rejectReason = item.reject_reason,
                     approval_status = item.approval_status,
                     completion_approval_status = item.completion_approval_status,
                     completion_status = item.completion_status,
@@ -353,117 +355,129 @@ namespace MotoBikeManage.Controllers.Admin
         // --- UpdateMaintenanceStatus Action (already exists) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult UpdateMaintenanceStatus(int id, string actionType)
+        public JsonResult UpdateMaintenanceStatus(int id, string actionType, string rejectReason = "")
         {
-            // --- Authorization Check: Only Admin can update status ---
-            if (!CheckAuthentication(requiredRole: "Admin"))
-            {
-                if (Session["Id"] == null || Session["Role"] == null)
-                {
-                    return Json(new { success = false, message = "Vui lòng đăng nhập để thực hiện hành động này." });
-                }
-                return Json(new { success = false, message = "Bạn không có quyền thực hiện hành động này." });
-            }
-            // --- End Authorization Check ---
-
-            var currentUserId = (int)Session["Id"]; // Admin's ID
+            var userRole = Session["Role"]?.ToString();
+            var currentUserId = (int)Session["Id"];
 
             using (var transaction = db.Database.BeginTransaction())
             {
                 try
                 {
-                    var item = db.Maintenances
-                                 .Include(m => m.Vehicle) // Include vehicle to update its status
-                                 .FirstOrDefault(m => m.maintenance_id == id);
-                    if (item == null)
+                    var item = db.Maintenances.Include(m => m.Vehicle).FirstOrDefault(m => m.maintenance_id == id);
+                    if (item == null || item.Vehicle == null)
+                        return Json(new { success = false, message = "Không tìm thấy yêu cầu hoặc xe tương ứng." });
+
+                    string message = "";
+
+                    switch (actionType)
                     {
-                        transaction.Rollback();
-                        return Json(new { success = false, message = "Không tìm thấy bản ghi." });
-                    }
-                    if (item.Vehicle == null)
-                    {
-                        transaction.Rollback();
-                        return Json(new { success = false, message = "Lỗi: Không tìm thấy thông tin xe liên kết với bảo trì này." });
+                        case "approve":
+                            if (userRole != "Admin") return Json(new { success = false, message = "Không có quyền." });
+                            if (item.approval_status == "Chờ phê duyệt")
+                            {
+                                item.approval_status = "Đã phê duyệt";
+                                item.approved_by = currentUserId;
+                                message = "Đã phê duyệt.";
+                            }
+                            break;
+
+                        case "reject":
+                            if (userRole != "Admin") return Json(new { success = false, message = "Không có quyền." });
+                            if (item.approval_status == "Chờ phê duyệt")
+                            {
+                                item.approval_status = "Từ chối";
+                                item.completion_status = null;
+                                item.completion_approval_status = null;
+                                item.reject_reason = rejectReason;
+                                item.Vehicle.status = "Trong kho";
+                                message = "Đã từ chối yêu cầu bảo trì.";
+                            }
+                            break;
+
+                        case "approve-complete":
+                            if (userRole != "Admin") return Json(new { success = false, message = "Không có quyền." });
+                            if (item.approval_status == "Đã phê duyệt" && item.completion_status == "Đang bảo trì")
+                            {
+                                item.completion_approval_status = "Đã xác nhận";
+                                item.completion_status = "Đã hoàn thành";
+                                item.end_date = DateTime.Now;
+                                item.Vehicle.status = "Trong kho";
+                                item.is_complete_request_sent = false;
+                                message = "Đã xác nhận hoàn tất.";
+                            }
+                            break;
+
+                        case "reject-complete":
+                            if (userRole != "Admin") return Json(new { success = false, message = "Không có quyền." });
+                            if (item.approval_status == "Đã phê duyệt" && item.completion_status == "Đang bảo trì")
+                            {
+                                item.completion_approval_status = "Từ chối";
+                                item.reject_reason = rejectReason;
+                                item.is_complete_request_sent = false;
+                                message = "Đã từ chối hoàn tất.";
+                            }
+                            break;
+
+                        case "send-complete-request":
+                            if (userRole != "NhanVien") return Json(new { success = false, message = "Không có quyền gửi xác nhận." });
+                            if (item.approval_status == "Đã phê duyệt" && item.completion_status == "Đang bảo trì")
+                            {
+                                item.is_complete_request_sent = true;
+                                item.completion_approval_status = "Chờ xác nhận"; // reset lại để Admin thấy nút duyệt
+                                message = "Đã gửi yêu cầu xác nhận hoàn tất đến Admin.";
+                            }
+                            break;
+                        case "resend-complete-request":
+                            if (userRole != "NhanVien")
+                                return Json(new { success = false, message = "Bạn không có quyền gửi lại xác nhận." });
+
+                            if (item.approval_status == "Đã phê duyệt"
+                                && item.completion_status == "Đang bảo trì"
+                                && item.completion_approval_status == "Từ chối")
+                            {
+                                item.completion_approval_status = "Chờ xác nhận";
+                                item.is_complete_request_sent = true;
+                                message = "Đã gửi lại yêu cầu xác nhận hoàn tất.";
+                            }
+                            else
+                            {
+                                return Json(new { success = false, message = "Không thể gửi lại trong trạng thái hiện tại." });
+                            }
+                            break;
+
+
+                        case "resend-maintenance-request":
+                            if (userRole != "NhanVien") return Json(new { success = false, message = "Không có quyền gửi lại yêu cầu." });
+                            if (item.approval_status == "Từ chối" && item.completion_status == null)
+                            {
+                                item.approval_status = "Chờ phê duyệt";
+                                item.completion_status = "Đang bảo trì";
+                                item.completion_approval_status = "Chờ xác nhận";
+                                item.start_date = DateTime.Now;
+                                item.end_date = null;
+                                item.approved_by = null;
+                                item.reject_reason = null;
+                                item.Vehicle.status = "Đang bảo trì";
+                                item.is_complete_request_sent = false;
+                                message = "Đã gửi lại yêu cầu bảo trì.";
+                            }
+                            break;
+
+                        default:
+                            return Json(new { success = false, message = "Hành động không hợp lệ." });
                     }
 
-                    string successMessage = "";
-
-                    // TH1: Nếu approval_status = "Chờ phê duyệt"
-                    if (item.approval_status == "Chờ phê duyệt")
-                    {
-                        if (actionType == "approve")
-                        {
-                            item.approval_status = "Đã phê duyệt";
-                            item.approved_by = currentUserId;
-                            // Vehicle status should remain 'Đang bảo trì'
-                            successMessage = "Yêu cầu bảo trì đã được phê duyệt.";
-                        }
-                        else // reject
-                        {
-                            item.approval_status = "Từ chối";
-                            item.approved_by = currentUserId;
-                            // Change vehicle status back to 'Trong kho' if rejected
-                            item.Vehicle.status = "Trong kho";
-                            successMessage = "Yêu cầu bảo trì đã bị từ chối.";
-                        }
-                    }
-                    // TH2: Nếu approval_status = "Đã phê duyệt" and completion_status = "Đang bảo trì"
-                    else if (item.approval_status == "Đã phê duyệt" && item.completion_status == "Đang bảo trì")
-                    {
-                        if (actionType == "approve") // Confirm completion
-                        {
-                            item.completion_approval_status = "Đã xác nhận";
-                            item.completion_status = "Đã hoàn thành";
-                            item.end_date = DateTime.Now;
-                            item.approved_by = currentUserId; // Admin confirmed completion
-                                                              // Change vehicle status back to 'Trong kho' after completion
-                            item.Vehicle.status = "Trong kho";
-                            successMessage = "Xác nhận bảo trì hoàn tất thành công.";
-                        }
-                        else // Reject completion
-                        {
-                            item.completion_approval_status = "Từ chối";
-                            item.approved_by = currentUserId; // Admin rejected completion
-                                                              // Vehicle status remains 'Đang bảo trì'
-                            successMessage = "Đã từ chối xác nhận hoàn tất bảo trì.";
-                        }
-                    }
-                    // TH3: Invalid state for update
-                    else
-                    {
-                        transaction.Rollback();
-                        string currentStatusDesc = $"Phê duyệt: {item.approval_status}, Hoàn thành: {item.completion_status}, Xác nhận HT: {item.completion_approval_status}";
-                        return Json(new { success = false, message = $"Trạng thái hiện tại ({currentStatusDesc}) không cho phép cập nhật." });
-                    }
-
-                    db.SaveChanges(); // Save Maintenance and Vehicle status changes
+                    db.SaveChanges();
                     transaction.Commit();
-                    return Json(new { success = true, message = successMessage });
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException dbEx)
-                {
-                    transaction.Rollback();
-                    // Log detailed validation errors
-                    string errorMessages = "Lỗi xác thực: ";
-                    foreach (var validationErrors in dbEx.EntityValidationErrors)
-                    {
-                        foreach (var validationError in validationErrors.ValidationErrors)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Property: {validationError.PropertyName} Error: {validationError.ErrorMessage}");
-                            errorMessages += $"\n- {validationError.ErrorMessage}";
-                        }
-                    }
-                    return Json(new { success = false, message = errorMessages });
+                    return Json(new { success = true, message });
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    // Log the general error (ex)
-                    System.Diagnostics.Debug.WriteLine("ERROR Updating Maintenance Status: " + ex.ToString());
-                    return Json(new { success = false, message = "Lỗi hệ thống khi cập nhật trạng thái." });
+                    return Json(new { success = false, message = "Lỗi: " + ex.Message });
                 }
             }
-        } // End UpdateMaintenanceStatus
-
-    } // End Controller
+        }
+    }
 }

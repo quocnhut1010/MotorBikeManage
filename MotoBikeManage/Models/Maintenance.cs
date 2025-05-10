@@ -26,6 +26,8 @@ namespace MotoBikeManage.Models
         public Nullable<System.DateTime> end_date { get; set; }
         public string completion_status { get; set; }
         public string completion_approval_status { get; set; }
+        public string reject_reason { get; set; }
+        public Nullable<bool> is_complete_request_sent { get; set; }
     
         public virtual User User { get; set; }
         public virtual User User1 { get; set; }
