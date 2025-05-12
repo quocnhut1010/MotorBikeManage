@@ -91,8 +91,8 @@ namespace MotoBikeManage.Controllers.Admin
 
                     inventoryList.Add(inventoryItem);
                 }
-
-                return View(inventoryList);
+            ViewBag.UserRole = Session["Role"]?.ToString();
+            return View(inventoryList);
             }
         [HttpGet]
         public ActionResult GetModelDetail(int modelId)
@@ -127,6 +127,13 @@ namespace MotoBikeManage.Controllers.Admin
         // Xuất báo cáo tồn kho ra Excel
         public ActionResult ExportCsv()
         {
+            var userRole = Session["Role"]?.ToString();
+            if (userRole != "Admin")
+            {
+                TempData["Error"] = "Bạn không có quyền xuất Excel.";
+                return RedirectToAction("Index");
+            }
+
             // 1. Lấy thông tin người dùng và thời gian hiện tại
             string fullName = Session["FullName"]?.ToString() ?? "Unknown";
             string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

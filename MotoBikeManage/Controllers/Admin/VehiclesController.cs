@@ -21,6 +21,7 @@ namespace MotoBikeManage.Controllers
         // rồi cập nhật lại trường status của Vehicles trước khi đổ ra View.
         public ActionResult Index()
         {
+
             // Bước 0.0: Lấy toàn bộ Vehicle trước
             var allVehicles = db.Vehicles.ToList();
 
@@ -119,7 +120,7 @@ namespace MotoBikeManage.Controllers
                 image = v.VehicleModel.image
             })
             .ToList();
-
+            ViewBag.UserRole = Session["Role"]?.ToString();
             // Bước 5: Trả về View
             return View(list);
         }

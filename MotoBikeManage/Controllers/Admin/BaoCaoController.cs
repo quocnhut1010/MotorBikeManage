@@ -16,6 +16,7 @@ namespace MotoBikeManage.Controllers.Admin
         // GET: BaoCao
         public ActionResult Index()
         {
+            ViewBag.UserRole = Session["Role"]?.ToString();
             return View();
         }
 
@@ -85,6 +86,10 @@ namespace MotoBikeManage.Controllers.Admin
         [HttpGet]
         public ActionResult ThongKeChiPhiLoiNhuanTheoThang(int? year)
         {
+            var userRole = Session["Role"]?.ToString();
+            if (userRole != "Admin")
+                return new HttpStatusCodeResult(403); // hoặc Json lỗi
+
             int selectedYear = year ?? DateTime.Now.Year;
 
             var chiPhiNhap = db.Import_Stock

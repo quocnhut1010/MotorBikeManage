@@ -1,6 +1,21 @@
 ﻿@{
     ViewBag.Title = "Báo cáo thống kê";
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var userRole = ViewBag.UserRole as string;
+    if (userRole == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    else if (userRole == "NhanVien")
+    {
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+    }
+    else
+    {
+        // Layout mặc định hoặc xử lý trường hợp vai trò không xác định (tùy chọn)
+        // Ví dụ: quay về trang đăng nhập hoặc dùng một layout chung
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Ví dụ layout chung
+
+    }
 }
 
 <div class="container mt-4">
@@ -32,73 +47,78 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card text-center h-100 shadow-sm">
-                <div class="card-body">
-                    <h4 class="card-title" id="tongGiaTriXuat">0 đ</h4>
-                    <p class="card-text text-muted">Doanh thu bán xe</p>
+        @if (ViewBag.UserRole == "Admin")
+        {
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card text-center h-100 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title" id="tongGiaTriXuat">0 đ</h4>
+                        <p class="card-text text-muted">Doanh thu bán xe</p>
+                    </div>
                 </div>
+            </div>
+        }
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Thống kê tồn kho theo mẫu xe</h4>
+    </div>
+    <div class="card-body" style="max-height: 450px; overflow-y: auto;">
+        <table class="table table-bordered table-hover table-sm" id="bangThongKeModel">
+            <thead class="thead-light" style="position: sticky; top: 0; z-index: 1; background-color: white;">
+                <tr>
+                    <th>Tên xe</th>
+                    <th>Hãng</th>
+                    <th>Model</th>
+                    <th>Trong kho</th>
+                    <th>Đã xuất</th>
+                    <th>Bảo trì</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row mb-4 align-items-end">
+    <div class="col-md-4 mb-3 mb-md-0">
+        <label for="filterYear">Lọc biểu đồ theo Năm:</label>
+        <select id="filterYear" class="form-control form-control-sm">
+        </select>
+    </div>
+    <div class="col-md-2 mb-3 mb-md-0">
+        <button class="btn btn-primary btn-block btn-sm" onclick="reloadThongKe()">Áp dụng</button>
+    </div> <small class="form-text text-muted">Lọc này sẽ áp dụng cho các biểu đồ bên dưới.</small>
+
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-7 mb-3 mb-lg-0">
+        <div class="card h-100">
+            <div class="card-header">
+                <h4>Số lượng nhập & bán xe theo tháng</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="bieudoNhapBanXe"></canvas>
             </div>
         </div>
     </div>
-
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>Thống kê tồn kho theo mẫu xe</h4>
-        </div>
-        <div class="card-body" style="max-height: 450px; overflow-y: auto;">
-            <table class="table table-bordered table-hover table-sm" id="bangThongKeModel">
-                <thead class="thead-light" style="position: sticky; top: 0; z-index: 1; background-color: white;">
-                    <tr>
-                        <th>Tên xe</th>
-                        <th>Hãng</th>
-                        <th>Model</th>
-                        <th>Trong kho</th>
-                        <th>Đã xuất</th>
-                        <th>Bảo trì</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="row mb-4 align-items-end">
-        <div class="col-md-4 mb-3 mb-md-0">
-            <label for="filterYear">Lọc biểu đồ theo Năm:</label>
-            <select id="filterYear" class="form-control form-control-sm">
-            </select>
-        </div>
-        <div class="col-md-2 mb-3 mb-md-0">
-            <button class="btn btn-primary btn-block btn-sm" onclick="reloadThongKe()">Áp dụng</button>
-        </div> <small class="form-text text-muted">Lọc này sẽ áp dụng cho các biểu đồ bên dưới.</small>
-       
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-lg-7 mb-3 mb-lg-0">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h4>Số lượng nhập & bán xe theo tháng</h4>
-                </div>
-                <div class="card-body">
-                    <canvas id="bieudoNhapBanXe"></canvas>
-                </div>
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">
+                <h4>Top 5 mẫu xe bán chạy</h4>
             </div>
-        </div>
-        <div class="col-lg-5">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h4>Top 5 mẫu xe bán chạy</h4>
-                </div>
-                <div class="card-body">
-                    <canvas id="bieudoTop5"></canvas>
-                </div>
+            <div class="card-body">
+                <canvas id="bieudoTop5"></canvas>
             </div>
         </div>
     </div>
+</div>
 
+@if (ViewBag.UserRole == "Admin")
+{
     <div class="row">
         <div class="col-12">
             <div class="card h-100">
@@ -111,8 +131,9 @@
             </div>
         </div>
     </div>
+}
 
-</div> 
+</div>
 
 <style>
     #bangThongKeModel thead th {
@@ -262,14 +283,18 @@
         loadAllThongKe();
     }
 
-    function loadAllThongKe() {
-        loadThongKeTongQuat();
-        loadThongKeTheoModel();
-        loadThongKeXuatKhoTheoThang();
-        loadTop5BanChay();
-        loadThongKeChiPhiLoiNhuan();
-        loadThongKeNhapBanXe();
+   function loadAllThongKe() {
+    loadThongKeTongQuat();
+    loadThongKeTheoModel();
+    loadThongKeXuatKhoTheoThang();
+    loadTop5BanChay();
+    loadThongKeNhapBanXe();
+
+    @if (ViewBag.UserRole == "Admin")
+    {
+        <text>loadThongKeChiPhiLoiNhuan();</text>
     }
+}
 
     function loadThongKeTongQuat() {
         $.ajax({

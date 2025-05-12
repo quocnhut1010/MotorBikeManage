@@ -2,7 +2,22 @@
 
 @{
     ViewBag.Title = "Danh sách xe máy";
-    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    var userRole = ViewBag.UserRole as string;
+    if (userRole == "Admin")
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+    else if (userRole == "NhanVien")
+    {
+        Layout = "~/Views/Shared/_Layout_Staff.cshtml";
+    }
+    else
+    {
+        // Layout mặc định hoặc xử lý trường hợp vai trò không xác định (tùy chọn)
+        // Ví dụ: quay về trang đăng nhập hoặc dùng một layout chung
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Ví dụ layout chung
+
+    }
 }
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 <style>
@@ -144,63 +159,67 @@
         }
 </style>
 <div class="container mt-5" style="width:100%">
-    <!-- Nút thêm xe -->
-    <a href="@Url.Action("Create", "Vehicles")">
-        <button class="btn btn-primary mb-3">Thêm Model Xe</button>
-    </a>
-
-    <table class="table table-bordered text-center">
-        <thead>
-            <tr>
-
-                <th>Hình ảnh</th>
-                <th>Tên xe</th>
-                <th>Nhãn hiệu</th>
-                <th>Loại xe</th>
-                <th>Màu sắc</th>
-                <th>Năm sản xuất</th>
-                <th>Ngày nhập kho</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    @if (ViewBag.UserRole == "Admin")
+    {
+        <!-- Nút thêm xe -->
+        <a href="@Url.Action("Create", "Vehicles")">
+            <button class="btn btn-primary mb-3">Thêm Model Xe</button>
+        </a>
+    }
+        <table class="table table-bordered text-center">
+            <thead>
                 <tr>
 
-                    <td>
-                        <img src="@Url.Content(item.image)" alt="Image" width="80" height="50" class="img-thumbnail" />
-                    </td>
-
-                    <td>@item.name</td>
-                    <td>@item.brand</td>
-                    <td>@item.model</td>
-                    <td>@item.color</td>
-                    <td>@item.manufacture_year</td>
-                    <td>@item.created_at</td>
-                    <td>
-                        <!-- Nút chỉnh sửa, xóa... -->
-                        <!-- SỬA: Thêm routeValues { id = emp.id } -->
-                        <button class="btn btn-warning btn-sm"
-                                onclick="showVehicleDetail(@item.vehicle_id)">
-                            <i class="fa fa-eye"></i>
-                        </button>
-                        <a href="@Url.Action("Edit", "Vehicles", new { id = item.model_id })"
-                           class="btn btn-sm btn-primary">
-                            <i class="fa fa-edit"></i> <!-- Icon sửa -->
-                        </a>
-
-                        <!-- Xóa (tham khảo) - tùy bạn sửa link cho đúng Controller/Action -->
-                        <a href="@Url.Action("Delete", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-danger">
-                            <i class="fa fa-trash"></i> <!-- Icon xóa -->
-                        </a>
-
-                    </td>
+                    <th>Hình ảnh</th>
+                    <th>Tên xe</th>
+                    <th>Nhãn hiệu</th>
+                    <th>Loại xe</th>
+                    <th>Màu sắc</th>
+                    <th>Năm sản xuất</th>
+                    <th>Ngày nhập kho</th>
+                    <th>Hành động</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            <img src="@Url.Content(item.image)" alt="Image" width="80" height="50" class="img-thumbnail" />
+                        </td>
+
+                        <td>@item.name</td>
+                        <td>@item.brand</td>
+                        <td>@item.model</td>
+                        <td>@item.color</td>
+                        <td>@item.manufacture_year</td>
+                        <td>@item.created_at</td>
+                        <td>
+                            <!-- Nút chỉnh sửa, xóa... -->
+                            <!-- SỬA: Thêm routeValues { id = emp.id } -->
+                            <button class="btn btn-warning btn-sm"
+                                    onclick="showVehicleDetail(@item.vehicle_id)">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            @if (ViewBag.UserRole == "Admin")
+                            {
+                                <a href="@Url.Action("Edit", "Vehicles", new { id = item.model_id })"
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fa fa-edit"></i> <!-- Icon sửa -->
+                                </a>
+
+                                <!-- Xóa (tham khảo) - tùy bạn sửa link cho đúng Controller/Action -->
+                                <a href="@Url.Action("Delete", "Vehicles", new { id = item.model_id })" class="btn btn-sm btn-danger">
+                                    <i class="fa fa-trash"></i> <!-- Icon xóa -->
+                                </a>
+                            }
+                            </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
 <!-- Phân trang giả lập -->
 <nav aria-label="Page navigation example">

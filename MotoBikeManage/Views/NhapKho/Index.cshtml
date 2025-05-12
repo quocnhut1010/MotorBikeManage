@@ -50,13 +50,14 @@
                         <option value="Từ chối" @(Request["status"] == "Từ chối" ? "selected" : "")>Đã từ chối</option>
                     </select>
                 </div>
+
                 if (userRole == "Admin")
                 {
                     <div class="col-md-3">
                         <label class="form-label">Nhà cung cấp</label>
                         <select name="supplierName" class="form-select">
                             <option value="">-- Tất cả --</option>
-                            @if (ViewBag.Suppliers != null) // Kiểm tra null
+                            @if (ViewBag.Suppliers != null)
                             {
                                 foreach (var s in (List<string>)ViewBag.Suppliers)
                                 {
@@ -65,20 +66,7 @@
                             }
                         </select>
                     </div>
-                }
-                @*<div class="col-md-3">
-                <label class="form-label">Nhà cung cấp</label>
-                <select name="supplierName" class="form-select">
-                    <option value="">-- Tất cả --</option>
-                    @foreach (var s in (List<string>)ViewBag.Suppliers)
-                    {
-                        <option value="@s" @(Request["supplierName"] == s ? "selected" : "")>@s</option>
-                    }
-                </select>
-            </div>*@
-                @* --- HIỂN THỊ BỘ LỌC NGƯỜI TẠO CHỈ CHO ADMIN --- *@
-                if (userRole == "Admin")
-                {
+
                     <div class="col-md-3">
                         <label class="form-label">Người tạo</label>
                         <select name="createdBy" class="form-select">
@@ -93,31 +81,30 @@
                         </select>
                     </div>
                 }
-                @* --- KẾT THÚC BỘ LỌC NGƯỜI TẠO --- *@
-                @*<div class="col-md-3">
-                <label class="form-label">Người tạo</label>
-                <select name="createdBy" class="form-select">
-                    <option value="">-- Tất cả --</option>
-                    @foreach (var c in (List<string>)ViewBag.Creators)
-                    {
-                        <option value="@c" @(Request["createdBy"] == c ? "selected" : "")>@c</option>
-                    }
-                </select>
-            </div>*@
 
-
-                <div class="row" style="margin-top:25px">
-                    <div class="col-md-3">
-                        <label class="form-label">Từ ngày</label>
-                        <input type="date" name="fromDate" class="form-control" value="@Request["fromDate"]" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Đến ngày</label>
-                        <input type="date" name="toDate" class="form-control" value="@Request["toDate"]" />
-                    </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tháng duyệt</label>
+                    <select name="monthFilter" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @if (ViewBag.Months != null)
+                        {
+                            foreach (var item in (SelectList)ViewBag.Months)
+                            {
+                                <option value="@item.Value" @(Request["monthFilter"] == item.Value ? "selected" : "")>@item.Text</option>
+                            }
+                        }
+                    </select>
                 </div>
 
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date" name="fromDate" class="form-control" value="@Request["fromDate"]" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date" name="toDate" class="form-control" value="@Request["toDate"]" />
+                </div>
 
                 <div class="col-md-12 text-end">
                     <p class="text-muted mt-2">
@@ -135,92 +122,93 @@
         <div class="col-md-12 mb-3">
             <div class="d-flex justify-content-between">
                 <div class="mr-auto">
-                    @if (userRole == "Admin" || userRole == "NhanVien") // Cho phép cả Admin và NV tạo
+                    @if (userRole == "Admin" || userRole == "NhanVien")
                     {
                         <a href="@Url.Action("Create", "NhapKho")" class="btn btn-primary mr-3">
-                            <i class="fa fa-plus-circle"></i> Tạo Phiếu Nhập Mới @*Đổi icon nếu muốn*@
+                            <i class="fa fa-plus-circle"></i> Tạo Phiếu Nhập Mới
                         </a>
                     }
-                  
                 </div>
-                @if (userRole == "Admin") // Chỉ admin thấy nút xuất excel
+
+                @if (userRole == "Admin")
                 {
-                    <a href="@Url.Action("ExportCsv", "TonKho")" class="btn btn-success">
-                        @*Kiểm tra lại action này nếu cần*@
-                        <i class="fa fa-file-excel"></i> Xuất Excel
+                    <a href="@Url.Action("ExportCsv", "NhapKho", new { monthFilter = Request["monthFilter"] })"
+                       class="btn btn-success">
+                        <i class="fa fa-file-excel"></i> Xuất Excel 
                     </a>
                 }
-               
             </div>
         </div>
+    </div>
 
-        <div class="col-md-12">
-            <div class="card mb-4">
-                <div class="card shadow mb-4">
-                    <div class="card-header">
-                        <i class="fas fa-table mr-1"></i> Danh sách tồn kho
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped"
-                                   id="inventoryTable"
-                                   width="100%"
-                                   cellspacing="0">
-                                <thead>
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <i class="fas fa-table mr-1"></i> Danh sách tồn kho
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped"
+                               id="inventoryTable"
+                               width="100%"
+                               cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID Phiếu</th>
+                                    <th>Nhà Cung Cấp</th>
+                                    <th>Người Tạo</th>
+                                    <th>Ngày Tạo</th>
+                                    <th>Trạng Thái</th>
+                                    <th>Ngày Duyệt</th>
+                                    <th>Ghi Chú</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
                                     <tr>
-                                        <th>ID Phiếu</th>
-                                        <th>Nhà Cung Cấp</th>
-                                        <th>Người Tạo</th>
-                                        <th>Ngày Tạo</th>
-                                        <th>Trạng Thái</th>
-                                        <th>Ngày Duyệt</th>
-                                        <th>Ghi Chú</th>
-                                        <th>Hành Động</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in Model)
-                                    {
-                                        <tr>
-                                            <td>@Html.DisplayFor(m => item.ImportId)</td>
-                                            <td>@Html.DisplayFor(m => item.SupplierName)</td>
-                                            <td>@Html.DisplayFor(m => item.UserName)</td>
-                                            <td>@Html.DisplayFor(m => item.ImportDate)</td>
-                                            <td>
-                                                @{
-                                                    string statusClass = "";
-                                                    if (item.ApprovalStatus == "Chờ duyệt")
-                                                    {
-                                                        statusClass = "badge bg-warning";
-                                                    }
-                                                    else if (item.ApprovalStatus == "Đã duyệt")
-                                                    {
-                                                        statusClass = "badge bg-success";
-                                                    }
-                                                    else if (item.ApprovalStatus == "Từ chối")
-                                                    {
-                                                        statusClass = "badge bg-danger";
-                                                    }
-                                                    else
-                                                    {
-                                                        statusClass = "badge bg-secondary";
-                                                    }
+                                        <td>@Html.DisplayFor(m => item.ImportId)</td>
+                                        <td>@Html.DisplayFor(m => item.SupplierName)</td>
+                                        <td>@Html.DisplayFor(m => item.UserName)</td>
+                                        <td>@Html.DisplayFor(m => item.ImportDate)</td>
+                                        <td>
+                                            @{
+                                                string statusClass = "";
+                                                if (item.ApprovalStatus == "Chờ duyệt")
+                                                {
+                                                    statusClass = "badge bg-warning";
                                                 }
-                                                <span class="@statusClass">
-                                                    @Html.DisplayFor(m => item.ApprovalStatus)
-                                                </span>
-                                            </td>
-                                            <td>@Html.DisplayFor(m => item.ApprovedDate)</td>
-                                            <td>@Html.DisplayFor(m => item.Note)</td>
-                                            <td>
-                                                <div class="d-flex justify-content-start">
-                                                    <!-- Icon Chi tiết -->
-                                                    <a onclick="showImportDetail(@item.ImportId)"
-                                                       class="btn btn-sm btn-primary me-2"
-                                                       title="Xem chi tiết phiếu">
-                                                        <i class="fa fa-info-circle"></i>
-                                                    </a>
-                                                    @*@if (item.ApprovalStatus == "Đã duyệt")
+                                                else if (item.ApprovalStatus == "Đã duyệt")
+                                                {
+                                                    statusClass = "badge bg-success";
+                                                }
+                                                else if (item.ApprovalStatus == "Từ chối")
+                                                {
+                                                    statusClass = "badge bg-danger";
+                                                }
+                                                else
+                                                {
+                                                    statusClass = "badge bg-secondary";
+                                                }
+                                            }
+                                            <span class="@statusClass">
+                                                @Html.DisplayFor(m => item.ApprovalStatus)
+                                            </span>
+                                        </td>
+                                        <td>@Html.DisplayFor(m => item.ApprovedDate)</td>
+                                        <td>@Html.DisplayFor(m => item.Note)</td>
+                                        <td>
+                                            <div class="d-flex justify-content-start">
+                                                <!-- Icon Chi tiết -->
+                                                <a onclick="showImportDetail(@item.ImportId)"
+                                                   class="btn btn-sm btn-primary me-2"
+                                                   title="Xem chi tiết phiếu">
+                                                    <i class="fa fa-info-circle"></i>
+                                                </a>
+                                                @*@if (item.ApprovalStatus == "Đã duyệt")
                                                     {
                                                         <a onclick="showImportDetail(@item.ImportId)"
                                                            class="btn btn-sm btn-info"
@@ -229,36 +217,37 @@
                                                         </a>
                                                     }*@
 
-                                                                            @* --- HIỂN THỊ NÚT DUYỆT/TỪ CHỐI CHỈ CHO ADMIN --- *@
-                                                                                            @if (userRole == "Admin" && item.ApprovalStatus == "Chờ duyệt") {
-                                                                                            <a href = "@Url.Action("Approve", new { id = item.ImportId })"
-                                                                                                   class="btn btn-success btn-sm me-2"
-                                                                                               title="Duyệt phiếu này"
-                                                                                               onclick="return confirm('Bạn chắc chắn muốn duyệt phiếu này?');">
-                                                                                                <i class="fas fa-check"></i>
-                                                                                            </a>
+                                                @* --- HIỂN THỊ NÚT DUYỆT/TỪ CHỐI CHỈ CHO ADMIN --- *@
+                                                @if (userRole == "Admin" && item.ApprovalStatus == "Chờ duyệt")
+                                                {
+                                                    <a href="@Url.Action("Approve", new { id = item.ImportId })"
+                                                       class="btn btn-success btn-sm me-2"
+                                                       title="Duyệt phiếu này"
+                                                       onclick="return confirm('Bạn chắc chắn muốn duyệt phiếu này?');">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
 
-                                                                                            <a href = "javascript:void(0);"
-                                                                                                   class="btn btn-danger btn-sm"
-                                                                                               title="Từ chối phiếu này"
-                                                                                               onclick="openRejectModal(@item.ImportId)">
-                                                                                                <i class="fas fa-times"></i>
-                                                                                            </a>
-                                                                                            }
-                                                                             @* --- KẾT THÚC NÚT DUYỆT/TỪ CHỐI --- *@
-                                                                                                </div>
-                                                                                            </td>
-                                                                                        </tr>
-                                                    }
-                                    </tbody>
-                            </table>
+                                                    <a href="javascript:void(0);"
+                                                       class="btn btn-danger btn-sm"
+                                                       title="Từ chối phiếu này"
+                                                       onclick="openRejectModal(@item.ImportId)">
+                                                        <i class="fas fa-times"></i>
+                                                    </a>
+                                                }
+                                                @* --- KẾT THÚC NÚT DUYỆT/TỪ CHỐI --- *@
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
 
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <!-- Modal Bootstrap để hiển thị chi tiết (nếu muốn) -->
 <div class="modal fade" id="importDetailModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

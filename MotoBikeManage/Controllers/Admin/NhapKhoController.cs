@@ -16,7 +16,7 @@ namespace MotoBikeManage.Controllers.Admin
     {
         QLXMEntities db = new QLXMEntities();
         // GET: NhapKho
-        public ActionResult Index(string status, string supplierName, string createdBy, DateTime? fromDate, DateTime? toDate)
+        public ActionResult Index(string status, string supplierName, string createdBy, DateTime? fromDate, DateTime? toDate, string monthFilter)
         {
             // Lấy thông tin người dùng từ Session
             var userRole = Session["Role"]?.ToString();
@@ -27,12 +27,23 @@ namespace MotoBikeManage.Controllers.Admin
                 // Nếu chưa đăng nhập hoặc thiếu thông tin Session, chuyển hướng về trang Login
                 return RedirectToAction("Login", "Admin"); // Hoặc trang đăng nhập phù hợp
             }
+
             var query = db.Import_Stock
                         .Include(i => i.Supplier)
                         .Include(i => i.User)
                         .Include(i => i.User1)
                         .OrderByDescending(i => i.import_date)
                         .AsQueryable();
+            if (!string.IsNullOrEmpty(monthFilter))
+            {
+                var parts = monthFilter.Split('-'); // "2025-04"
+                if (parts.Length == 2 && int.TryParse(parts[0], out int year) && int.TryParse(parts[1], out int month))
+                {
+                    query = query.Where(i => i.approved_date.HasValue &&
+                                             i.approved_date.Value.Month == month &&
+                                             i.approved_date.Value.Year == year);
+                }
+            }
 
             // --- LỌC DỮ LIỆU THEO VAI TRÒ ---
             if (userRole == "NhanVien")
@@ -106,6 +117,23 @@ namespace MotoBikeManage.Controllers.Admin
             //    .Distinct()
             //    .OrderBy(n => n)
             //    .ToList();
+            // Tạo danh sách tháng có phiếu nhập kho
+            var months = db.Import_Stock
+                .Where(i => i.approved_date.HasValue)
+                .Select(i => i.approved_date.Value)
+                .ToList()
+                .Select(d => new
+                {
+                    Year = d.Year,
+                    Month = d.Month,
+                    Display = d.ToString("MM/yyyy"),
+                    Value = $"{d.Year}-{d.Month:D2}"
+                })
+                .Distinct()
+                .OrderByDescending(m => m.Year).ThenByDescending(m => m.Month)
+                .ToList();
+
+            ViewBag.Months = new SelectList(months, "Value", "Display");
             ViewBag.UserRole = userRole;
             return View(importList);
         }
@@ -545,6 +573,102 @@ namespace MotoBikeManage.Controllers.Admin
 
             TempData["SuccessReject"] = "Phiếu nhập đã được từ chối.";
             return RedirectToAction("Index");
+        }
+        public ActionResult ExportCsv(string monthFilter)
+        {
+            var userRole = Session["Role"]?.ToString();
+            if (userRole != "Admin")
+            {
+                TempData["Error"] = "Bạn không có quyền thực hiện hành động này.";
+                return RedirectToAction("Index");
+            }
+
+            // Parse tháng
+            int? filterMonth = null, filterYear = null;
+            if (!string.IsNullOrEmpty(monthFilter))
+            {
+                var parts = monthFilter.Split('-');
+                if (parts.Length == 2 && int.TryParse(parts[0], out int year) && int.TryParse(parts[1], out int month))
+                {
+                    filterYear = year;
+                    filterMonth = month;
+                }
+            }
+
+            string fullName = Session["FullName"]?.ToString() ?? "Admin";
+            string currentTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+            var query = db.Import_Stock
+                .Include(i => i.User)
+                .Include(i => i.Import_Details.Select(d => d.VehicleModel))
+                .Where(i => i.approval_status == "Đã duyệt" && i.approved_date.HasValue);
+
+            if (filterMonth.HasValue && filterYear.HasValue)
+            {
+                query = query.Where(i => i.approved_date.Value.Month == filterMonth.Value &&
+                                         i.approved_date.Value.Year == filterYear.Value);
+            }
+
+            var importList = query.OrderBy(i => i.import_id).ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("BÁO CÁO PHIẾU NHẬP KHO CHI TIẾT");
+            sb.AppendLine($"Người xuất file: {fullName}");
+            sb.AppendLine($"Thời gian xuất file: {currentTime}");
+            if (filterMonth.HasValue && filterYear.HasValue)
+            {
+                sb.AppendLine($"Tháng lọc: {filterMonth:D2}/{filterYear}");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("Mã Phiếu,Ngày Duyệt,Người Tạo,Model,Số lượng,Đơn giá (VNĐ),Thành tiền (VNĐ)");
+
+            decimal grandTotal = 0;
+
+            foreach (var i in importList)
+            {
+                decimal totalPerImport = 0;
+                foreach (var d in i.Import_Details)
+                {
+                    decimal lineTotal = d.quantity * d.price;
+                    totalPerImport += lineTotal;
+
+                    sb.AppendLine(string.Join(",",
+                        $"PNK{i.import_id:D5}",
+                        EscapeCsvField(i.approved_date?.ToString("dd/MM/yyyy HH:mm") ?? "-"),
+                        EscapeCsvField(i.User?.full_name ?? "-"),
+                        EscapeCsvField(d.VehicleModel?.name ?? "-"),
+                        d.quantity,
+                        EscapeCsvField(d.price.ToString("N0")),
+                        EscapeCsvField(lineTotal.ToString("N0"))
+                    ));
+                }
+
+                sb.AppendLine($",,,Tổng cộng phiếu nhập,,,,{EscapeCsvField(totalPerImport.ToString("N0"))}");
+                sb.AppendLine();
+                grandTotal += totalPerImport;
+            }
+
+            sb.AppendLine($",,,TỔNG GIÁ TRỊ TẤT CẢ PHIẾU,,,,{EscapeCsvField(grandTotal.ToString("N0"))}");
+
+            var preamble = Encoding.UTF8.GetPreamble();
+            var csvBytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var finalBytes = preamble.Concat(csvBytes).ToArray();
+
+            string fileName = $"ChiTiet_NhapKho_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            return File(finalBytes, "text/csv", fileName);
+        }
+
+
+        // Dùng lại hàm EscapeCsvField
+        private string EscapeCsvField(string field)
+        {
+            if (field == null) return "";
+            if (field.Contains(",") || field.Contains("\"") || field.Contains("\n"))
+            {
+                return $"\"{field.Replace("\"", "\"\"")}\"";
+            }
+            return field;
         }
 
     }

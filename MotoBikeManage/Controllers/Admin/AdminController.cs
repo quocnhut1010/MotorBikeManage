@@ -1,4 +1,5 @@
 ﻿using MotoBikeManage.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,12 +13,85 @@ namespace MotoBikeManage.Controllers.Admin
 {
     public class AdminController : Controller
     {
+        private QLXMEntities db = new QLXMEntities();
         // GET: Admin
         public ActionResult Index()
         {
+            var now = DateTime.Now;
+
+            // Doanh thu tháng hiện tại
+            // Sử dụng (decimal?)d.price để Sum() có thể xử lý trường hợp không có bản ghi nào
+            // và thêm ?? 0 để nếu kết quả Sum là null (không có dữ liệu) thì sẽ gán 0 cho currentMonthRevenue.
+            var currentMonthRevenue = db.Export_Stock
+                .Where(e => e.approval_status == "Đã duyệt"
+                             && e.export_date.HasValue
+                             && e.export_date.Value.Month == now.Month
+                             && e.export_date.Value.Year == now.Year)
+                .Join(db.Export_Details,
+                      e => e.export_id,    // Khóa từ Export_Stock
+                      d => d.export_id,    // Khóa từ Export_Details
+                      (e, d) => d.price)   // Chọn cột price từ Export_Details
+                .Sum(price => (decimal?)price) ?? 0m; // Tính tổng các giá trị price.
+                                                      // (decimal?)price cho phép tính tổng ngay cả khi price có thể là null hoặc không có bản ghi nào.
+                                                      // ?? 0m đảm bảo nếu tổng là null (không có giao dịch) thì kết quả là 0 (m là hậu tố cho decimal).
+
+            ViewBag.CurrentMonthRevenue = currentMonthRevenue;
+
+            //// Doanh thu năm hiện tại và năm trước
+            //int year = now.Year;
+            //ViewBag.RevenueThisYear = db.Export_Stock
+            //    .Where(e => e.approval_status == "Đã duyệt" && e.export_date.Value.Year == year)
+            //    .Join(db.Export_Details, e => e.export_id, d => d.export_id, (e, d) => d.price)
+            //    .Sum();
+
+            //ViewBag.RevenueLastYear = db.Export_Stock
+            //    .Where(e => e.approval_status == "Đã duyệt" && e.export_date.Value.Year == year - 1)
+            //    .Join(db.Export_Details, e => e.export_id, d => d.export_id, (e, d) => d.price)
+            //    .Sum();
+
+            //// Dữ liệu biểu đồ doanh thu theo tháng
+            //var salesOverview = db.Export_Stock
+            //    .Where(e => e.approval_status == "Đã duyệt" && e.export_date.HasValue)
+            //    .Join(db.Export_Details, e => e.export_id, d => d.export_id, (e, d) => new { e.export_date, d.price })
+            //    .GroupBy(x => new { x.export_date.Value.Year, x.export_date.Value.Month })
+            //    .Select(g => new
+            //    {
+            //        Thang = g.Key.Month,
+            //        Nam = g.Key.Year,
+            //        DoanhThu = g.Sum(x => x.price)
+            //    })
+            //    .OrderBy(x => x.Nam).ThenBy(x => x.Thang)
+            //    .ToList();
+
+            //ViewBag.SalesOverviewData = JsonConvert.SerializeObject(salesOverview);
+
+            //// Recent Transactions
+            //ViewBag.RecentExports = db.Export_Stock
+            //    .Where(e => e.approval_status == "Đã duyệt")
+            //    .OrderByDescending(e => e.export_date)
+            //    .Take(5)
+            //    .ToList();
+
+            //ViewBag.RecentImports = db.Import_Stock
+            //    .Where(i => i.approval_status == "Đã duyệt")
+            //    .OrderByDescending(i => i.import_date)
+            //    .Take(5)
+            //    .ToList();
+
+            //ViewBag.RecentMaintenances = db.Maintenances
+            //    .OrderByDescending(m => m.start_date)
+            //    .Take(5)
+            //    .ToList();
+
+            //// Mẫu xe nổi bật
+            //ViewBag.TopModels = db.VehicleModels
+            //    .OrderByDescending(m => db.Export_Details.Count(e => e.Vehicle.model_id == m.model_id))
+            //    .Take(4)
+            //    .ToList();
+
             return View();
         }
-        private QLXMEntities db = new QLXMEntities();
+      
         // GET: Account
         // GET: Account
         public ActionResult Login()
